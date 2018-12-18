@@ -1,0 +1,48 @@
+setwd("C:/Users/rjbudnik/Desktop/wd")
+df<-read.csv("yt18.csv", header=T, na.strings=c("", " ", "NA"))
+str(df)
+summary(df)
+library(agricolae)
+library(dplyr)
+
+#Set Factors:
+df$entry<-factor(df$entry)
+df$ped.id<-factor(df$ped.id)
+df$code<-factor(df$code)
+
+attach(df)
+
+#Calculate yield for entire dataset,
+#Adds a new column named "yld":
+df <- df%>%mutate (yld = (((wt*((100-moist)/100))/0.845)/56)*435.6)
+
+#Subset data of interest:
+#New Data Frame <- subset(data, experiment = experiment code), e.g.:
+C81A<-subset(df, exp=="C81A")
+CF811<-subset(df, book.name=="CF811")
+
+#Exploratory:
+hist(C81A$yld,col="purple", main="Distribution of Yield", xlab="Yld")
+
+boxplot(C81A$yld~C81A$hybrid,
+        main="2018 Yield Across Hybrids",
+        xlab="Hybrid", ylab="Yld")
+
+#Determine data balnce:
+aggregate(yld~hybrid, data=C81A, length)
+aggregate(yld~hybrid, data=CF811, length)
+
+#Modeling:
+model1<-lm(yld~hybrid, data=C81A)
+anova(model1)
+plot(model1, which=c(1,2))
+cv.model(model1)
+LSD.test(model1, "hybrid", console=TRUE)
+library(emmeans)
+print(lsmeans(model1, list(pairwise ~ hybrid)), adjust = c("tukey"))
+
+model2<-lm(yld~hybrid, data=CF811)
+anova(model2)
+plot(model2, which=c(1,2))
+cv.model(model2)
+LSD.test(model2, "hybrid", console=TRUE)
