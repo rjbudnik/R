@@ -1,153 +1,110 @@
 #Load Required Libraries:
-library(agricolae)
-library(dplyr)
-library(emmeans)
-library(lme4)
-library(predictmeans)
-library(outliers)
-library(sjstats)
-library(car)
-library(lmerTest)
-library(devtools)
-install_github("stats4sd/LSDer")
+  library(agricolae)
+  library(dplyr)
+  library(nlme)
+  library(lme4)
+  library(predictmeans)
+  library(emmeans)
+  library(LMERConvenienceFunctions)
+  library(lmerTest)
+  library(outliers)
+  library(sjstats)
+  library(car)
+  # library(devtools)
+  # install_github("stats4sd/LSDer")
+
 
 #Set wd, Import CSV Data, and Quickly Check Data:
-setwd("C:/Users/Ryan.Ryan-PC/Desktop/wd")
-df<-read.csv("yt18.csv", header=T, na.strings=c("", " ", "NA"))
-str(df)
-summary(df)
+  setwd("C:/Users/rjbudnik/Desktop/wd")
+  df<-read.csv("yt18.csv", header=T, na.strings=c("", " ", "NA"))
 
 #Calculate yield for entire dataset,
 #Adds a new column named "yld":
-df <- df%>%mutate (yld = (((wt*((100-moist)/100))/0.845)/56)*435.6)
+  CCF<-8.067
+  df <- df%>%mutate (yld = (wt*CCF))
+
+  # BCF<-7.779
+  # df <- df%>%mutate (yld = (wt*BCF))
 
 #Subset data of interest:
+#Here you will be selecting the single location data from the master list that
+#will be analyzed using a mixed model. Entries must be specified!
 #e.g. New Data <- subset(data, ==experiment code, %in%c(entry numbers)):
-CF811<-subset(df, book.name=="CF811", entry %in% c(1:45))
-CF811
-summary(CF811)
-str(CF811)
+  CF811<-subset(df, book.name=="CF811", entry %in% c(1:45))
 
-#Set Factors:
-CF811$entry<-factor(CF811$entry)
-CF811$ped.id<-factor(CF811$ped.id)
-CF811$code<-factor(CF811$code)
-CF811$range<-factor(CF811$range)
-CF811$pass<-factor(CF811$pass)
-CF811$rep<-factor(CF811$rep)
+#View Classifications & Set Factors:
+  str(CF811)
+  CF811$entry<-factor(CF811$entry)
+  CF811$ped.id<-factor(CF811$ped.id)
+  CF811$code<-factor(CF811$code)
+  CF811$range<-factor(CF811$range)
+  CF811$pass<-factor(CF811$pass)
+  CF811$rep<-factor(CF811$rep)
 
 #Exploratory:
-hist(CF811$yld,col="purple", main="Distribution of Yield", xlab="Yld")
-Boxplot(CF811$wt~CF811$entry,id=TRUE,
-        main="2018 Yield Across Entries",
-        xlab="entry", ylab="Yld")
+  attach(CF811)
+  summary(CF811)
+  hist(CF811$yld,col="purple", main="Distribution of Yield", xlab="Yld")
+  Boxplot(CF811$yld~CF811$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
 
 #Determine Data Balance & Immediate Outlier Detection:
-aggregate(yld~entry, data=CF811, length)
-aggregate(yld~entry, data=CF811, mean)
-aggregate(yld~entry, data=CF811, max)
-aggregate(yld~entry, data=CF811, min)
-
+  aggregate(yld~entry, data=CF811, FUN=function(x) c(n=length(x), min=min(x), mean=mean(x), max=max(x)))
+  
 #Modeling:
-attach(CF811)
-model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CF811, REML=TRUE)
-summary(model1)
-anovalmer(model1)
+  model1<-lmer(wt~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CF811, REML=TRUE)
+  summary(model1)
+  anova(model1)
+  anovalmer(model1)
+  ranova(model1)
+  LSDer::CVer(model1)
+  LSDer::LSDer(model1, "entry")
+  predictmeans(model1, "entry", pairwise=TRUE, Df=44, level=.25)
 
-model2<-lmer(yld~entry + pass + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CF811)
-summary(model2)
-anovalmer(model2)
-
-predictmeans(model1, "entry", pairwise=TRUE, Df=44, level=.25)
-predictmeans(model2, "entry", pairwise=TRUE, Df=44, level=.25)
-
-cv(model1)
-cv(model2)
+#More Modeling, Post-Residual Outlier Removal:
+#i.e. Exclude Outliers = romr.fnc(model, data, trim = # of stddev above/below the residual means)
+  CF811clean<-romr.fnc(model1, CF811, trim = 3)
+  model2<-lmer(wt~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CF811clean[["data"]], REML=TRUE)
+  summary(model2)
+  anova(model2)
+  anovalmer(model2)
+  ranova(model2)
+  LSDer::CVer(model2)
+  LSDer::LSDer(model2, "entry")
+  predictmeans(model2, "entry", pairwise=TRUE, Df=44, level=.25)
 
 #LS Means Pairwise???
-print(lsmeans(model1, list(pairwise ~ entry)), adjust = c("tukey"))
+  print(lsmeans(model1, list(pairwise ~ entry)), adjust = c("tukey"))
 
 #Outliers & Plots:
-residplot(model1)
-residplot(model2)
-
-qqnorm(resid(model1))
-qqline(resid(model1))
-identify(qqnorm(resid(model1)))
-
-grubbs.test(CF811$yld, type = 10, opposite = FALSE, two.sided = FALSE)
-grubbs.test(CF811$yld, type = 10, opposite = TRUE, two.sided = FALSE)
+  residplot(model1)
+  residplot(model2)
+  
+  qq<-qqnorm(resid(model1))
+  qqline(resid(model1))
+  identify(qqnorm(resid(model1)))
+  
+  plot.lme(model1)
+  covariatemeans(model1, covariate="entry")
+  
+  grubbs.test(CF811$yld, type = 10, opposite = FALSE, two.sided = FALSE)
+  grubbs.test(CF811$yld, type = 10, opposite = TRUE, two.sided = FALSE)
 
 #Outliers via Cook's Distance:
-cooksd <- cooks.distance(model1)
-sample_size <- nrow(CF811)
-plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")
-abline(h = 4/sample_size, col="red")
-text(x=1:length(cooksd)+1, y=cooksd,
-     labels=ifelse(cooksd>4/sample_size,
-                   names(cooksd),""), col="red")
+  cooksd <- cooks.distance(model1)
+  sample_size <- nrow(CF811)
+  plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")
+  abline(h = 4/sample_size, col="red")
+  text(x=1:length(cooksd)+1, y=cooksd,
+       labels=ifelse(cooksd>4/sample_size,
+                     names(cooksd),""), col="red")
+  
+  influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
+  head(df[influential, ])
 
-influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
-head(df[influential, ])
-
-  #OR:
-CookD(model1, newwd=FALSE)
-cooksd<-CookD(model1, newwd=FALSE)
-sample_size <- nrow(CF811)
-influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
-head(df[influential, ])
-
-cooksd<-CookD(model2, newwd=FALSE)
-sample_size <- nrow(CF811)
-influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
-head(df[influential, ])
-
-###????####NOT SURE
-permanova.lmer(model1)
-permanova.lmer(model2)
-
-#CVer Function:???
-CVer<-function(model){
-  if(class(model)=="merMod"|class(model)=="merModLmerTest"|class(model)=="lmerMod"|class(model)=="lmerModLmerTest"){
-    
-    GM<-mean(model@frame[,1])
-    MS<-sigma(model)**2
-    return(paste(round(100*sqrt(MS)/GM,2),"%",sep=""))
-  }
-  else(stop("model not of class merMod or merModLmerTest"))
-}
-
-#LSDer Function:???
-LSDer<-function(model,term,comps=NULL,level=0.95){
-  if(class(model)=="merMod"|class(model)=="merModLmerTest"|class(model)=="lmerModLmerTest"){
-    if(!term%in%colnames(model@frame))
-    {stop(paste("No variable called",term,"found in model",deparse(substitute(model))))}
-    if(is.null(comps)){
-      t1<-(table(model@frame[term]))
-      ns<-cbind(median(t1),median(t1))
-      rownames(ns)<-NULL
-      message<-paste("LSD for comparison between two groups with",ns[1],"observations in each group")
-    }
-    else{A
-      if(!comps[1]%in%as.character(model@frame[term][,1])){
-        stop(paste("No group called",comps[1],"found in variable",term))
-      }
-      if(!comps[2]%in%as.character(model@frame[term][,1])){
-        stop(paste("No group called",comps[2],"found in variable",term))
-      }
-      ns<-t(matrix((table(model@frame[term]))[comps]))
-      names(ns)<-NULL
-      message<-paste("LSD for comparison between",comps[1],"and",comps[2])
-    }
-    
-    MS<-sigma(model)**2
-    DF<-(anova(model))[term,"DenDF"]
-    NREP1<-ns[,1]
-    NREP2<-ns[,2]
-    LSD<-qt(1-((1-level)/2),DF)*sqrt(MS*(1/NREP1+1/NREP2))
-    
-    cat(message,sep = "\n")
-    return(LSD)
-  }
-  else(stop("model not of class merMod or merModLmerTest"))
-}
+#OR:
+  cooksd<-CookD(model1, newwd=FALSE)
+  abline(h = 0.02, col="red")
+  sample_size <- nrow(CF811)
+  influential <- as.numeric(names(cooksd)[(cooksd > (h=0.02))])
+  head(df[influential, ])
+  
