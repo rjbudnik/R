@@ -5,8 +5,7 @@ library(nlme)
 library(lme4)
 library(LMERConvenienceFunctions)
 library(lmerTest)
-
-# library(devtools)
+library(devtools)
 # install_github("stats4sd/LSDer")
 # library(emmeans)
 
@@ -26,6 +25,7 @@ df <- df%>%mutate (yld = (wt*CCF))
 #Here you will be selecting the single location data from the master list that
 #will be analyzed using a mixed model. Entries must be specified!
 #e.g. New Data <- subset(data, ==experiment code, %in%c(entry numbers)):
+#Use Code>RenameinScope (ctrl+Alt+Shift+M) to replace all dataset names at once when changin Experiments:
 CF811<-subset(df, book.name=="CF811", entry %in% c(1:45))
 #Subset the Desired Experiment:
 CF811_C81A<-subset(CF811, exp=="C81A")
@@ -50,18 +50,19 @@ library(colorRamps)
 histo<-hist(CF811_C81A$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yld")
 
 #Remove All Low Values Identified in  Histogram (e.g.< 150 bu/ac)
-# NoLow<-CF811_C81A[CF811_C81A$yld <=150 , ]
-# NoLowRows<-as.numeric(rownames(NoLow))
-# HistoClean<-CF811_C81A
-# HistoClean$yld<-replace(HistoClean$yld, NoLowRows, NA)
+NoLow<-CF811_C81A[CF811_C81A$yld <=150 , ]
+NoLowRows<-as.numeric(rownames(NoLow))
+HistoClean<-CF811_C81A
+HistoClean$yld<-replace(HistoClean$yld, NoLowRows, NA)
+
 #Model Without Histogram Identified Low Yields:
-# model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=HistoClean, REML=TRUE)
-# summary(model4)
-# anova(model4)
-# anovalmer(model4)
-# ranova(model4)
-# LSDer::CVer(model4)
-# LSDer::LSDer(model4, "entry")
+model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=HistoClean, REML=TRUE)
+summary(model4)
+anova(model4)
+anovalmer(model4)
+ranova(model4)
+LSDer::CVer(model4)
+LSDer::LSDer(model4, "entry")
 
 palette <- primary.colors(length(unique(CF811_C81A$entry)))
 CF811_C81A$color <- palette[as.factor(CF811_C81A$entry)]
@@ -89,8 +90,8 @@ LSDer::LSDer(model1, "entry")
 #More Modeling, Post-Residual Outlier Removal:
 #i.e. Exclude Outliers = romr.fnc(model, data, trim = # of stddev above/below the residual means)
 #You designate the trim number, check qq and residual plots for corresponding trim #
-# Exp_Clean<-romr.fnc(model1, CF811_C81A, trim = 2.5)
-# model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=Exp_Clean[["data"]], REML=TRUE)
+# ResidualClean<-romr.fnc(model1, CF811_C81A, trim = 2.5)
+# model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=ResidualClean[["data"]], REML=TRUE)
 # summary(model2)
 # anova(model2)
 # anovalmer(model2)
@@ -119,12 +120,11 @@ qqline(resid(model1), col="red")
 #Outliers via Cook's Distance:
 cooksd<-CookD(model1, newwd=FALSE)
 abline(h = 50/sample_size, col="red")
-sample_size <- nrow(CF811)
-influential2 <- as.numeric(names(cooksd)[(cooksd > (h=50/sample_size))])
-head(df[influential2, ])
 # identify(cooksd)
 
 #New Clean Dataset, Where "Influential" Values Determined Via Cook's Distance have been set to NA:
+# sample_size <- nrow(CF811)
+# influential2 <- as.numeric(names(cooksd)[(cooksd > (h=50/sample_size))])
 # CooksClean<-CF811_C81A
 # CooksClean$yld<-replace(CooksClean$yld, influential2, NA)
 # #Cooks Clean Model:
@@ -136,6 +136,13 @@ head(df[influential2, ])
 # LSDer::CVer(model3)
 # LSDer::LSDer(model3, "entry")
 
+#Export Clean CSV Dataset:
+# write.csv(CooksClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/CooksClean_CF811_C81A.csv")
+# write.csv(QQClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/QQClean_CF811_C81A.csv")
+# write.csv(HistoClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_CF811_C81A.csv")
+# write.csv(ResidualClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/ResidualClean_CF811_C81A.csv")
+
+
 #Sjstats Package:
 # library(sjstats)
 # anova_stats(model1)
@@ -146,4 +153,3 @@ head(df[influential2, ])
 #LS Means Pairwise???
 # library(emmeans)
 # print(lsmeans(model1, list(pairwise ~ entry)), adjust = c("tukey"))
-  
