@@ -1,0 +1,154 @@
+---
+title: "Yield Trial Single Loc"
+output: html_document
+
+params:
+  filename: "yt18.csv"
+  Book.name: "CF811"
+  Exp: "C81A"
+  new: "CF811_C81A"
+---
+##Overview
+
+##Load data
+
+```{r load_data}
+library(agricolae)
+library(dplyr)
+library(nlme)
+library(lme4)
+library(LMERConvenienceFunctions)
+library(lmerTest)
+library(colorRamps)
+library(car)
+library(predictmeans)
+
+setwd("C:/Users/rjbudnik/Desktop/wd")
+df<-read.csv(params$filename, header=T, na.strings=c("", " ", "NA"))
+```
+
+##Data Preparation
+
+```{r data_prep}
+CCF<-8.067
+df <- df%>%mutate (yld = (wt*CCF))
+# BCF<-7.779
+# df <- df%>%mutate (yld = (wt*BCF))
+params$Book.name<-subset(df, book.name=="params$Book.name", entry %in% c(1:45))
+params$new<-subset(params$Book.name, exp=="params$Exp")
+str(params$new)
+(params$new)$entry<-factor((params$new)$entry)
+params$new$ped.id<-factor(params$new$ped.id)
+params$new$code<-factor(params$new$code)
+params$new$range<-factor(params$new$range)
+params$new$pass<-factor(params$new$pass)
+params$new$rep<-factor(params$new$rep)
+```
+
+##Data Visualization
+
+```{r data_viz}
+# #Set IQRS:
+max <- quantile(CF811_C81A$yld,0.75, na.rm=TRUE) + (IQR(CF811_C81A$yld, na.rm=TRUE) * 1.5 )
+min <- quantile(CF811_C81A$yld,0.25, na.rm=TRUE) - (IQR(CF811_C81A$yld, na.rm=TRUE) * 1.5 )
+# #Exploratory:
+attach(CF811_C81A)
+summary(CF811_C81A)
+library(colorRamps)
+histo<-hist(CF811_C81A$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yld")
+
+palette <- primary.colors(length(unique(CF811_C81A$entry)))
+CF811_C81A$color <- palette[as.factor(CF811_C81A$entry)]
+barplot(CF811_C81A$yld, names.arg=CF811_C81A$entry, ylim=c(0,260), ylab="yld", xlab="id", col=CF811_C81A$color)
+
+Boxplot(CF811_C81A$yld~CF811_C81A$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+abline(h = max, col="red")
+abline(h = min, col="red")
+
+# #Determine Data Balance & Immediate Outlier Detection:
+aggregate(yld~entry, data=CF811_C81A, FUN=function(x) c(n=length(x), min=min(x), mean=mean(x), max=max(x)))
+```
+
+##Analysis
+
+```{r modeling}
+model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CF811_C81A, REML=TRUE)
+summary(model1)
+anova(model1)
+anovalmer(model1)
+ranova(model1)
+LSDer::CVer(model1)
+LSDer::LSDer(model1, "entry")
+
+# #Remove All Low Values Identified in  Histogram (e.g.< 150 bu/ac)
+# NoLow<-CF811_C81A[CF811_C81A$yld <=150 , ]
+# NoLowRows<-as.numeric(rownames(NoLow))
+# HistoClean<-CF811_C81A
+# HistoClean$yld<-replace(HistoClean$yld, NoLowRows, NA)
+# #Model Without Histogram Identified Low Yields:
+# model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=HistoClean, REML=TRUE)
+# summary(model2)
+# anova(model2)
+# anovalmer(model2)
+# ranova(model2)
+# LSDer::CVer(model2)
+# LSDer::LSDer(model2, "entry")
+
+
+```
+
+##Outlier Detection
+
+```{r outlier}
+qq<-qqnorm(resid(model1))
+qqline(resid(model1), col="red")
+influential1<-identify(qqnorm(resid(model1)))
+
+cooksd<-CookD(model1, newwd=FALSE)
+abline(h = 50/sample_size, col="red")
+```
+
+
+##Further Analysis
+
+```{r modeling}
+# #More Modeling, Post-Residual Outlier Removal:
+# #i.e. Exclude Outliers = romr.fnc(model, data, trim = # of stddev above/below the residual means)
+# #You designate the trim number, check qq and residual plots for corresponding trim #
+# ResidualClean<-romr.fnc(model1, CF811_C81A, trim = 2.5)
+
+# #OR
+# QQClean<-CF811_C81A
+# QQClean$yld<-replace(QQClean$yld, influential1, NA)
+# model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=ResidualClean[["data"]], REML=TRUE)
+# summary(model3)
+# anova(model3)
+# anovalmer(model3)
+# ranova(model3)
+# LSDer::CVer(model3)
+# LSDer::LSDer(model3, "entry")
+# predictmeans(model3, "entry", pairwise=TRUE, Df=44, level=.25)
+
+
+# #New Clean Dataset, Where "Influential" Values Determined Via Cook's Distance have been set to NA:
+# sample_size <- nrow(CF811)
+# influential2 <- as.numeric(names(cooksd)[(cooksd > (h=50/sample_size))])
+# CooksClean<-CF811_C81A
+# CooksClean$yld<-replace(CooksClean$yld, influential2, NA)
+# #Cooks Clean Model:
+# model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CooksClean, REML=TRUE)
+# summary(model4)
+# anova(model4)
+# anovalmer(model4)
+# ranova(model4)
+# LSDer::CVer(model4)
+# LSDer::LSDer(model4, "entry")
+```
+
+##Export Clean Dataset
+```{r export}
+# write.csv(CooksClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/CooksClean_CF811_C81A.csv")
+# write.csv(QQClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/QQClean_CF811_C81A.csv")
+# write.csv(HistoClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_CF811_C81A.csv")
+# write.csv(ResidualClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/ResidualClean_CF811_C81A.csv")
+```
