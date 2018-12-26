@@ -1,3 +1,10 @@
+###Load Desired Template:
+devtools::install("YieldTrialSingleLoc")
+library(YieldTrialSingleLoc)
+
+###Start New RMarkdown File:
+###File > New File > R Markdown > From Template > Yield Trial Single Loc
+
 ---
 title: "Yield Trial Single Loc"
 output: html_document
