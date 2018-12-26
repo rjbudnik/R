@@ -1,110 +1,149 @@
 #Load Required Libraries:
-  library(agricolae)
-  library(dplyr)
-  library(nlme)
-  library(lme4)
-  library(predictmeans)
-  library(emmeans)
-  library(LMERConvenienceFunctions)
-  library(lmerTest)
-  library(outliers)
-  library(sjstats)
-  library(car)
-  # library(devtools)
-  # install_github("stats4sd/LSDer")
+library(agricolae)
+library(dplyr)
+library(nlme)
+library(lme4)
+library(LMERConvenienceFunctions)
+library(lmerTest)
 
+# library(devtools)
+# install_github("stats4sd/LSDer")
+# library(emmeans)
 
 #Set wd, Import CSV Data, and Quickly Check Data:
-  setwd("C:/Users/rjbudnik/Desktop/wd")
-  df<-read.csv("yt18.csv", header=T, na.strings=c("", " ", "NA"))
+setwd("C:/Users/rjbudnik/Desktop/wd")
+df<-read.csv("yt18.csv", header=T, na.strings=c("", " ", "NA"))
 
 #Calculate yield for entire dataset,
 #Adds a new column named "yld":
-  CCF<-8.067
-  df <- df%>%mutate (yld = (wt*CCF))
+CCF<-8.067
+df <- df%>%mutate (yld = (wt*CCF))
 
-  # BCF<-7.779
-  # df <- df%>%mutate (yld = (wt*BCF))
+# BCF<-7.779
+# df <- df%>%mutate (yld = (wt*BCF))
 
 #Subset data of interest:
 #Here you will be selecting the single location data from the master list that
 #will be analyzed using a mixed model. Entries must be specified!
 #e.g. New Data <- subset(data, ==experiment code, %in%c(entry numbers)):
-  CF811<-subset(df, book.name=="CF811", entry %in% c(1:45))
+CF811<-subset(df, book.name=="CF811", entry %in% c(1:45))
+#Subset the Desired Experiment:
+CF811_C81A<-subset(CF811, exp=="C81A")
 
 #View Classifications & Set Factors:
-  str(CF811)
-  CF811$entry<-factor(CF811$entry)
-  CF811$ped.id<-factor(CF811$ped.id)
-  CF811$code<-factor(CF811$code)
-  CF811$range<-factor(CF811$range)
-  CF811$pass<-factor(CF811$pass)
-  CF811$rep<-factor(CF811$rep)
+str(CF811_C81A)
+CF811_C81A$entry<-factor(CF811_C81A$entry)
+CF811_C81A$ped.id<-factor(CF811_C81A$ped.id)
+CF811_C81A$code<-factor(CF811_C81A$code)
+CF811_C81A$range<-factor(CF811_C81A$range)
+CF811_C81A$pass<-factor(CF811_C81A$pass)
+CF811_C81A$rep<-factor(CF811_C81A$rep)
 
+
+#Set IQRS:
+max <- quantile(CF811_C81A$yld,0.75, na.rm=TRUE) + (IQR(CF811_C81A$yld, na.rm=TRUE) * 1.5 )
+min <- quantile(CF811_C81A$yld,0.25, na.rm=TRUE) - (IQR(CF811_C81A$yld, na.rm=TRUE) * 1.5 )
 #Exploratory:
-  attach(CF811)
-  summary(CF811)
-  hist(CF811$yld,col="purple", main="Distribution of Yield", xlab="Yld")
-  Boxplot(CF811$yld~CF811$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+attach(CF811_C81A)
+summary(CF811_C81A)
+library(colorRamps)
+histo<-hist(CF811_C81A$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yld")
+
+#Remove All Low Values Identified in  Histogram (e.g.< 150 bu/ac)
+# NoLow<-CF811_C81A[CF811_C81A$yld <=150 , ]
+# NoLowRows<-as.numeric(rownames(NoLow))
+# HistoClean<-CF811_C81A
+# HistoClean$yld<-replace(HistoClean$yld, NoLowRows, NA)
+#Model Without Histogram Identified Low Yields:
+# model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=HistoClean, REML=TRUE)
+# summary(model4)
+# anova(model4)
+# anovalmer(model4)
+# ranova(model4)
+# LSDer::CVer(model4)
+# LSDer::LSDer(model4, "entry")
+
+palette <- primary.colors(length(unique(CF811_C81A$entry)))
+CF811_C81A$color <- palette[as.factor(CF811_C81A$entry)]
+barplot(CF811_C81A$yld, names.arg=CF811_C81A$entry, ylim=c(0,260), ylab="yld", xlab="id", col=CF811_C81A$color)
+
+library(car)
+Boxplot(CF811_C81A$yld~CF811_C81A$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+abline(h = max, col="red")
+abline(h = min, col="red")
 
 #Determine Data Balance & Immediate Outlier Detection:
-  aggregate(yld~entry, data=CF811, FUN=function(x) c(n=length(x), min=min(x), mean=mean(x), max=max(x)))
-  
+aggregate(yld~entry, data=CF811_C81A, FUN=function(x) c(n=length(x), min=min(x), mean=mean(x), max=max(x)))
+
 #Modeling:
-  model1<-lmer(wt~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CF811, REML=TRUE)
-  summary(model1)
-  anova(model1)
-  anovalmer(model1)
-  ranova(model1)
-  LSDer::CVer(model1)
-  LSDer::LSDer(model1, "entry")
-  predictmeans(model1, "entry", pairwise=TRUE, Df=44, level=.25)
+model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CF811_C81A, REML=TRUE)
+library(predictmeans)
+summary(model1)
+anova(model1)
+anovalmer(model1)
+ranova(model1)
+LSDer::CVer(model1)
+LSDer::LSDer(model1, "entry")
+# predictmeans(model1, "entry", pairwise=TRUE, Df=44, level=.25)
 
 #More Modeling, Post-Residual Outlier Removal:
 #i.e. Exclude Outliers = romr.fnc(model, data, trim = # of stddev above/below the residual means)
-  CF811clean<-romr.fnc(model1, CF811, trim = 3)
-  model2<-lmer(wt~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CF811clean[["data"]], REML=TRUE)
-  summary(model2)
-  anova(model2)
-  anovalmer(model2)
-  ranova(model2)
-  LSDer::CVer(model2)
-  LSDer::LSDer(model2, "entry")
-  predictmeans(model2, "entry", pairwise=TRUE, Df=44, level=.25)
-
-#LS Means Pairwise???
-  print(lsmeans(model1, list(pairwise ~ entry)), adjust = c("tukey"))
+#You designate the trim number, check qq and residual plots for corresponding trim #
+# Exp_Clean<-romr.fnc(model1, CF811_C81A, trim = 2.5)
+# model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=Exp_Clean[["data"]], REML=TRUE)
+# summary(model2)
+# anova(model2)
+# anovalmer(model2)
+# ranova(model2)
+# LSDer::CVer(model2)
+# LSDer::LSDer(model2, "entry")
+# predictmeans(model2, "entry", pairwise=TRUE, Df=44, level=.25)
 
 #Outliers & Plots:
-  residplot(model1)
-  residplot(model2)
-  
-  qq<-qqnorm(resid(model1))
-  qqline(resid(model1))
-  identify(qqnorm(resid(model1)))
-  
-  plot.lme(model1)
-  covariatemeans(model1, covariate="entry")
-  
-  grubbs.test(CF811$yld, type = 10, opposite = FALSE, two.sided = FALSE)
-  grubbs.test(CF811$yld, type = 10, opposite = TRUE, two.sided = FALSE)
+# residplot(model1)
+# residplot(model2)
+
+qq<-qqnorm(resid(model1))
+qqline(resid(model1), col="red")
+# influential1<-identify(qqnorm(resid(model1)))
+# QQClean<-CF811_C81A
+# QQClean$yld<-replace(QQClean$yld, influential1, NA)
+
+# plot.lme(model1)
+# covariatemeans(model1, covariate="entry")
+
+# library(outliers)
+# grubbs.test(CF811$yld, type = 10, opposite = FALSE, two.sided = FALSE)
+# grubbs.test(CF811$yld, type = 10, opposite = TRUE, two.sided = FALSE)
 
 #Outliers via Cook's Distance:
-  cooksd <- cooks.distance(model1)
-  sample_size <- nrow(CF811)
-  plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")
-  abline(h = 4/sample_size, col="red")
-  text(x=1:length(cooksd)+1, y=cooksd,
-       labels=ifelse(cooksd>4/sample_size,
-                     names(cooksd),""), col="red")
-  
-  influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
-  head(df[influential, ])
+cooksd<-CookD(model1, newwd=FALSE)
+abline(h = 50/sample_size, col="red")
+sample_size <- nrow(CF811)
+influential2 <- as.numeric(names(cooksd)[(cooksd > (h=50/sample_size))])
+head(df[influential2, ])
+# identify(cooksd)
 
-#OR:
-  cooksd<-CookD(model1, newwd=FALSE)
-  abline(h = 0.02, col="red")
-  sample_size <- nrow(CF811)
-  influential <- as.numeric(names(cooksd)[(cooksd > (h=0.02))])
-  head(df[influential, ])
+#New Clean Dataset, Where "Influential" Values Determined Via Cook's Distance have been set to NA:
+# CooksClean<-CF811_C81A
+# CooksClean$yld<-replace(CooksClean$yld, influential2, NA)
+# #Cooks Clean Model:
+# model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CooksClean, REML=TRUE)
+# summary(model3)
+# anova(model3)
+# anovalmer(model3)
+# ranova(model3)
+# LSDer::CVer(model3)
+# LSDer::LSDer(model3, "entry")
+
+#Sjstats Package:
+# library(sjstats)
+# anova_stats(model1)
+# grpmean(CF811_C81A, yld)
+# cv(model1)
+# converge_ok(model1)
+
+#LS Means Pairwise???
+# library(emmeans)
+# print(lsmeans(model1, list(pairwise ~ entry)), adjust = c("tukey"))
   
