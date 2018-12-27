@@ -1,19 +1,19 @@
 ---
-title: "Yield Trial Single Location Analysis"
-author: "Ryan Budnik"
-date: "December 26, 2018"
+title: "**Yield Trial Single Loc**"
+author: "*Ryan Budnik*"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: html_document
 params:
   book.name:
     label: "Book Name:"
     value: CF811
     input: select
-    choices: [CF811,	CF812,	CF813,	CF814,	CF815,	CF821,	CF822,	CF823,	CF824,	         CF825,	CF831,	CF832,	CF833,	CF834,	CF835,	F83.MN.Mor.105,	F83.MN.Oli.106,	            F83.ND.Cas.123,	F83.ND.Fes.126,	F83.ND.Oak.129,	F83.ND.Pri.130,	F83.ND.Was.131,	           F83.SD.Abe.143,	F83.SD.Cas.145,	F83.SD.Dim.146,	F83.SD.Wes.148,	F8C.IA.Atl.9,	            F8C.IA.Bod.12,	F8C.IA.Cla.17,	F8C.IA.Cle.18,	F8C.IA.Dow,	F8C.IA.Est.28,	               F8C.IA.Gra.31,	F8C.IA.Har,	F8C.IA.Hux.33,	F8C.IA.Lut.39,	F8C.IA.Rei.49,	                F8C.IA.Ric.50,	F8C.IA.Sla.53,	F8C.IL.Cha.161,	F8C.IL.Gen.61,	F8C.IL.Har.162,	           F8C.IL.MtP.163,	F8C.IL.Roc.74,	F8C.IL.Ros.75,	F8C.IL.Ton.164,	F8C.IN.Bro.165,	          F8C.IN.Far.166,	F8C.MN.Bro.100,	F8C.MN.Mad.104,	F8C.MN.Pip.107,	F8C.MN.Pla.108,	           F8C.MN.San.111,	F8C.MN.Sle.113,	F8C.MN.StC.114,	F8C.MN.Ste.115,	F8C.MN.Wel.116,	          F8C.NE.Arl.132,	F8H.MB.Win,	F8I.MB.Mor,	F8I.MB.Por,	F8I.MB.War,	F8K.IA.Gri,	               F8K.MN.Rou.110,	F8K.NE.Tek.135,	F8K.SD.Can.144,	F8P.IL.DGr.167,	F8P.IL.Mal.169,	          F8P.IL.Tam.168,	F8P.PA.Lew.171,	F8P.PA.MtJ.172,	F8P.WI.Ran.170,	F8R.MN.Gly.101,	           F8R.MN.Rad.109,	F8R.ND.Cha.124,	F8R.ND.Don.125,	F8R.ND.Min.128,	F8T.IA.Ced.15,	          F8T.IA.Cre.23,	F8T.IA.Dec.24,	F8T.IA.Lak.36,	F8T.IA.Spe.54,	F8T.IL.Blo.57,	           F8T.IL.Mon.69,	F8T.MI.Ree.96,	F8T.MN.Alb.97,	F8T.MN.Hay.102,	F8T.MN.Jac.103,	            F8T.WI.Jan.149,	F8T.WI.Pla.150]
+    choices: [CF811, CF812, CF813, CF814, CF815, CF821, CF822,	CF823, CF824, CF825, CF831, CF832, CF833, CF834, CF835, F83.MN.Mor.105, F83.MN.Oli.106, F83.ND.Cas.123,	F83.ND.Fes.126,	F83.ND.Oak.129,	F83.ND.Pri.130,	F83.ND.Was.131, F83.SD.Abe.143,	F83.SD.Cas.145,	F83.SD.Dim.146,	F83.SD.Wes.148,	F8C.IA.Atl.9, F8C.IA.Bod.12, F8C.IA.Cla.17,	F8C.IA.Cle.18,	F8C.IA.Dow,	F8C.IA.Est.28, F8C.IA.Gra.31,	F8C.IA.Har,	F8C.IA.Hux.33, F8C.IA.Lut.39,	F8C.IA.Rei.49, F8C.IA.Ric.50,	F8C.IA.Sla.53,	F8C.IL.Cha.161,	F8C.IL.Gen.61, F8C.IL.Har.162, F8C.IL.MtP.163, F8C.IL.Roc.74, F8C.IL.Ros.75,	F8C.IL.Ton.164,	F8C.IN.Bro.165, F8C.IN.Far.166,	F8C.MN.Bro.100,	F8C.MN.Mad.104,	F8C.MN.Pip.107,	F8C.MN.Pla.108, F8C.MN.San.111,	F8C.MN.Sle.113,	F8C.MN.StC.114,	F8C.MN.Ste.115,	F8C.MN.Wel.116, F8C.NE.Arl.132,	F8H.MB.Win,	F8I.MB.Mor,	F8I.MB.Por,	F8I.MB.War,	F8K.IA.Gri, F8K.MN.Rou.110,	F8K.NE.Tek.135,	F8K.SD.Can.144,	F8P.IL.DGr.167,	F8P.IL.Mal.169, F8P.IL.Tam.168,	F8P.PA.Lew.171,	F8P.PA.MtJ.172,	F8P.WI.Ran.170,	F8R.MN.Gly.101, F8R.MN.Rad.109,	F8R.ND.Cha.124,	F8R.ND.Don.125,	F8R.ND.Min.128,	F8T.IA.Ced.15, F8T.IA.Cre.23,	F8T.IA.Dec.24,	F8T.IA.Lak.36,	F8T.IA.Spe.54,	F8T.IL.Blo.57, F8T.IL.Mon.69,	F8T.MI.Ree.96,	F8T.MN.Alb.97,	F8T.MN.Hay.102,	F8T.MN.Jac.103, F8T.WI.Jan.149,	F8T.WI.Pla.150]
   exp:
     label: "Experiment:"
     value: C81A
     input: select
-    choices: [C81A,	C81B,	C82A,	C82B,	C83A,	C83B,	R18-101,	R18-102,	R18-103,	R18-104,	     R18-105,	R18-106,	R18-107,	R18-108,	R18-201,	R18-202,	R18-203,	R18-204,	R18-205,	    R18-206-Olivia,	R18-301,	R18-302,	R18-303,	R18-401,	R18-402,	R18-501,	R18-601,	    R18-602,	YT01P18_UE,	YT02P18_E,	YT03P18_M1,	YT04P18_L1,	YT05P18_WL2,	YT06P18_RE,	       YT07P18_RM,	YT08P18_RL,	YT09P18_D1E1,	YT10P18_D1E2,	YT11P18_D1E3,	YT12P18_D1M4,	          YT13P18_D2A,	YT14P18_D2B,	YT15P18_D2C,	YT16P18_D3,	YT17P18_JE,	YT18P18_JL,	             YT19P18_WES,	YT20P18_WLS,	YT21P18_PSN,	YT22P18_PSL,	YT23P18_KM,	YT24P18_KL,	            YT25P18_DG,	YTNL_Obs,	YTNL01,	YTNL02,	YTNL03,	YTNL04,	YTNL05,	YTNL06,	YTNL07,	YTNL08,	     YTNL09,	YTNL10,	YTNL11,	YTNL12]
+    choices: [C81A,	C81B,	C82A,	C82B,	C83A,	C83B,	R18-101, R18-102, R18-103, R18-104, R18-105, R18-106, R18-107, R18-108, R18-201, R18-202, R18-203, R18-204, R18-205, R18-206-Olivia,	R18-301,	R18-302, R18-303, R18-401, R18-402, R18-501, R18-601, R18-602, YT01P18_UE, YT02P18_E,	YT03P18_M1,	YT04P18_L1,	YT05P18_WL2, YT06P18_RE, YT07P18_RM,	YT08P18_RL,	YT09P18_D1E1,	YT10P18_D1E2,	YT11P18_D1E3,	YT12P18_D1M4, YT13P18_D2A, YT14P18_D2B,	YT15P18_D2C, YT16P18_D3, YT17P18_JE,	YT18P18_JL, YT19P18_WES, YT20P18_WLS, YT21P18_PSN, YT22P18_PSL,	YT23P18_KM,	YT24P18_KL, YT25P18_DG,	YTNL_Obs,	YTNL01,	YTNL02,	YTNL03,	YTNL04,	YTNL05,	YTNL06,	YTNL07,	YTNL08, YTNL09,	YTNL10,	YTNL11,	YTNL12]
   entry:
     label: "Entry"
     value: 45
@@ -22,94 +22,96 @@ params:
     max: 100
     step: 1
     sep: ""
+  year:
+    label: "Year"
+    value: 2018
+    input: slider
+    min: 2010
+    max: 2030
+    step: 1
+    sep: ""
   data:
     label: "Input dataset:"
     value: yt18.csv
     input: file
 ---
-##Overview
+# Overview:
+The following report renders a single location mixed model analysis with corresponding figures for the `r params$year` `r params$exp` Trial, at the `r params$book.name` location. Adjustments to residual and 
 
-
-##Load data
-
-```{r load_data}
-library(agricolae)
+```{r setup, include=FALSE}
 library(dplyr)
+library(agricolae)
 library(nlme)
 library(lme4)
 library(LMERConvenienceFunctions)
 library(lmerTest)
-library(colorRamps)
+library(randomcoloR)
 library(car)
 library(predictmeans)
+library(knitr)
+opts_chunk$set(echo = FALSE)
 ```
 
-##Data Preparation
+# Data Visualization:
 
-```{r data_prep}
-df<-read.csv(params$data, header=T, na.strings=c("", " ", "NA"))
+## Summary & Aggregation:
+
+```{r data_viz, include=FALSE}
+summary(data)
+aggregate(yld~entry, data=data, FUN=function(x) c(n=length(x), min=min(x), mean=mean(x), max=max(x)))
 ```
 
-```{r data_prep}
-CCF<-8.067
-df <- df%>%mutate (yld = (wt*CCF))
-# BCF<-7.779
-# df <- df%>%mutate (yld = (wt*BCF))
-```
+## Histogram, Barplot, & Boxplot:
 
-```{r data_prep}
-data<-subset(df, book.name=="param$book.name", entry %in% c(1:45))
-data1<-subset(data, exp=="param$exp")
-str(df)
-data1$entry<-factor(data1$entry)
-data1$ped.id<-factor(data1$ped.id)
-data1$code<-factor(data1$code)
-data1$range<-factor(data1$range)
-data1$pass<-factor(data1$pass)
-data1$rep<-factor(data1$rep)
-```
+``` {r data_viz1, include=FALSE}
+histo<-hist(data$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yield")
 
-##Data Visualization
+palette <- randomColor(length(unique(data$entry)))
+data$color <- palette[as.factor(data$entry)]
+barplot(data$yld, names.arg=data$entry, ylim=c(0,260), ylab="Yield", xlab="Entry", col=data$color)
 
-```{r data_viz}
-# #Set IQRS:
-max <- quantile(CF811_C81A$yld,0.75, na.rm=TRUE) + (IQR(CF811_C81A$yld, na.rm=TRUE) * 1.5 )
-min <- quantile(CF811_C81A$yld,0.25, na.rm=TRUE) - (IQR(CF811_C81A$yld, na.rm=TRUE) * 1.5 )
-# #Exploratory:
-attach(CF811_C81A)
-summary(CF811_C81A)
-library(colorRamps)
-histo<-hist(CF811_C81A$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yld")
-
-palette <- primary.colors(length(unique(CF811_C81A$entry)))
-CF811_C81A$color <- palette[as.factor(CF811_C81A$entry)]
-barplot(CF811_C81A$yld, names.arg=CF811_C81A$entry, ylim=c(0,260), ylab="yld", xlab="id", col=CF811_C81A$color)
-
-Boxplot(CF811_C81A$yld~CF811_C81A$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
 abline(h = max, col="red")
 abline(h = min, col="red")
-
-# #Determine Data Balance & Immediate Outlier Detection:
-aggregate(yld~entry, data=CF811_C81A, FUN=function(x) c(n=length(x), min=min(x), mean=mean(x), max=max(x)))
 ```
 
-##Analysis
+# Mixed Model Analysis:
 
-```{r modeling}
-model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CF811_C81A, REML=TRUE)
+```{r model, include=FALSE}
+model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=data, REML=TRUE)
 summary(model1)
 anova(model1)
 anovalmer(model1)
 ranova(model1)
 LSDer::CVer(model1)
 LSDer::LSDer(model1, "entry")
+```
 
-# #Remove All Low Values Identified in  Histogram (e.g.< 150 bu/ac)
-# NoLow<-CF811_C81A[CF811_C81A$yld <=150 , ]
-# NoLowRows<-as.numeric(rownames(NoLow))
-# HistoClean<-CF811_C81A
+# Outlier Detection:
+
+## Normal Q-Q Plot:
+
+```{r fig.cap="QQ plot (or quantile-quantile plot) draws the correlation between a given sample and the normal distribution. A 45-degree reference line is also plotted. QQ plots are used to visually check the normality of the data.", include=FALSE}
+qq<-qqnorm(resid(model1))
+qqline(resid(model1), col="red")
+```
+
+## Cook's Distance:
+
+```{r fig.cap="Cook’s distance is useful for identifying outliers in the X values (observations for predictor variables). It also shows the influence of each observation on the fitted response values. An observation with Cook’s distance larger than three times the mean Cook’s distance might be an outlier.", include=FALSE}
+cooksd<-CookD(model1, newwd=FALSE)
+abline(h = 50/sample_size, col="red")
+```
+
+# Cleaned Models:
+
+```{r models, include=FALSE}
+###Replace All Low Values Identified in  Histogram (e.g.< 150 bu/ac) with NA:
+# HistoNoLow<-data[data$yld <min , ]
+# NoLowRows<-as.numeric(rownames(HistoNoLow))
+# HistoClean<-data
 # HistoClean$yld<-replace(HistoClean$yld, NoLowRows, NA)
-# #Model Without Histogram Identified Low Yields:
+###Model Without Histogram Identified Low Yields:
 # model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=HistoClean, REML=TRUE)
 # summary(model2)
 # anova(model2)
@@ -118,32 +120,13 @@ LSDer::LSDer(model1, "entry")
 # LSDer::CVer(model2)
 # LSDer::LSDer(model2, "entry")
 
-
-```
-
-##Outlier Detection
-
-```{r outlier}
-qq<-qqnorm(resid(model1))
-qqline(resid(model1), col="red")
-influential1<-identify(qqnorm(resid(model1)))
-
-cooksd<-CookD(model1, newwd=FALSE)
-abline(h = 50/sample_size, col="red")
-```
-
-
-##Further Analysis
-
-```{r modeling}
-# #More Modeling, Post-Residual Outlier Removal:
-# #i.e. Exclude Outliers = romr.fnc(model, data, trim = # of stddev above/below the residual means)
-# #You designate the trim number, check qq and residual plots for corresponding trim #
-# ResidualClean<-romr.fnc(model1, CF811_C81A, trim = 2.5)
-
-# #OR
+###Replace All Residual Outliers Identified in  Q-Q Plot with NA:
+# influential1<-identify(qqnorm(resid(model1)))
 # QQClean<-CF811_C81A
 # QQClean$yld<-replace(QQClean$yld, influential1, NA)
+###Alternatively, MUST designate trim = # of stddev above/below the residual means.
+# ResidualClean<-romr.fnc(model1, CF811_C81A, trim = 2.5)
+###Model Without Q-Q Residual Outliers:
 # model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=ResidualClean[["data"]], REML=TRUE)
 # summary(model3)
 # anova(model3)
@@ -151,15 +134,13 @@ abline(h = 50/sample_size, col="red")
 # ranova(model3)
 # LSDer::CVer(model3)
 # LSDer::LSDer(model3, "entry")
-# predictmeans(model3, "entry", pairwise=TRUE, Df=44, level=.25)
 
-
-# #New Clean Dataset, Where "Influential" Values Determined Via Cook's Distance have been set to NA:
-# sample_size <- nrow(CF811)
+###Replace "Influential" Values Determined Via Cook's Distance, with NA:
+# sample_size <- nrow(data)
 # influential2 <- as.numeric(names(cooksd)[(cooksd > (h=50/sample_size))])
-# CooksClean<-CF811_C81A
+# CooksClean<-data
 # CooksClean$yld<-replace(CooksClean$yld, influential2, NA)
-# #Cooks Clean Model:
+###Cooks Clean Model:
 # model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CooksClean, REML=TRUE)
 # summary(model4)
 # anova(model4)
@@ -169,10 +150,12 @@ abline(h = 50/sample_size, col="red")
 # LSDer::LSDer(model4, "entry")
 ```
 
-##Export Clean Dataset
+# Export Clean Dataset:
+
 ```{r export}
 # write.csv(CooksClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/CooksClean_CF811_C81A.csv")
 # write.csv(QQClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/QQClean_CF811_C81A.csv")
 # write.csv(HistoClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_CF811_C81A.csv")
 # write.csv(ResidualClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/ResidualClean_CF811_C81A.csv")
 ```
+
