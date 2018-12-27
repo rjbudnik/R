@@ -1,21 +1,34 @@
-###Load Desired Template:
-devtools::install("YieldTrialSingleLoc")
-library(YieldTrialSingleLoc)
-
-###Start New RMarkdown File:
-###File > New File > R Markdown > From Template > Yield Trial Single Loc
-
 ---
-title: "Yield Trial Single Loc"
+title: "Yield Trial Single Location Analysis"
+author: "Ryan Budnik"
+date: "December 26, 2018"
 output: html_document
-
 params:
-  filename: "yt18.csv"
-  Book.name: "CF811"
-  Exp: "C81A"
-  new: "CF811_C81A"
+  book.name:
+    label: "Book Name:"
+    value: CF811
+    input: select
+    choices: [CF811,	CF812,	CF813,	CF814,	CF815,	CF821,	CF822,	CF823,	CF824,	         CF825,	CF831,	CF832,	CF833,	CF834,	CF835,	F83.MN.Mor.105,	F83.MN.Oli.106,	            F83.ND.Cas.123,	F83.ND.Fes.126,	F83.ND.Oak.129,	F83.ND.Pri.130,	F83.ND.Was.131,	           F83.SD.Abe.143,	F83.SD.Cas.145,	F83.SD.Dim.146,	F83.SD.Wes.148,	F8C.IA.Atl.9,	            F8C.IA.Bod.12,	F8C.IA.Cla.17,	F8C.IA.Cle.18,	F8C.IA.Dow,	F8C.IA.Est.28,	               F8C.IA.Gra.31,	F8C.IA.Har,	F8C.IA.Hux.33,	F8C.IA.Lut.39,	F8C.IA.Rei.49,	                F8C.IA.Ric.50,	F8C.IA.Sla.53,	F8C.IL.Cha.161,	F8C.IL.Gen.61,	F8C.IL.Har.162,	           F8C.IL.MtP.163,	F8C.IL.Roc.74,	F8C.IL.Ros.75,	F8C.IL.Ton.164,	F8C.IN.Bro.165,	          F8C.IN.Far.166,	F8C.MN.Bro.100,	F8C.MN.Mad.104,	F8C.MN.Pip.107,	F8C.MN.Pla.108,	           F8C.MN.San.111,	F8C.MN.Sle.113,	F8C.MN.StC.114,	F8C.MN.Ste.115,	F8C.MN.Wel.116,	          F8C.NE.Arl.132,	F8H.MB.Win,	F8I.MB.Mor,	F8I.MB.Por,	F8I.MB.War,	F8K.IA.Gri,	               F8K.MN.Rou.110,	F8K.NE.Tek.135,	F8K.SD.Can.144,	F8P.IL.DGr.167,	F8P.IL.Mal.169,	          F8P.IL.Tam.168,	F8P.PA.Lew.171,	F8P.PA.MtJ.172,	F8P.WI.Ran.170,	F8R.MN.Gly.101,	           F8R.MN.Rad.109,	F8R.ND.Cha.124,	F8R.ND.Don.125,	F8R.ND.Min.128,	F8T.IA.Ced.15,	          F8T.IA.Cre.23,	F8T.IA.Dec.24,	F8T.IA.Lak.36,	F8T.IA.Spe.54,	F8T.IL.Blo.57,	           F8T.IL.Mon.69,	F8T.MI.Ree.96,	F8T.MN.Alb.97,	F8T.MN.Hay.102,	F8T.MN.Jac.103,	            F8T.WI.Jan.149,	F8T.WI.Pla.150]
+  exp:
+    label: "Experiment:"
+    value: C81A
+    input: select
+    choices: [C81A,	C81B,	C82A,	C82B,	C83A,	C83B,	R18-101,	R18-102,	R18-103,	R18-104,	     R18-105,	R18-106,	R18-107,	R18-108,	R18-201,	R18-202,	R18-203,	R18-204,	R18-205,	    R18-206-Olivia,	R18-301,	R18-302,	R18-303,	R18-401,	R18-402,	R18-501,	R18-601,	    R18-602,	YT01P18_UE,	YT02P18_E,	YT03P18_M1,	YT04P18_L1,	YT05P18_WL2,	YT06P18_RE,	       YT07P18_RM,	YT08P18_RL,	YT09P18_D1E1,	YT10P18_D1E2,	YT11P18_D1E3,	YT12P18_D1M4,	          YT13P18_D2A,	YT14P18_D2B,	YT15P18_D2C,	YT16P18_D3,	YT17P18_JE,	YT18P18_JL,	             YT19P18_WES,	YT20P18_WLS,	YT21P18_PSN,	YT22P18_PSL,	YT23P18_KM,	YT24P18_KL,	            YT25P18_DG,	YTNL_Obs,	YTNL01,	YTNL02,	YTNL03,	YTNL04,	YTNL05,	YTNL06,	YTNL07,	YTNL08,	     YTNL09,	YTNL10,	YTNL11,	YTNL12]
+  entry:
+    label: "Entry"
+    value: 45
+    input: slider
+    min: 1
+    max: 100
+    step: 1
+    sep: ""
+  data:
+    label: "Input dataset:"
+    value: yt18.csv
+    input: file
 ---
 ##Overview
+
 
 ##Load data
 
@@ -29,27 +42,31 @@ library(lmerTest)
 library(colorRamps)
 library(car)
 library(predictmeans)
-
-setwd("C:/Users/rjbudnik/Desktop/wd")
-df<-read.csv(params$filename, header=T, na.strings=c("", " ", "NA"))
 ```
 
 ##Data Preparation
+
+```{r data_prep}
+df<-read.csv(params$data, header=T, na.strings=c("", " ", "NA"))
+```
 
 ```{r data_prep}
 CCF<-8.067
 df <- df%>%mutate (yld = (wt*CCF))
 # BCF<-7.779
 # df <- df%>%mutate (yld = (wt*BCF))
-params$Book.name<-subset(df, book.name=="params$Book.name", entry %in% c(1:45))
-params$new<-subset(params$Book.name, exp=="params$Exp")
-str(params$new)
-(params$new)$entry<-factor((params$new)$entry)
-params$new$ped.id<-factor(params$new$ped.id)
-params$new$code<-factor(params$new$code)
-params$new$range<-factor(params$new$range)
-params$new$pass<-factor(params$new$pass)
-params$new$rep<-factor(params$new$rep)
+```
+
+```{r data_prep}
+data<-subset(df, book.name=="param$book.name", entry %in% c(1:45))
+data1<-subset(data, exp=="param$exp")
+str(df)
+data1$entry<-factor(data1$entry)
+data1$ped.id<-factor(data1$ped.id)
+data1$code<-factor(data1$code)
+data1$range<-factor(data1$range)
+data1$pass<-factor(data1$pass)
+data1$rep<-factor(data1$rep)
 ```
 
 ##Data Visualization
