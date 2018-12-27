@@ -35,10 +35,21 @@ params:
     value: yt18.csv
     input: file
 ---
+---
+title: "**Yield Trial Single Loc**"
+author: "*Ryan Budnik*"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: pdf_document
+params:
+  exp: CF811
+  book.name: C81A
+  year: 2018
+  
+---
 # Overview:
-The following report renders a single location mixed model analysis with corresponding figures for the `r params$year` `r params$exp` Trial, at the `r params$book.name` location. Adjustments to residual and 
+The following report renders a single location mixed model analysis with corresponding figures for the `r params$year` `r params$exp` Trial, at the `r params$book.name` location.
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 library(dplyr)
 library(agricolae)
 library(nlme)
@@ -49,21 +60,51 @@ library(randomcoloR)
 library(car)
 library(predictmeans)
 library(knitr)
-opts_chunk$set(echo = FALSE)
+```
+
+```{r setup2, echo = FALSE}
+###Set wd & Import CSV Dataset:
+df<-read.csv("yt18.csv", header=T, na.strings=c("", " ", "NA"))
+
+###CCF
+CCF<-8.067
+df <- df%>%mutate (yld = (wt*CCF))
+###BCF
+# BCF<-7.779
+# df <- df%>%mutate (yld = (wt*BCF))
+
+###Subset data of interest:
+Location<-filter(df, book.name=="params$book.name", entry %in% c(1:45))
+###Subset the Desired Experiment:
+data<-filter(Location, exp=="params$exp")
+
+###View Classifications & Set Factors:
+data$entry<-factor(data$entry)
+data$ped.id<-factor(data$ped.id)
+data$code<-factor(data$code)
+data$range<-factor(data$range)
+data$pass<-factor(data$pass)
+data$rep<-factor(data$rep)
+attach(data)
+
+###Mean & IQRS:
+max <- quantile(data$yld,0.75, na.rm=TRUE) + (IQR(data$yld, na.rm=TRUE) * 1.5 )
+min <- quantile(data$yld,0.25, na.rm=TRUE) - (IQR(data$yld, na.rm=TRUE) * 1.5 )
+mean<- mean(data$yld)
 ```
 
 # Data Visualization:
 
 ## Summary & Aggregation:
 
-```{r data_viz, include=FALSE}
+```{r viz, echo = FALSE}
 summary(data)
 aggregate(yld~entry, data=data, FUN=function(x) c(n=length(x), min=min(x), mean=mean(x), max=max(x)))
 ```
 
 ## Histogram, Barplot, & Boxplot:
 
-``` {r data_viz1, include=FALSE}
+``` {r viz2, echo = FALSE}
 histo<-hist(data$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yield")
 
 palette <- randomColor(length(unique(data$entry)))
@@ -77,7 +118,7 @@ abline(h = min, col="red")
 
 # Mixed Model Analysis:
 
-```{r model, include=FALSE}
+```{r model, echo = FALSE}
 model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=data, REML=TRUE)
 summary(model1)
 anova(model1)
@@ -91,27 +132,30 @@ LSDer::LSDer(model1, "entry")
 
 ## Normal Q-Q Plot:
 
-```{r fig.cap="QQ plot (or quantile-quantile plot) draws the correlation between a given sample and the normal distribution. A 45-degree reference line is also plotted. QQ plots are used to visually check the normality of the data.", include=FALSE}
+```{r fig.cap="QQ plot (or quantile-quantile plot) draws the correlation between a given sample and the normal distribution. A 45-degree reference line is also plotted. QQ plots are used to visually check the normality of the data.", echo = FALSE}
 qq<-qqnorm(resid(model1))
 qqline(resid(model1), col="red")
 ```
 
 ## Cook's Distance:
 
-```{r fig.cap="Cook’s distance is useful for identifying outliers in the X values (observations for predictor variables). It also shows the influence of each observation on the fitted response values. An observation with Cook’s distance larger than three times the mean Cook’s distance might be an outlier.", include=FALSE}
-cooksd<-CookD(model1, newwd=FALSE)
+```{r fig.cap="Cook’s distance is useful for identifying outliers in the X values (observations for predictor variables). It also shows the influence of each observation on the fitted response values. An observation with Cook’s distance larger than three times the mean Cook’s distance might be an outlier.", echo = FALSE}
+sample_size<-nrow(data)
+Cooksd<-CookD(model1, newwd=FALSE)
 abline(h = 50/sample_size, col="red")
 ```
 
 # Cleaned Models:
 
-```{r models, include=FALSE}
-###Replace All Low Values Identified in  Histogram (e.g.< 150 bu/ac) with NA:
+Adjustments replacing 
+
+```{r modelc, echo = FALSE}
+# ##Replace All Low Values Identified in  Histogram (e.g.< 150 bu/ac) with NA:
 # HistoNoLow<-data[data$yld <min , ]
 # NoLowRows<-as.numeric(rownames(HistoNoLow))
 # HistoClean<-data
 # HistoClean$yld<-replace(HistoClean$yld, NoLowRows, NA)
-###Model Without Histogram Identified Low Yields:
+# ##Model Without Histogram Identified Low Yields:
 # model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=HistoClean, REML=TRUE)
 # summary(model2)
 # anova(model2)
@@ -120,13 +164,13 @@ abline(h = 50/sample_size, col="red")
 # LSDer::CVer(model2)
 # LSDer::LSDer(model2, "entry")
 
-###Replace All Residual Outliers Identified in  Q-Q Plot with NA:
-# influential1<-identify(qqnorm(resid(model1)))
+# ##Replace All Residual Outliers Identified in  Q-Q Plot with NA:
+# influentialQQ<-identify(qqnorm(resid(model1)))
 # QQClean<-CF811_C81A
-# QQClean$yld<-replace(QQClean$yld, influential1, NA)
-###Alternatively, MUST designate trim = # of stddev above/below the residual means.
+# QQClean$yld<-replace(QQClean$yld, influentialQQ, NA)
+# ##Alternatively, MUST designate trim = # of stddev above/below the residual means.
 # ResidualClean<-romr.fnc(model1, CF811_C81A, trim = 2.5)
-###Model Without Q-Q Residual Outliers:
+# ##Model Without Q-Q Residual Outliers:
 # model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=ResidualClean[["data"]], REML=TRUE)
 # summary(model3)
 # anova(model3)
@@ -135,12 +179,12 @@ abline(h = 50/sample_size, col="red")
 # LSDer::CVer(model3)
 # LSDer::LSDer(model3, "entry")
 
-###Replace "Influential" Values Determined Via Cook's Distance, with NA:
+# ##Replace "Influential" Values Determined Via Cook's Distance, with NA:
 # sample_size <- nrow(data)
-# influential2 <- as.numeric(names(cooksd)[(cooksd > (h=50/sample_size))])
+# influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=50/sample_size))])
 # CooksClean<-data
-# CooksClean$yld<-replace(CooksClean$yld, influential2, NA)
-###Cooks Clean Model:
+# CooksClean$yld<-replace(CooksClean$yld, influentialcooks, NA)
+# ##Cooks Clean Model:
 # model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CooksClean, REML=TRUE)
 # summary(model4)
 # anova(model4)
@@ -152,7 +196,7 @@ abline(h = 50/sample_size, col="red")
 
 # Export Clean Dataset:
 
-```{r export}
+```{r export, echo = FALSE}
 # write.csv(CooksClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/CooksClean_CF811_C81A.csv")
 # write.csv(QQClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/QQClean_CF811_C81A.csv")
 # write.csv(HistoClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_CF811_C81A.csv")
