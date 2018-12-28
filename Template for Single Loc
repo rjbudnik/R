@@ -2,7 +2,12 @@
 title: "**Yield Trial Single Loc**"
 author: "*Ryan Budnik*"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
-output: html_document
+output: 
+  html_document:
+    theme: journal
+    toc: true
+    toc_float:
+      collapsed: true
 params:
   book.name:
     label: "Book Name:"
@@ -14,8 +19,16 @@ params:
     value: C81A
     input: select
     choices: [C81A,	C81B,	C82A,	C82B,	C83A,	C83B,	R18-101, R18-102, R18-103, R18-104, R18-105, R18-106, R18-107, R18-108, R18-201, R18-202, R18-203, R18-204, R18-205, R18-206-Olivia,	R18-301,	R18-302, R18-303, R18-401, R18-402, R18-501, R18-601, R18-602, YT01P18_UE, YT02P18_E,	YT03P18_M1,	YT04P18_L1,	YT05P18_WL2, YT06P18_RE, YT07P18_RM,	YT08P18_RL,	YT09P18_D1E1,	YT10P18_D1E2,	YT11P18_D1E3,	YT12P18_D1M4, YT13P18_D2A, YT14P18_D2B,	YT15P18_D2C, YT16P18_D3, YT17P18_JE,	YT18P18_JL, YT19P18_WES, YT20P18_WLS, YT21P18_PSN, YT22P18_PSL,	YT23P18_KM,	YT24P18_KL, YT25P18_DG,	YTNL_Obs,	YTNL01,	YTNL02,	YTNL03,	YTNL04,	YTNL05,	YTNL06,	YTNL07,	YTNL08, YTNL09,	YTNL10,	YTNL11,	YTNL12]
-  entry:
-    label: "Entry"
+  entry.start:
+    label: "Entry Start"
+    value: 1
+    input: slider
+    min: 1
+    max: 100
+    step: 1
+    sep: ""
+  entry.end:
+    label: "Entry End"
     value: 45
     input: slider
     min: 1
@@ -30,21 +43,6 @@ params:
     max: 2030
     step: 1
     sep: ""
-  data:
-    label: "Input dataset:"
-    value: yt18.csv
-    input: file
----
----
-title: "**Yield Trial Single Loc**"
-author: "*Ryan Budnik*"
-date: '`r format(Sys.time(), "%d %B, %Y")`'
-output: pdf_document
-params:
-  exp: CF811
-  book.name: C81A
-  year: 2018
-  
 ---
 # Overview:
 The following report renders a single location mixed model analysis with corresponding figures for the `r params$year` `r params$exp` Trial, at the `r params$book.name` location.
@@ -60,6 +58,9 @@ library(randomcoloR)
 library(car)
 library(predictmeans)
 library(knitr)
+library(shiny)
+library(shinythemes)
+library(psych)
 ```
 
 ```{r setup2, echo = FALSE}
@@ -73,12 +74,14 @@ df <- df%>%mutate (yld = (wt*CCF))
 # BCF<-7.779
 # df <- df%>%mutate (yld = (wt*BCF))
 
+df <- df%>%mutate(yld=replace(yld, plot.discard=="Yes", NA))
+
 ###Subset data of interest:
-Location<-filter(df, book.name=="params$book.name", entry %in% c(1:45))
-###Subset the Desired Experiment:
-data<-filter(Location, exp=="params$exp")
+data<-filter(df, book.name==c(params$book.name) & exp==c(params$exp), entry %in% c(params$entry.start:params$entry.end))
 
 ###View Classifications & Set Factors:
+data$book.name<-factor(data$book.name)
+data$exp<-factor(data$exp)
 data$entry<-factor(data$entry)
 data$ped.id<-factor(data$ped.id)
 data$code<-factor(data$code)
@@ -90,15 +93,19 @@ attach(data)
 ###Mean & IQRS:
 max <- quantile(data$yld,0.75, na.rm=TRUE) + (IQR(data$yld, na.rm=TRUE) * 1.5 )
 min <- quantile(data$yld,0.25, na.rm=TRUE) - (IQR(data$yld, na.rm=TRUE) * 1.5 )
-mean<- mean(data$yld)
+Average <- mean(data$yld)
 ```
 
-# Data Visualization:
+# Data Visualization: {.tabset .tabset-fade}
 
 ## Summary & Aggregation:
 
 ```{r viz, echo = FALSE}
-summary(data)
+
+describe(data)
+
+# summary(data)
+
 aggregate(yld~entry, data=data, FUN=function(x) c(n=length(x), min=min(x), mean=mean(x), max=max(x)))
 ```
 
@@ -116,7 +123,7 @@ abline(h = max, col="red")
 abline(h = min, col="red")
 ```
 
-# Mixed Model Analysis:
+# Mixed Model Analysis: {.tabset .tabset-fade}
 
 ```{r model, echo = FALSE}
 model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=data, REML=TRUE)
@@ -128,7 +135,7 @@ LSDer::CVer(model1)
 LSDer::LSDer(model1, "entry")
 ```
 
-# Outlier Detection:
+# Outlier Detection: {.tabset .tabset-fade}
 
 ## Normal Q-Q Plot:
 
@@ -142,10 +149,12 @@ qqline(resid(model1), col="red")
 ```{r fig.cap="Cook’s distance is useful for identifying outliers in the X values (observations for predictor variables). It also shows the influence of each observation on the fitted response values. An observation with Cook’s distance larger than three times the mean Cook’s distance might be an outlier.", echo = FALSE}
 sample_size<-nrow(data)
 Cooksd<-CookD(model1, newwd=FALSE)
-abline(h = 50/sample_size, col="red")
+abline(h = (12/(sample_size-params$entry.end-1)), col="red")
+abline(h = (8/(sample_size-params$entry.end-1)), col="red", lwd=c(2))
+abline(h = (4/(sample_size-params$entry.end-1)), col="red", lwd=c(3))
 ```
 
-# Cleaned Models:
+# Cleaned Models: {.tabset .tabset-fade}
 
 Adjustments replacing 
 
@@ -168,8 +177,9 @@ Adjustments replacing
 # influentialQQ<-identify(qqnorm(resid(model1)))
 # QQClean<-CF811_C81A
 # QQClean$yld<-replace(QQClean$yld, influentialQQ, NA)
-# ##Alternatively, MUST designate trim = # of stddev above/below the residual means.
-# ResidualClean<-romr.fnc(model1, CF811_C81A, trim = 2.5)
+# model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=QQClean, REML=TRUE)
+##Alternatively, MUST designate trim = # of stddev above/below the residual means.
+# ResidualClean<-romr.fnc(model1, data, trim = 3)
 # ##Model Without Q-Q Residual Outliers:
 # model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=ResidualClean[["data"]], REML=TRUE)
 # summary(model3)
@@ -194,7 +204,7 @@ Adjustments replacing
 # LSDer::LSDer(model4, "entry")
 ```
 
-# Export Clean Dataset:
+# Export Clean Dataset: {.tabset .tabset-fade}
 
 ```{r export, echo = FALSE}
 # write.csv(CooksClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/CooksClean_CF811_C81A.csv")
@@ -202,4 +212,3 @@ Adjustments replacing
 # write.csv(HistoClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_CF811_C81A.csv")
 # write.csv(ResidualClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/ResidualClean_CF811_C81A.csv")
 ```
-
