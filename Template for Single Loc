@@ -61,6 +61,7 @@ library(knitr)
 library(shiny)
 library(shinythemes)
 library(psych)
+library(skimr)
 ```
 
 ```{r setup2, echo = FALSE}
@@ -74,7 +75,7 @@ df <- df%>%mutate (yld = (wt*CCF))
 # BCF<-7.779
 # df <- df%>%mutate (yld = (wt*BCF))
 
-df <- df%>%mutate(yld=replace(yld, plot.discard=="Yes", NA))
+df <- df%>%mutate(yld=replace(yld, plot.discarded=="Yes", NA))
 
 ###Subset data of interest:
 data<-filter(df, book.name==c(params$book.name) & exp==c(params$exp), entry %in% c(params$entry.start:params$entry.end))
@@ -100,9 +101,10 @@ Average <- mean(data$yld)
 
 ## Summary & Aggregation:
 
-```{r viz, echo = FALSE}
+```{r viz, echo = FALSE, fig.width=6, warning=FALSE}
 
-describe(data)
+ds<-describe(data, IQR=TRUE)
+knitr::kable(ds, caption = "Table with kable")
 
 # summary(data)
 
@@ -111,12 +113,14 @@ aggregate(yld~entry, data=data, FUN=function(x) c(n=length(x), min=min(x), mean=
 
 ## Histogram, Barplot, & Boxplot:
 
-``` {r viz2, echo = FALSE}
+``` {r viz2, echo = FALSE, fig.width=9}
 histo<-hist(data$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yield")
 
 palette <- randomColor(length(unique(data$entry)))
 data$color <- palette[as.factor(data$entry)]
 barplot(data$yld, names.arg=data$entry, ylim=c(0,260), ylab="Yield", xlab="Entry", col=data$color)
+abline(h = max, col="red")
+abline(h = min, col="red")
 
 Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
 abline(h = max, col="red")
@@ -156,52 +160,93 @@ abline(h = (4/(sample_size-params$entry.end-1)), col="red", lwd=c(3))
 
 # Cleaned Models: {.tabset .tabset-fade}
 
-Adjustments replacing 
+## Outside Minimum IQR: {.tabset .tabset-fade}
 
-```{r modelc, echo = FALSE}
-# ##Replace All Low Values Identified in  Histogram (e.g.< 150 bu/ac) with NA:
-# HistoNoLow<-data[data$yld <min , ]
-# NoLowRows<-as.numeric(rownames(HistoNoLow))
-# HistoClean<-data
-# HistoClean$yld<-replace(HistoClean$yld, NoLowRows, NA)
-# ##Model Without Histogram Identified Low Yields:
-# model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=HistoClean, REML=TRUE)
-# summary(model2)
-# anova(model2)
-# anovalmer(model2)
-# ranova(model2)
-# LSDer::CVer(model2)
-# LSDer::LSDer(model2, "entry")
+Replaced all low values outside the minimum IQR value, as visualized in the barplot.
 
-# ##Replace All Residual Outliers Identified in  Q-Q Plot with NA:
-# influentialQQ<-identify(qqnorm(resid(model1)))
-# QQClean<-CF811_C81A
-# QQClean$yld<-replace(QQClean$yld, influentialQQ, NA)
-# model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=QQClean, REML=TRUE)
-##Alternatively, MUST designate trim = # of stddev above/below the residual means.
-# ResidualClean<-romr.fnc(model1, data, trim = 3)
+```{r modelc1, echo = FALSE}
+##Replace All Low Values Identified in  Histogram (e.g.< IQR Minimum bu/ac) with NA:
+IQRNoLow<-subset(data, data$yld < min)
+NoLowRows<-as.numeric(rownames(IQRNoLow))
+IQRClean1<-data
+IQRClean1$yld<-replace(IQRClean1$yld, NoLowRows, NA)
+##Model Without Histogram Identified Low Yields:
+model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRClean1, REML=TRUE)
+summary(model2)
+anova(model2)
+anovalmer(model2)
+ranova(model2)
+LSDer::CVer(model2)
+LSDer::LSDer(model2, "entry")
+```
+
+## Outside Min/Max IQRs: {.tabset .tabset-fade}
+
+Replaced all values outside the minimum and maximum IQRs with NA, as visualized in the barplot.
+
+```{r modelc2, echo = FALSE}
+##Replace values outside the minimum and maximum IQR values with NA:
+IQRNoHigh<-subset(data, data$yld > max)
+NoHighRows<-as.numeric(rownames(IQRNoHigh))
+IQRClean2<-data
+IQRClean2$yld<-replace(IQRClean2$yld, NoLowRows, NA)
+IQRClean2$yld<-replace(IQRClean2$yld, NoHighRows, NA)
+##Model Without Histogram Identified Low Yields:
+model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRClean2, REML=TRUE)
+summary(model3)
+anova(model3)
+anovalmer(model3)
+ranova(model3)
+LSDer::CVer(model3)
+LSDer::LSDer(model3, "entry")
+```
+
+## Residual Deviations: {.tabset .tabset-fade}
+
+Replace residual outliers identified in  Q-Q Plot with NA for all resdiual values 2.5 times the standard deviation above/below the residual mean. 
+
+```{r modelc3, echo = FALSE}
+# ##Replace All Residual Outliers 2.5 times the standard deviation above/below the 
+# ##residual mean in  Q-Q Plot with NA:
+influentialQQ<-resid(model1)[abs(resid(model1)-mean(resid(model1)))>2.5*sd(resid(model1))]
+influentialQQ<-as.numeric(names(influentialQQ))
+QQClean<-data
+QQClean$yld<-replace(QQClean$yld, influentialQQ, NA)
+model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=QQClean, REML=TRUE)
+
+# ##Alternatively, MUST designate trim = # of stddev above/below the residual means.
+# ##Can NOT get to pull up "data" from romr Function.
+# ResidualClean<-romr.fnc(model1, data, trim = 2.5)
+# ResidualClean<-ResidualClean[["data"]]
 # ##Model Without Q-Q Residual Outliers:
-# model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=ResidualClean[["data"]], REML=TRUE)
-# summary(model3)
-# anova(model3)
-# anovalmer(model3)
-# ranova(model3)
-# LSDer::CVer(model3)
-# LSDer::LSDer(model3, "entry")
+# model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=ResidualClean, REML=TRUE)
 
-# ##Replace "Influential" Values Determined Via Cook's Distance, with NA:
-# sample_size <- nrow(data)
-# influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=50/sample_size))])
-# CooksClean<-data
-# CooksClean$yld<-replace(CooksClean$yld, influentialcooks, NA)
-# ##Cooks Clean Model:
-# model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CooksClean, REML=TRUE)
-# summary(model4)
-# anova(model4)
-# anovalmer(model4)
-# ranova(model4)
-# LSDer::CVer(model4)
-# LSDer::LSDer(model4, "entry")
+summary(model4)
+anova(model4)
+anovalmer(model4)
+ranova(model4)
+LSDer::CVer(model4)
+LSDer::LSDer(model4, "entry")
+```
+
+## Cook's Distance: {.tabset .tabset-fade}
+
+Replace influential Values determined Via Cook's Distance with NA.
+
+```{r modelc4, echo = FALSE}
+##Replace "Influential" Values Determined Via Cook's Distance, with NA:
+influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=(12/(sample_size-params$entry.end-1))))])
+# influential2 <- as.numeric(names(cooksd)[(cooksd > (h=50/sample_size))])
+CooksClean<-data
+CooksClean$yld<-replace(CooksClean$yld, influentialcooks, NA)
+##Cooks Clean Model:
+model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CooksClean, REML=TRUE)
+summary(model5)
+anova(model5)
+anovalmer(model5)
+ranova(model5)
+LSDer::CVer(model5)
+LSDer::LSDer(model5, "entry")
 ```
 
 # Export Clean Dataset: {.tabset .tabset-fade}
