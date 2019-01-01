@@ -1,14 +1,18 @@
 ---
 title: "**Yield Trial Single Loc**"
-author: "*Ryan Budnik*"
+author: "Ryan Budnik"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: 
   html_document:
-    theme: journal
+    theme: darkly
     toc: true
     toc_float:
       collapsed: true
 params:
+  data:
+    label: "Input dataset:"
+    value: yt18.csv
+    input: file
   book.name:
     label: "Book Name:"
     value: CF811
@@ -45,9 +49,9 @@ params:
     sep: ""
 ---
 # Overview:
-The following report renders a single location mixed model analysis with corresponding figures for the `r params$year` `r params$exp` Trial, at the `r params$book.name` location.
+The following report renders a single location mixed model analysis with corresponding figures for the `r params$year`-- **`r params$exp`** Trial, at the **`r params$book.name`** location.
 
-```{r setup, include = FALSE}
+```{r setup1, include = FALSE}
 library(dplyr)
 library(agricolae)
 library(nlme)
@@ -64,6 +68,8 @@ library(psych)
 library(skimr)
 ```
 
+Corn Coversion Factor = **8.067**
+
 ```{r setup2, echo = FALSE}
 ###Set wd & Import CSV Dataset:
 df<-read.csv("yt18.csv", header=T, na.strings=c("", " ", "NA"))
@@ -75,7 +81,7 @@ df <- df%>%mutate (yld = (wt*CCF))
 # BCF<-7.779
 # df <- df%>%mutate (yld = (wt*BCF))
 
-df <- df%>%mutate(yld=replace(yld, plot.discarded=="Yes", NA))
+df <- df%>%mutate(yld=replace(yld, plot.discard=="Yes", NA))
 
 ###Subset data of interest:
 data<-filter(df, book.name==c(params$book.name) & exp==c(params$exp), entry %in% c(params$entry.start:params$entry.end))
@@ -94,34 +100,47 @@ attach(data)
 ###Mean & IQRS:
 max <- quantile(data$yld,0.75, na.rm=TRUE) + (IQR(data$yld, na.rm=TRUE) * 1.5 )
 min <- quantile(data$yld,0.25, na.rm=TRUE) - (IQR(data$yld, na.rm=TRUE) * 1.5 )
-Average <- mean(data$yld)
+avg <- mean(data$yld, na.rm = TRUE)
 ```
 
 # Data Visualization: {.tabset .tabset-fade}
 
-## Summary & Aggregation:
+## Summary
 
-```{r viz, echo = FALSE, fig.width=6, warning=FALSE}
+```{r viz1, echo = FALSE, cols.print=8, rows.print=20, warning=FALSE}
+des<-describe(data, IQR=TRUE)
+rmarkdown::paged_table(des, options(scipen=999, digits = 5))
+```
 
-ds<-describe(data, IQR=TRUE)
-knitr::kable(ds, caption = "Table with kable")
+## Aggregation
 
-# summary(data)
-
+```{r viz2, echo = FALSE, warning=FALSE}
 aggregate(yld~entry, data=data, FUN=function(x) c(n=length(x), min=min(x), mean=mean(x), max=max(x)))
 ```
 
-## Histogram, Barplot, & Boxplot:
+## Histogram
 
-``` {r viz2, echo = FALSE, fig.width=9}
+``` {r graph1, echo = FALSE, fig.width=9}
 histo<-hist(data$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yield")
+abline(v = max, col="red")
+abline(v = avg, col="red", lwd=c(3))
+abline(v = min, col="red")
+```
 
+## Barplot
+
+``` {r graph2, echo = FALSE, fig.width=10, fig.height=7}
 palette <- randomColor(length(unique(data$entry)))
 data$color <- palette[as.factor(data$entry)]
-barplot(data$yld, names.arg=data$entry, ylim=c(0,260), ylab="Yield", xlab="Entry", col=data$color)
+barplot(data$yld, names.arg=data$entry, ylim=c(0,275), ylab="Yield", xlab="Entry", col=data$color)
 abline(h = max, col="red")
+abline(h = avg, col="red", lwd=c(3))
 abline(h = min, col="red")
+```
 
+## Boxplot
+
+``` {r graph3, echo = FALSE, fig.width=9}
 Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
 abline(h = max, col="red")
 abline(h = min, col="red")
@@ -129,34 +148,119 @@ abline(h = min, col="red")
 
 # Mixed Model Analysis: {.tabset .tabset-fade}
 
-```{r model, echo = FALSE}
+## Summary
+
+```{r model, echo = FALSE, warning = FALSE}
 model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=data, REML=TRUE)
 summary(model1)
-anova(model1)
-anovalmer(model1)
-ranova(model1)
-LSDer::CVer(model1)
-LSDer::LSDer(model1, "entry")
 ```
+
+## Random-Effects Table
+
+```{r modelsum, echo=FALSE}
+
+knitr::kable(ranova(model1))
+```
+
+## Predicted Means
+
+```{r modelpredictmeans, echo=FALSE}
+predictmeans(model1, "entry", pairwise=FALSE, level=.25, newwd=FALSE)
+```
+
+## ANOVA Tables
+
+Generally speaking, the smaller the *p-value*, and the larger the *F-statistic* the better the model fit and grounds for rejection of the null hypothesis.
+
+ANOVA uses the *F-statistic* to determine whether the variability between group means is larger than the variability of the observations within the groups. If that ratio is sufficiently large, you can conclude that not all the means are equal. A low *p-value* suggests that your sample provides enough evidence that you can reject the null hypothesis for the entire population.
+
+  + The **null hypothesis** states that the model with no independent variables fits       the data as well as your model.
+
+  + The **alternative hypothesis** says that your model fits the data better than the      intercept-only model.
+
+
+Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
+
+```{r modelanova1, echo = FALSE}
+rmarkdown::paged_table(anovalmer(model1))
+```
+
+**Type III** Analysis of Variance Table with Satterthwaite's method:
+
+```{r modelanova2, echo = FALSE}
+rmarkdown::paged_table(anova(model1))
+```
+
+## CV & LSD
+
+**Coefficient of Vairance (CV):**
+
+The CV for a model aims to describe the model fit in terms of the relative sizes of the squared residuals and outcome values.  The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit.
+
+The advantage of the CV is that it is unitless.  This allows CVs to be compared to each other in ways that other measures, like standard deviations or root mean squared residuals, cannot be. 
+
+**The model with the smaller CV has predicted values that are closer to the actual values.**
+
+```{r modelcv, echo = FALSE}
+LSDer::CVer(model1)
+```
+
+**Fisher's Least Significant Differnce (LSD):**
+
+Least significant difference is used to compare means of different treatments that have an equal number of replications. The yields must be greater than the LSD value between any two hybrids, varieties, or treatments to be considered significant. This ensures the differences are real and not because of chance or due to soil variability.
+
+LSD values in the university tests are generally reported at (0.1) or 10% level. It means that there is a 90% chance that any one of the hybrids or varieties within the LSD value for the test could be on the top. Some test plot data are now being reported with LSD at (0.25) or 75% level, perhaps to be more inclusive.
+
+
+*At 90% Confidence:*
+
+```{r modellsd.1, echo = FALSE}
+LSDer::LSDer(model1, "entry", level=0.90)
+```
+
+*At 75% Confidence:*
+
+```{r modellsd.25, echo = FALSE}
+LSDer::LSDer(model1, "entry", level=0.75)
+```
+
 
 # Outlier Detection: {.tabset .tabset-fade}
 
-## Normal Q-Q Plot:
+## Normal Q-Q Plot
 
-```{r fig.cap="QQ plot (or quantile-quantile plot) draws the correlation between a given sample and the normal distribution. A 45-degree reference line is also plotted. QQ plots are used to visually check the normality of the data.", echo = FALSE}
+QQ plot (or quantile-quantile plot) draws the correlation between a given sample and the normal distribution. A 45-degree reference line is also plotted. QQ plots are used to visually check the normality of the data.
+
+```{r qq, echo = FALSE, warning = FALSE}
 qq<-qqnorm(resid(model1))
-qqline(resid(model1), col="red")
+qqline(resid(model1), col="red", lwd=c(2))
+text(qq, rownames(data), cex=1.2, font=2)
 ```
 
-## Cook's Distance:
+## Cook's Distance
 
-```{r fig.cap="Cook’s distance is useful for identifying outliers in the X values (observations for predictor variables). It also shows the influence of each observation on the fitted response values. An observation with Cook’s distance larger than three times the mean Cook’s distance might be an outlier.", echo = FALSE}
+Cook’s distance is useful for identifying outliers in the X values (observations for predictor variables). It also shows the influence of each observation on the fitted response values. An observation with Cook’s distance larger than three times the mean Cook’s distance might be an outlier.
+
+  + Graphical Reference Thresholds:
+      1. 10/*n*-*k*-1
+      2. 8/*n*-*k*-1
+      3. 4/*n*-*k*-1, (**Hair et.al**,1998)
+     
+      where,
+      
+      *n* = sample size
+      
+      *k* = number of independent variables
+
+```{r cook, echo = FALSE}
 sample_size<-nrow(data)
 Cooksd<-CookD(model1, newwd=FALSE)
-abline(h = (12/(sample_size-params$entry.end-1)), col="red")
+abline(h = (10/(sample_size-params$entry.end-1)), col="red")
 abline(h = (8/(sample_size-params$entry.end-1)), col="red", lwd=c(2))
 abline(h = (4/(sample_size-params$entry.end-1)), col="red", lwd=c(3))
 ```
+
+
 
 # Cleaned Models: {.tabset .tabset-fade}
 
@@ -164,52 +268,150 @@ abline(h = (4/(sample_size-params$entry.end-1)), col="red", lwd=c(3))
 
 Replaced all low values outside the minimum IQR value, as visualized in the barplot.
 
-```{r modelc1, echo = FALSE}
+### Linear Mixed Model Summary
+
+Low yielding rows in which yield values were replaced with NA.
+
+```{r modelc1.sum, echo = FALSE}
 ##Replace All Low Values Identified in  Histogram (e.g.< IQR Minimum bu/ac) with NA:
 IQRNoLow<-subset(data, data$yld < min)
 NoLowRows<-as.numeric(rownames(IQRNoLow))
+NoLowRows
 IQRClean1<-data
 IQRClean1$yld<-replace(IQRClean1$yld, NoLowRows, NA)
 ##Model Without Histogram Identified Low Yields:
 model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRClean1, REML=TRUE)
 summary(model2)
-anova(model2)
-anovalmer(model2)
-ranova(model2)
+```
+
+### Random-Effect Table
+
+ANOVA-like table for random-effects: Single term deletions;
+
+Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
+
+```{r modelc1.reml, echo=FALSE}
+knitr::kable(ranova(model2))
+```
+
+### ANOVA Tables (Type I & Type III)
+
+Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
+
+```{r modelc1.anova1, echo=FALSE}
+knitr::kable(anovalmer(model2))
+```
+
+**Type III** Analysis of Variance Table with Satterthwaite's method:
+
+```{r modelc1.anova2, echo=FALSE}
+knitr::kable(anova(model2))
+```
+
+### CV & LSD
+
+**Coefficient of Vairance (CV):**
+
+```{r, modelc1.cv, echo=FALSE}
 LSDer::CVer(model2)
-LSDer::LSDer(model2, "entry")
+```
+
+**Fisher's Least Significant Differnce (LSD):**
+
+*At 90% Confidence:*
+
+```{r, modelc1.lsd.1, echo=FALSE}
+LSDer::LSDer(model2, "entry", level=0.95)
+```
+
+*At 75% Confidence:*
+
+```{r, modelc1.lsd.25, echo=FALSE}
+LSDer::LSDer(model2, "entry", level=0.75)
 ```
 
 ## Outside Min/Max IQRs: {.tabset .tabset-fade}
 
 Replaced all values outside the minimum and maximum IQRs with NA, as visualized in the barplot.
 
+### Linear Mixed Model Fit By REML
+
+Low yielding, followed by high yielding rows in which yield values were replaced with NA.
+
 ```{r modelc2, echo = FALSE}
 ##Replace values outside the minimum and maximum IQR values with NA:
 IQRNoHigh<-subset(data, data$yld > max)
 NoHighRows<-as.numeric(rownames(IQRNoHigh))
+NoLowRows
+NoHighRows
 IQRClean2<-data
 IQRClean2$yld<-replace(IQRClean2$yld, NoLowRows, NA)
 IQRClean2$yld<-replace(IQRClean2$yld, NoHighRows, NA)
 ##Model Without Histogram Identified Low Yields:
 model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRClean2, REML=TRUE)
 summary(model3)
-anova(model3)
-anovalmer(model3)
-ranova(model3)
+```
+
+### Random-Effects Table
+
+ANOVA-like table for random-effects: Single term deletions;
+
+Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
+
+```{r modelc2.reml, echo=FALSE}
+knitr::kable(ranova(model3))
+```
+
+### ANOVA Tables (Type I & Type III)
+
+Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
+
+```{r modelc2.1, echo=FALSE}
+knitr::kable(anovalmer(model3))
+```
+
+**Type III** Analysis of Variance Table with Satterthwaite's method:
+
+```{r modelc2.anova3, echo=FALSE}
+knitr::kable(anova(model3))
+```
+
+### CV & LSD
+
+**Coefficient of Vairance (CV):**
+
+```{r modelc2.cv, echo=FALSE}
 LSDer::CVer(model3)
-LSDer::LSDer(model3, "entry")
+```
+
+**Fisher's Least Significant Differnce (LSD):**
+
+*At 90% Confidence:*
+
+```{r modelc2.lsd.1, echo=FALSE}
+LSDer::LSDer(model3, "entry", level=0.90)
+```
+
+*At 75% Confidence:*
+
+```{r modelc2.lsd.25, echo=FALSE}
+LSDer::LSDer(model3, "entry", level=0.75)
 ```
 
 ## Residual Deviations: {.tabset .tabset-fade}
 
 Replace residual outliers identified in  Q-Q Plot with NA for all resdiual values 2.5 times the standard deviation above/below the residual mean. 
 
+### Linear Mixed Model Summary
+
+Influential residual deviating rows in which yield values were replaced with NA.
+
 ```{r modelc3, echo = FALSE}
 # ##Replace All Residual Outliers 2.5 times the standard deviation above/below the 
 # ##residual mean in  Q-Q Plot with NA:
 influentialQQ<-resid(model1)[abs(resid(model1)-mean(resid(model1)))>2.5*sd(resid(model1))]
 influentialQQ<-as.numeric(names(influentialQQ))
+influentialQQ
 QQClean<-data
 QQClean$yld<-replace(QQClean$yld, influentialQQ, NA)
 model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=QQClean, REML=TRUE)
@@ -222,31 +424,112 @@ model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=QQClea
 # model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=ResidualClean, REML=TRUE)
 
 summary(model4)
-anova(model4)
-anovalmer(model4)
-ranova(model4)
+```
+
+### Random-Effects Table
+
+```{r modelc3.reml, echo=FALSE}
+knitr::kable(ranova(model4))
+```
+
+### ANOVA Tables (Type I & Type III)
+
+Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
+
+```{r modelc3.anova1, echo=FALSE}
+knitr::kable(anovalmer(model4))
+```
+
+**Type III** Analysis of Variance Table with Satterthwaite's method:
+
+```{r modelc3.anova2, echo=FALSE}
+knitr::kable(anova(model4))
+```
+
+### CV & LSD
+
+**Coefficient of Vairance (CV):**
+
+```{r modelc3.cv, echo=FALSE}
 LSDer::CVer(model4)
-LSDer::LSDer(model4, "entry")
+```
+
+**Fisher's Least Significant Differnce (LSD):**
+
+*At 90% Confidence:*
+
+```{r modelc3.lsd.1, echo=FALSE}
+LSDer::LSDer(model4, "entry", level=0.90)
+```
+
+*At 75% Confidence:*
+
+```{r modelc3.lsd.25, echo=FALSE}
+LSDer::LSDer(model4, "entry", level=0.75)
 ```
 
 ## Cook's Distance: {.tabset .tabset-fade}
 
 Replace influential Values determined Via Cook's Distance with NA.
 
-```{r modelc4, echo = FALSE}
+Cook' Distance outliers: 4/n-k-1
+used: 12/n-k-1
+
+### Linear Mixed Model Summary
+
+Influential Cook's Distance rows in which yield values were replaced with NA.
+
+```{r modelc4.sum, echo = FALSE}
 ##Replace "Influential" Values Determined Via Cook's Distance, with NA:
-influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=(12/(sample_size-params$entry.end-1))))])
-# influential2 <- as.numeric(names(cooksd)[(cooksd > (h=50/sample_size))])
+influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=(10/(sample_size-params$entry.end-1))))])
+influentialcooks
 CooksClean<-data
 CooksClean$yld<-replace(CooksClean$yld, influentialcooks, NA)
 ##Cooks Clean Model:
 model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CooksClean, REML=TRUE)
 summary(model5)
-anova(model5)
-anovalmer(model5)
-ranova(model5)
+```
+
+### Random-Effects Table
+
+```{r modelc4.reml, echo=FALSE}
+knitr::kable(ranova(model5))
+```
+
+### ANOVA Tables (Type I & Type III)
+
+Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
+
+```{r modelc4.anova1, echo=FALSE}
+knitr::kable(anovalmer(model5))
+```
+
+**Type III** Analysis of Variance Table with Satterthwaite's method:
+
+```{r modelc4.anova2, echo=FALSE}
+knitr::kable(anova(model5))
+```
+
+### CV & LSD
+
+**Coefficient of Vairance (CV):**
+
+```{r modelc4.cv, echo=FALSE}
 LSDer::CVer(model5)
-LSDer::LSDer(model5, "entry")
+```
+
+**Fisher's Least Significant Differnce (LSD):**
+
+*At 90% Confidence:*
+
+```{r modelc4.lsd.1, echo=FALSE}
+LSDer::LSDer(model5, "entry", level=0.90)
+```
+
+*At 75% Confidence:*
+
+```{r modelc4.lsd.25, echo=FALSE}
+LSDer::LSDer(model5, "entry", level=0.75)
 ```
 
 # Export Clean Dataset: {.tabset .tabset-fade}
@@ -257,3 +540,6 @@ LSDer::LSDer(model5, "entry")
 # write.csv(HistoClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_CF811_C81A.csv")
 # write.csv(ResidualClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/ResidualClean_CF811_C81A.csv")
 ```
+
+# References
+1. **Hair, J., Anderson, R., Tatham, R. and Black W.** (1998). Multivariate Data Analysis (fifth edition). Englewood Cliffs, NJ: Prentice-Hall.
