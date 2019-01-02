@@ -48,10 +48,22 @@ params:
     step: 1
     sep: ""
 ---
+
+```{r logo, cache=TRUE, echo=FALSE}
+htmltools::img(src = knitr::image_uri(file.path("C:", "Users", "Ryan.Ryan-PC", "Desktop", "ICIA_logo.png")), 
+               alt = 'logo', 
+               style = 'position:absolute; top:0; right:0; padding:10px;')
+```
+
+---
+
+
 # Overview:
 The following report renders a single location mixed model analysis with corresponding figures for the `r params$year`-- **`r params$exp`** Trial, at the **`r params$book.name`** location.
 
-```{r setup1, include = FALSE}
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
 library(dplyr)
 library(agricolae)
 library(nlme)
@@ -61,7 +73,6 @@ library(lmerTest)
 library(randomcoloR)
 library(car)
 library(predictmeans)
-library(knitr)
 library(shiny)
 library(shinythemes)
 library(psych)
@@ -70,7 +81,7 @@ library(skimr)
 
 Corn Coversion Factor = **8.067**
 
-```{r setup2, echo = FALSE}
+```{r setup, echo = FALSE}
 ###Set wd & Import CSV Dataset:
 df<-read.csv("yt18.csv", header=T, na.strings=c("", " ", "NA"))
 
@@ -98,59 +109,86 @@ data$rep<-factor(data$rep)
 attach(data)
 
 ###Mean & IQRS:
-max <- quantile(data$yld,0.75, na.rm=TRUE) + (IQR(data$yld, na.rm=TRUE) * 1.5 )
-min <- quantile(data$yld,0.25, na.rm=TRUE) - (IQR(data$yld, na.rm=TRUE) * 1.5 )
-avg <- mean(data$yld, na.rm = TRUE)
+max.yld <- quantile(data$yld,0.75, na.rm=TRUE) + (IQR(data$yld, na.rm=TRUE) * 1.5 )
+min.yld <- quantile(data$yld,0.25, na.rm=TRUE) - (IQR(data$yld, na.rm=TRUE) * 1.5 )
+avg.yld <- mean(data$yld, na.rm = TRUE)
+max.wt <- quantile(data$wt,0.75, na.rm=TRUE) + (IQR(data$wt, na.rm=TRUE) * 1.5 )
+min.wt <- quantile(data$wt,0.25, na.rm=TRUE) - (IQR(data$wt, na.rm=TRUE) * 1.5 )
+avg.wt <- mean(data$wt, na.rm = TRUE)
 ```
 
 # Data Visualization: {.tabset .tabset-fade}
 
 ## Summary
 
-```{r viz1, echo = FALSE, cols.print=8, rows.print=20, warning=FALSE}
-des<-describe(data, IQR=TRUE)
-rmarkdown::paged_table(des, options(scipen=999, digits = 5))
+```{r summary, echo = FALSE, cols.print=8, rows.print=20, warning=FALSE}
+dfNo_rec.id<-subset(data, select = -c(rec.id))
+des<-describe(dfNo_rec.id, IQR=TRUE)
+paged_table(des, options(scipen=999, digits=3))
 ```
 
 ## Aggregation
 
-```{r viz2, echo = FALSE, warning=FALSE}
-aggregate(yld~entry, data=data, FUN=function(x) c(n=length(x), min=min(x), mean=mean(x), max=max(x)))
+```{r aggregation, echo = FALSE, rows.print=20, warning=FALSE}
+options(digits=5)
+aggdf <- data.frame(aggregate(yld~entry, data=data, function(x) c(length(x))),aggregate(yld~entry, data=data, function(x) c(min(x))),aggregate(yld~entry, data=data, function(x) c(mean(x))),aggregate(yld~entry, data=data, function(x) c(max(x))))
+aggdf <- aggdf[,c(1,2,4,6,8)]
+colnames(aggdf)<-c("Entry", "Count", "Min", "Mean", "Max")
+paged_table(aggdf)
 ```
 
-## Histogram
+## Histograms
 
-``` {r graph1, echo = FALSE, fig.width=9}
+``` {r histo.wt, echo = FALSE, fig.width=9}
+histo<-hist(data$wt, breaks=seq(0,40, l=90), col="orange", main="Distribution of Weight", xlab="Weight")
+abline(v = max.wt, col="red")
+abline(v = avg.wt, col="red", lwd=c(3))
+abline(v = min.wt, col="red")
+```
+
+```{r histo.yld, echo = FALSE, fig.width=9}
 histo<-hist(data$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yield")
-abline(v = max, col="red")
-abline(v = avg, col="red", lwd=c(3))
-abline(v = min, col="red")
+abline(v = max.yld, col="red")
+abline(v = avg.yld, col="red", lwd=c(3))
+abline(v = min.yld, col="red")
 ```
 
-## Barplot
+## Barplots
 
-``` {r graph2, echo = FALSE, fig.width=10, fig.height=7}
+``` {r bar.wt, echo = FALSE, fig.width=10, fig.height=7}
 palette <- randomColor(length(unique(data$entry)))
 data$color <- palette[as.factor(data$entry)]
-barplot(data$yld, names.arg=data$entry, ylim=c(0,275), ylab="Yield", xlab="Entry", col=data$color)
-abline(h = max, col="red")
-abline(h = avg, col="red", lwd=c(3))
-abline(h = min, col="red")
+barplot(data$wt, names.arg=data$entry, ylim=c(0,40), main="Distribution of Weight", ylab="Weight", xlab="Entry", col=data$color)
+abline(h = max.wt, col="red")
+abline(h = avg.wt, col="red", lwd=c(3))
+abline(h = min.wt, col="red")
+```
+
+``` {r bar.yld, echo = FALSE, fig.width=10, fig.height=7}
+barplot(data$yld, names.arg=data$entry, ylim=c(0,300), main="Distribution of Yield", ylab="Yield", xlab="Entry", col=data$color)
+abline(h = max.yld, col="red")
+abline(h = avg.yld, col="red", lwd=c(3))
+abline(h = min.yld, col="red")
 ```
 
 ## Boxplot
 
-``` {r graph3, echo = FALSE, fig.width=9}
+``` {r boxplot, echo = FALSE, fig.width=9}
 Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
-abline(h = max, col="red")
-abline(h = min, col="red")
+abline(h = max.yld, col="red")
+abline(h = avg.yld, col="red", lwd=c(3))
+abline(h = min.yld, col="red")
 ```
 
 # Mixed Model Analysis: {.tabset .tabset-fade}
 
 ## Summary
 
-```{r model, echo = FALSE, warning = FALSE}
+**Model: Yield = Entry**
+
+Random Effects: rep, pass(rep), range(rep)
+
+```{r model, echo=FALSE, message=FALSE}
 model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=data, REML=TRUE)
 summary(model1)
 ```
@@ -158,13 +196,12 @@ summary(model1)
 ## Random-Effects Table
 
 ```{r modelsum, echo=FALSE}
-
-knitr::kable(ranova(model1))
+kable(ranova(model1))
 ```
 
 ## Predicted Means
 
-```{r modelpredictmeans, echo=FALSE}
+```{r modelpredictmeans, echo=FALSE, message=FALSE}
 predictmeans(model1, "entry", pairwise=FALSE, level=.25, newwd=FALSE)
 ```
 
@@ -182,13 +219,13 @@ ANOVA uses the *F-statistic* to determine whether the variability between group 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
 ```{r modelanova1, echo = FALSE}
-rmarkdown::paged_table(anovalmer(model1))
+kable(anovalmer(model1))
 ```
 
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelanova2, echo = FALSE}
-rmarkdown::paged_table(anova(model1))
+kable(anova(model1))
 ```
 
 ## CV & LSD
@@ -252,7 +289,7 @@ Cook’s distance is useful for identifying outliers in the X values (observatio
       
       *k* = number of independent variables
 
-```{r cook, echo = FALSE}
+```{r cook, cache=TRUE, echo = FALSE}
 sample_size<-nrow(data)
 Cooksd<-CookD(model1, newwd=FALSE)
 abline(h = (10/(sample_size-params$entry.end-1)), col="red")
@@ -261,26 +298,30 @@ abline(h = (4/(sample_size-params$entry.end-1)), col="red", lwd=c(3))
 ```
 
 
-
 # Cleaned Models: {.tabset .tabset-fade}
 
 ## Outside Minimum IQR: {.tabset .tabset-fade}
 
 Replaced all low values outside the minimum IQR value, as visualized in the barplot.
 
-### Linear Mixed Model Summary
+### Summary
 
 Low yielding rows in which yield values were replaced with NA.
 
-```{r modelc1.sum, echo = FALSE}
+```{r modelc1, echo = FALSE}
 ##Replace All Low Values Identified in  Histogram (e.g.< IQR Minimum bu/ac) with NA:
-IQRNoLow<-subset(data, data$yld < min)
+IQRNoLow<-subset(data, data$yld < min.yld)
 NoLowRows<-as.numeric(rownames(IQRNoLow))
 NoLowRows
 IQRClean1<-data
 IQRClean1$yld<-replace(IQRClean1$yld, NoLowRows, NA)
 ##Model Without Histogram Identified Low Yields:
 model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRClean1, REML=TRUE)
+```
+
+**Summary**
+
+```{r modelc1.sum2, echo=FALSE, message=FALSE}
 summary(model2)
 ```
 
@@ -291,21 +332,21 @@ ANOVA-like table for random-effects: Single term deletions;
 Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
 
 ```{r modelc1.reml, echo=FALSE}
-knitr::kable(ranova(model2))
+kable(ranova(model2))
 ```
 
-### ANOVA Tables (Type I & Type III)
+### ANOVA Tables
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
 ```{r modelc1.anova1, echo=FALSE}
-knitr::kable(anovalmer(model2))
+kable(anovalmer(model2))
 ```
 
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelc1.anova2, echo=FALSE}
-knitr::kable(anova(model2))
+kable(anova(model2))
 ```
 
 ### CV & LSD
@@ -334,13 +375,13 @@ LSDer::LSDer(model2, "entry", level=0.75)
 
 Replaced all values outside the minimum and maximum IQRs with NA, as visualized in the barplot.
 
-### Linear Mixed Model Fit By REML
+### Summary
 
 Low yielding, followed by high yielding rows in which yield values were replaced with NA.
 
 ```{r modelc2, echo = FALSE}
 ##Replace values outside the minimum and maximum IQR values with NA:
-IQRNoHigh<-subset(data, data$yld > max)
+IQRNoHigh<-subset(data, data$yld > max.yld)
 NoHighRows<-as.numeric(rownames(IQRNoHigh))
 NoLowRows
 NoHighRows
@@ -349,6 +390,11 @@ IQRClean2$yld<-replace(IQRClean2$yld, NoLowRows, NA)
 IQRClean2$yld<-replace(IQRClean2$yld, NoHighRows, NA)
 ##Model Without Histogram Identified Low Yields:
 model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRClean2, REML=TRUE)
+```
+
+**Summary**
+
+```{r modelc2.sum, echo=FALSE, message=FALSE}
 summary(model3)
 ```
 
@@ -359,21 +405,21 @@ ANOVA-like table for random-effects: Single term deletions;
 Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
 
 ```{r modelc2.reml, echo=FALSE}
-knitr::kable(ranova(model3))
+kable(ranova(model3))
 ```
 
-### ANOVA Tables (Type I & Type III)
+### ANOVA Tables
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
 ```{r modelc2.1, echo=FALSE}
-knitr::kable(anovalmer(model3))
+kable(anovalmer(model3))
 ```
 
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelc2.anova3, echo=FALSE}
-knitr::kable(anova(model3))
+kable(anova(model3))
 ```
 
 ### CV & LSD
@@ -402,7 +448,7 @@ LSDer::LSDer(model3, "entry", level=0.75)
 
 Replace residual outliers identified in  Q-Q Plot with NA for all resdiual values 2.5 times the standard deviation above/below the residual mean. 
 
-### Linear Mixed Model Summary
+### Summary
 
 Influential residual deviating rows in which yield values were replaced with NA.
 
@@ -422,28 +468,32 @@ model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=QQClea
 # ResidualClean<-ResidualClean[["data"]]
 # ##Model Without Q-Q Residual Outliers:
 # model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=ResidualClean, REML=TRUE)
+```
 
+**Summary**
+
+```{r modelc3.sum, echo=FALSE, message=FALSE}
 summary(model4)
 ```
 
 ### Random-Effects Table
 
 ```{r modelc3.reml, echo=FALSE}
-knitr::kable(ranova(model4))
+kable(ranova(model4))
 ```
 
-### ANOVA Tables (Type I & Type III)
+### ANOVA Tables
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
 ```{r modelc3.anova1, echo=FALSE}
-knitr::kable(anovalmer(model4))
+kable(anovalmer(model4))
 ```
 
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelc3.anova2, echo=FALSE}
-knitr::kable(anova(model4))
+kable(anova(model4))
 ```
 
 ### CV & LSD
@@ -472,14 +522,15 @@ LSDer::LSDer(model4, "entry", level=0.75)
 
 Replace influential Values determined Via Cook's Distance with NA.
 
-Cook' Distance outliers: 4/n-k-1
-used: 12/n-k-1
+-Cook' Distance outliers: **4/n-k-1**
+-used: **10/n-k-1** 
+-[i.e. 2.5 x Cook's Distance Significance]
 
-### Linear Mixed Model Summary
+### Summary
 
 Influential Cook's Distance rows in which yield values were replaced with NA.
 
-```{r modelc4.sum, echo = FALSE}
+```{r modelc4, echo = FALSE}
 ##Replace "Influential" Values Determined Via Cook's Distance, with NA:
 influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=(10/(sample_size-params$entry.end-1))))])
 influentialcooks
@@ -487,27 +538,32 @@ CooksClean<-data
 CooksClean$yld<-replace(CooksClean$yld, influentialcooks, NA)
 ##Cooks Clean Model:
 model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CooksClean, REML=TRUE)
+```
+
+**Summary**
+
+```{r modelc4.sum, echo=FALSE, message=FALSE}
 summary(model5)
 ```
 
 ### Random-Effects Table
 
 ```{r modelc4.reml, echo=FALSE}
-knitr::kable(ranova(model5))
+kable(ranova(model5))
 ```
 
-### ANOVA Tables (Type I & Type III)
+### ANOVA Tables
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
 ```{r modelc4.anova1, echo=FALSE}
-knitr::kable(anovalmer(model5))
+kable(anovalmer(model5))
 ```
 
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelc4.anova2, echo=FALSE}
-knitr::kable(anova(model5))
+kable(anova(model5))
 ```
 
 ### CV & LSD
@@ -541,5 +597,5 @@ LSDer::LSDer(model5, "entry", level=0.75)
 # write.csv(ResidualClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/ResidualClean_CF811_C81A.csv")
 ```
 
-# References
+# References:
 1. **Hair, J., Anderson, R., Tatham, R. and Black W.** (1998). Multivariate Data Analysis (fifth edition). Englewood Cliffs, NJ: Prentice-Hall.
