@@ -1,0 +1,36 @@
+file_list <- list.files("C:/Users/rjbudnik/Desktop/R_Cleaned")
+dis.18 <- do.call("rbind", lapply(file_list, read.csv, header = TRUE))
+
+write.csv(dis.18, "C:/Users/rjbudnik/Desktop/R_Combined/dis.18.csv", row.names=FALSE)
+
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(LMERConvenienceFunctions)
+library(lmerTest)
+library(randomcoloR)
+library(car)
+library(predictmeans)
+
+setwd("C:/Users/rjbudnik/Desktop/R_Combined")
+df<-read.csv("dis.18.csv", header=T, na.strings=c("", " ", "NA"))
+
+###Subset data of interest:
+data<-filter(df, exp=="C81A", c(1:45))
+
+###Set factors:
+data$entry<-factor(data$entry)
+data$ped.id<-factor(data$ped.id)
+data$code<-factor(data$code)
+data$range<-factor(data$range)
+data$pass<-factor(data$pass)
+data$rep<-factor(data$rep)
+
+bp<-Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+
+model1<-lmer(yld~entry + book.name + (rep:book.name), data=data, REML=TRUE)
+
+model1<-lmer(yld~entry + book.name + (rep:book.name), data=data, REML=TRUE)
+
+### + (1|(book.name*rep)|range)+ (1|(book.name*rep)|pass) + (1|(entry*book.name)??
