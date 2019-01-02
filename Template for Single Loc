@@ -12,7 +12,8 @@ params:
   data:
     label: "Input dataset:"
     value: yt18.csv
-    input: file
+    input: select
+    choices: yt18.csv
   book.name:
     label: "Book Name:"
     value: CF811
@@ -50,8 +51,8 @@ params:
 ---
 
 ```{r logo, cache=TRUE, echo=FALSE}
-htmltools::img(src = knitr::image_uri(file.path("C:", "Users", "Ryan.Ryan-PC", "Desktop", "ICIA_logo.png")), 
-               alt = 'logo', 
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "YieldTrialSingleLoc","inst","rmarkdown","templates","report","skeleton","ICIA_logo.png")), 
+               alt = 'logo',
                style = 'position:absolute; top:0; right:0; padding:10px;')
 ```
 
@@ -79,7 +80,9 @@ library(psych)
 library(skimr)
 ```
 
-Corn Coversion Factor = **8.067**
+-Corn Coversion Factor = **8.067**
+
+-Bean Conversion Factor = **7.779**
 
 ```{r setup, echo = FALSE}
 ###Set wd & Import CSV Dataset:
@@ -92,7 +95,7 @@ df <- df%>%mutate (yld = (wt*CCF))
 # BCF<-7.779
 # df <- df%>%mutate (yld = (wt*BCF))
 
-df <- df%>%mutate(yld=replace(yld, plot.discard=="Yes", NA))
+df <- df%>%mutate(yld=replace(yld, plot.discarded=="Yes", NA))
 
 ###Subset data of interest:
 data<-filter(df, book.name==c(params$book.name) & exp==c(params$exp), entry %in% c(params$entry.start:params$entry.end))
@@ -112,9 +115,9 @@ attach(data)
 max.yld <- quantile(data$yld,0.75, na.rm=TRUE) + (IQR(data$yld, na.rm=TRUE) * 1.5 )
 min.yld <- quantile(data$yld,0.25, na.rm=TRUE) - (IQR(data$yld, na.rm=TRUE) * 1.5 )
 avg.yld <- mean(data$yld, na.rm = TRUE)
-max.wt <- quantile(data$wt,0.75, na.rm=TRUE) + (IQR(data$wt, na.rm=TRUE) * 1.5 )
-min.wt <- quantile(data$wt,0.25, na.rm=TRUE) - (IQR(data$wt, na.rm=TRUE) * 1.5 )
-avg.wt <- mean(data$wt, na.rm = TRUE)
+# max.wt <- quantile(data$wt,0.75, na.rm=TRUE) + (IQR(data$wt, na.rm=TRUE) * 1.5 )
+# min.wt <- quantile(data$wt,0.25, na.rm=TRUE) - (IQR(data$wt, na.rm=TRUE) * 1.5 )
+# avg.wt <- mean(data$wt, na.rm = TRUE)
 ```
 
 # Data Visualization: {.tabset .tabset-fade}
@@ -140,10 +143,10 @@ paged_table(aggdf)
 ## Histograms
 
 ``` {r histo.wt, echo = FALSE, fig.width=9}
-histo<-hist(data$wt, breaks=seq(0,40, l=90), col="orange", main="Distribution of Weight", xlab="Weight")
-abline(v = max.wt, col="red")
-abline(v = avg.wt, col="red", lwd=c(3))
-abline(v = min.wt, col="red")
+# histo<-hist(data$wt, breaks=seq(0,40, l=90), col="orange", main="Distribution of Weight", xlab="Weight")
+# abline(v = max.wt, col="red")
+# abline(v = avg.wt, col="red", lwd=c(3))
+# abline(v = min.wt, col="red")
 ```
 
 ```{r histo.yld, echo = FALSE, fig.width=9}
@@ -158,10 +161,10 @@ abline(v = min.yld, col="red")
 ``` {r bar.wt, echo = FALSE, fig.width=10, fig.height=7}
 palette <- randomColor(length(unique(data$entry)))
 data$color <- palette[as.factor(data$entry)]
-barplot(data$wt, names.arg=data$entry, ylim=c(0,40), main="Distribution of Weight", ylab="Weight", xlab="Entry", col=data$color)
-abline(h = max.wt, col="red")
-abline(h = avg.wt, col="red", lwd=c(3))
-abline(h = min.wt, col="red")
+# barplot(data$wt, names.arg=data$entry, ylim=c(0,40), main="Distribution of Weight", ylab="Weight", xlab="Entry", col=data$color)
+# abline(h = max.wt, col="red")
+# abline(h = avg.wt, col="red", lwd=c(3))
+# abline(h = min.wt, col="red")
 ```
 
 ``` {r bar.yld, echo = FALSE, fig.width=10, fig.height=7}
@@ -188,20 +191,20 @@ abline(h = min.yld, col="red")
 
 Random Effects: rep, pass(rep), range(rep)
 
-```{r model, echo=FALSE, message=FALSE}
+```{r model, comment=NA, echo=FALSE, message=FALSE}
 model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=data, REML=TRUE)
 summary(model1)
 ```
 
 ## Random-Effects Table
 
-```{r modelsum, echo=FALSE}
+```{r modelsum, echo=FALSE, message=FALSE}
 kable(ranova(model1))
 ```
 
 ## Predicted Means
 
-```{r modelpredictmeans, echo=FALSE, message=FALSE}
+```{r modelpredictmeans, comment=NA, echo=FALSE, message=FALSE}
 predictmeans(model1, "entry", pairwise=FALSE, level=.25, newwd=FALSE)
 ```
 
@@ -238,7 +241,7 @@ The advantage of the CV is that it is unitless.  This allows CVs to be compared 
 
 **The model with the smaller CV has predicted values that are closer to the actual values.**
 
-```{r modelcv, echo = FALSE}
+```{r modelcv, comment=NA, echo = FALSE}
 LSDer::CVer(model1)
 ```
 
@@ -251,13 +254,13 @@ LSD values in the university tests are generally reported at (0.1) or 10% level.
 
 *At 90% Confidence:*
 
-```{r modellsd.1, echo = FALSE}
+```{r modellsd.1, comment=NA, echo = FALSE}
 LSDer::LSDer(model1, "entry", level=0.90)
 ```
 
 *At 75% Confidence:*
 
-```{r modellsd.25, echo = FALSE}
+```{r modellsd.25, comment=NA, echo = FALSE}
 LSDer::LSDer(model1, "entry", level=0.75)
 ```
 
@@ -308,7 +311,7 @@ Replaced all low values outside the minimum IQR value, as visualized in the barp
 
 Low yielding rows in which yield values were replaced with NA.
 
-```{r modelc1, echo = FALSE}
+```{r modelc1, comment=NA, echo = FALSE}
 ##Replace All Low Values Identified in  Histogram (e.g.< IQR Minimum bu/ac) with NA:
 IQRNoLow<-subset(data, data$yld < min.yld)
 NoLowRows<-as.numeric(rownames(IQRNoLow))
@@ -321,7 +324,7 @@ model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRCle
 
 **Summary**
 
-```{r modelc1.sum2, echo=FALSE, message=FALSE}
+```{r modelc1.sum2, comment=NA, echo=FALSE, message=FALSE}
 summary(model2)
 ```
 
@@ -331,7 +334,7 @@ ANOVA-like table for random-effects: Single term deletions;
 
 Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
 
-```{r modelc1.reml, echo=FALSE}
+```{r modelc1.reml, echo=FALSE, message=FALSE}
 kable(ranova(model2))
 ```
 
@@ -353,7 +356,7 @@ kable(anova(model2))
 
 **Coefficient of Vairance (CV):**
 
-```{r, modelc1.cv, echo=FALSE}
+```{r, modelc1.cv, comment=NA, echo=FALSE}
 LSDer::CVer(model2)
 ```
 
@@ -361,13 +364,13 @@ LSDer::CVer(model2)
 
 *At 90% Confidence:*
 
-```{r, modelc1.lsd.1, echo=FALSE}
+```{r, modelc1.lsd.1, comment=NA, echo=FALSE}
 LSDer::LSDer(model2, "entry", level=0.95)
 ```
 
 *At 75% Confidence:*
 
-```{r, modelc1.lsd.25, echo=FALSE}
+```{r, modelc1.lsd.25, comment=NA, echo=FALSE}
 LSDer::LSDer(model2, "entry", level=0.75)
 ```
 
@@ -379,7 +382,7 @@ Replaced all values outside the minimum and maximum IQRs with NA, as visualized 
 
 Low yielding, followed by high yielding rows in which yield values were replaced with NA.
 
-```{r modelc2, echo = FALSE}
+```{r modelc2, comment=NA, echo = FALSE}
 ##Replace values outside the minimum and maximum IQR values with NA:
 IQRNoHigh<-subset(data, data$yld > max.yld)
 NoHighRows<-as.numeric(rownames(IQRNoHigh))
@@ -394,7 +397,7 @@ model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRCle
 
 **Summary**
 
-```{r modelc2.sum, echo=FALSE, message=FALSE}
+```{r modelc2.sum, comment=NA, echo=FALSE, message=FALSE}
 summary(model3)
 ```
 
@@ -404,7 +407,7 @@ ANOVA-like table for random-effects: Single term deletions;
 
 Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
 
-```{r modelc2.reml, echo=FALSE}
+```{r modelc2.reml, echo=FALSE, meesage=FALSE}
 kable(ranova(model3))
 ```
 
@@ -426,7 +429,7 @@ kable(anova(model3))
 
 **Coefficient of Vairance (CV):**
 
-```{r modelc2.cv, echo=FALSE}
+```{r modelc2.cv, comment=NA, echo=FALSE}
 LSDer::CVer(model3)
 ```
 
@@ -434,13 +437,13 @@ LSDer::CVer(model3)
 
 *At 90% Confidence:*
 
-```{r modelc2.lsd.1, echo=FALSE}
+```{r modelc2.lsd.1, comment=NA, echo=FALSE}
 LSDer::LSDer(model3, "entry", level=0.90)
 ```
 
 *At 75% Confidence:*
 
-```{r modelc2.lsd.25, echo=FALSE}
+```{r modelc2.lsd.25, comment=NA, echo=FALSE}
 LSDer::LSDer(model3, "entry", level=0.75)
 ```
 
@@ -452,7 +455,7 @@ Replace residual outliers identified in  Q-Q Plot with NA for all resdiual value
 
 Influential residual deviating rows in which yield values were replaced with NA.
 
-```{r modelc3, echo = FALSE}
+```{r modelc3, comment=NA, echo = FALSE}
 # ##Replace All Residual Outliers 2.5 times the standard deviation above/below the 
 # ##residual mean in  Q-Q Plot with NA:
 influentialQQ<-resid(model1)[abs(resid(model1)-mean(resid(model1)))>2.5*sd(resid(model1))]
@@ -472,13 +475,13 @@ model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=QQClea
 
 **Summary**
 
-```{r modelc3.sum, echo=FALSE, message=FALSE}
+```{r modelc3.sum, comment=NA, echo=FALSE, message=FALSE}
 summary(model4)
 ```
 
 ### Random-Effects Table
 
-```{r modelc3.reml, echo=FALSE}
+```{r modelc3.reml, echo=FALSE, message=FALSE}
 kable(ranova(model4))
 ```
 
@@ -500,7 +503,7 @@ kable(anova(model4))
 
 **Coefficient of Vairance (CV):**
 
-```{r modelc3.cv, echo=FALSE}
+```{r modelc3.cv, comment=NA, echo=FALSE}
 LSDer::CVer(model4)
 ```
 
@@ -508,13 +511,13 @@ LSDer::CVer(model4)
 
 *At 90% Confidence:*
 
-```{r modelc3.lsd.1, echo=FALSE}
+```{r modelc3.lsd.1, comment=NA, echo=FALSE}
 LSDer::LSDer(model4, "entry", level=0.90)
 ```
 
 *At 75% Confidence:*
 
-```{r modelc3.lsd.25, echo=FALSE}
+```{r modelc3.lsd.25, comment=NA, echo=FALSE}
 LSDer::LSDer(model4, "entry", level=0.75)
 ```
 
@@ -530,7 +533,7 @@ Replace influential Values determined Via Cook's Distance with NA.
 
 Influential Cook's Distance rows in which yield values were replaced with NA.
 
-```{r modelc4, echo = FALSE}
+```{r modelc4, comment=NA, echo = FALSE}
 ##Replace "Influential" Values Determined Via Cook's Distance, with NA:
 influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=(10/(sample_size-params$entry.end-1))))])
 influentialcooks
@@ -542,13 +545,13 @@ model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CooksC
 
 **Summary**
 
-```{r modelc4.sum, echo=FALSE, message=FALSE}
+```{r modelc4.sum, comment=NA, echo=FALSE, message=FALSE}
 summary(model5)
 ```
 
 ### Random-Effects Table
 
-```{r modelc4.reml, echo=FALSE}
+```{r modelc4.reml, echo=FALSE, message=FALSE}
 kable(ranova(model5))
 ```
 
@@ -570,7 +573,7 @@ kable(anova(model5))
 
 **Coefficient of Vairance (CV):**
 
-```{r modelc4.cv, echo=FALSE}
+```{r modelc4.cv, comment=NA, echo=FALSE}
 LSDer::CVer(model5)
 ```
 
@@ -578,13 +581,13 @@ LSDer::CVer(model5)
 
 *At 90% Confidence:*
 
-```{r modelc4.lsd.1, echo=FALSE}
+```{r modelc4.lsd.1, comment=NA, echo=FALSE}
 LSDer::LSDer(model5, "entry", level=0.90)
 ```
 
 *At 75% Confidence:*
 
-```{r modelc4.lsd.25, echo=FALSE}
+```{r modelc4.lsd.25, comment=NA, echo=FALSE}
 LSDer::LSDer(model5, "entry", level=0.75)
 ```
 
