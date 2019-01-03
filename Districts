@@ -1,0 +1,355 @@
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(LMERConvenienceFunctions)
+library(lmerTest)
+library(randomcoloR)
+library(car)
+library(predictmeans)
+
+setwd("C:/Users/rjbudnik/Desktop/R_Combined")
+df_jim<-read.csv("18CC.csv",header=T,na.strings=c("", " ", "NA"))
+
+CCF<-8.067
+df_jim<-df_jim%>%mutate(yld = (wt*CCF))
+
+###Subset data of interest:
+jim.c81a<-filter(df_jim,exp=="C81A",c(1:45))
+
+###Set factors:
+jim.c81a$entry<-factor(jim.c81a$entry)
+jim.c81a$ped.id<-factor(jim.c81a$ped.id)
+jim.c81a$code<-factor(jim.c81a$code)
+jim.c81a$rng<-factor(jim.c81a$rng)
+jim.c81a$pass<-factor(jim.c81a$pass)
+jim.c81a$rep<-factor(jim.c81a$rep)
+jim.c81a$env<-factor(jim.c81a$env)
+
+
+###RJB Suggested:
+modelc81a.ryan<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep)+ (1|rep:book.name), data=jim.c81a, REML=TRUE)
+
+
+###ALL:
+modelc81a.all<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=jim.c81a, REML=TRUE)
+
+
+###BEST:
+modelc81a.best<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=jim.c81a, REML=TRUE)
+
+
+###JIM:
+modelc81a.jim<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=jim.c81a, REML=TRUE)
+
+
+###COMPARE Mixed:
+anova(modelc81a.ryan)
+anova(modelc81a.all)
+anova(modelc81a.best)
+anova(modelc81a.jim)
+
+ranova(modelc81a.ryan)
+ranova(modelc81a.all)
+ranova(modelc81a.best)
+ranova(modelc81a.jim)
+
+anova(modelc81a.ryan, modelc81a.all, modelc81a.best, modelc81a.jim)
+
+LSDer::CVer(modelc81a.ryan)
+LSDer::CVer(modelc81a.all)
+LSDer::CVer(modelc81a.best)
+LSDer::CVer(modelc81a.jim)
+
+
+
+###LINEAR:
+c81almodel1<-lm(yld~entry + book.name + rep:book.name, data=jim.c81a)
+c81almodel2<-lm(yld~entry + book.name + rep:book.name + entry:book.name, data=jim.c81a)
+c81almodel.ryan<-lm(yld~entry+book.name+entry:book.name, data=jim.c81a)
+###COMPARE Linear:
+anova(c81almodel1)
+anova(c81almodel2)
+anova(c81almodel.ryan)
+cv.model(c81almodel1)
+cv.model(c81almodel2)
+cv.model(c81almodel.ryan)
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(LMERConvenienceFunctions)
+library(lmerTest)
+library(randomcoloR)
+library(car)
+library(predictmeans)
+
+setwd("C:/Users/rjbudnik/Desktop/R_Combined")
+df_jim<-read.csv("18CC.csv",header=T,na.strings=c("", " ", "NA"))
+
+CCF<-8.067
+df_jim<-df_jim%>%mutate(yld = (wt*CCF))
+
+###Subset data of interest:
+jim.c81b<-filter(df_jim,exp=="C81B",c(1:45))
+
+###Set factors:
+jim.c81b$entry<-factor(jim.c81b$entry)
+jim.c81b$ped.id<-factor(jim.c81b$ped.id)
+jim.c81b$code<-factor(jim.c81b$code)
+jim.c81b$rng<-factor(jim.c81b$rng)
+jim.c81b$pass<-factor(jim.c81b$pass)
+jim.c81b$rep<-factor(jim.c81b$rep)
+jim.c81b$env<-factor(jim.c81b$env)
+
+
+###RJB SUGGESTED:
+modelc81b.ryan<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep)+ (1|rep:book.name), data=jim.c81b, REML=TRUE)
+
+
+###ALL:
+modelc81b.all<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=jim.c81b, REML=TRUE)
+
+
+###BEST:
+modelc81b.best<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=jim.c81b, REML=TRUE)
+
+
+###JIM:
+modelc81b.jim<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=jim.c81b, REML=TRUE)
+
+###COMPARE Mixed:
+anova(modelc81b.ryan)
+anova(modelc81b.all)
+anova(modelc81b.best)
+anova(modelc81b.jim)
+
+ranova(modelc81b.ryan)
+ranova(modelc81b.all)
+ranova(modelc81b.best)
+ranova(modelc81b.jim)
+
+anova(modelc81b.ryan, modelc81b.all, modelc81b.best, modelc81b.jim)
+
+LSDer::CVer(modelc81b.ryan)
+LSDer::CVer(modelc81b.all)
+LSDer::CVer(modelc81b.best)
+LSDer::CVer(modelc81b.jim)
+
+qq.ryan<-qqnorm(resid(modelc81b.ryan), pch=23, bg="violet")
+qqline(resid(modelc81b.ryan), col="darkred", lwd=c(2))
+qq.all<-qqnorm(resid(modelc81b.all), pch=23, bg="yellow")
+qqline(resid(modelc81b.all), col="darkred", lwd=c(2))
+qq.best<-qqnorm(resid(modelc81b.best), pch=23, bg="blue")
+qqline(resid(modelc81b.best), col="darkred", lwd=c(2))
+qq.jim<-qqnorm(resid(modelc81b.jim), pch=23, bg="green")
+qqline(resid(modelc81b.jim), col="darkred", lwd=c(2))
+
+
+
+###LINEAR:
+c81blmodel1<-lm(yld~entry + book.name + rep:book.name, data=jim.c81b)
+c81blmodel2<-lm(yld~entry + book.name + rep:book.name + entry:book.name, data=jim.c81b)
+c81blmodel.ryan<-lm(yld~entry+book.name+entry:book.name, data=jim.c81b)
+###COMPARE Linear:
+anova(c81blmodel1)
+anova(c81blmodel2)
+anova(c81blmodel.ryan)
+cv.model(c81blmodel1)
+cv.model(c81blmodel2)
+cv.model(c81blmodel.ryan)
+
+
+
+###Experimenting:
+modelc81b.exp<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=jim.c81b, REML=TRUE)
+anova(modelc81b.exp)
+ranova(modelc81b.exp)
+LSDer::CVer(modelc81b.exp)
+qq.exp<-qqnorm(resid(modelc81b.exp), pch=23, bg="gray45")
+qqline(resid(modelc81b.exp), col="darkred", lwd=c(2))
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(LMERConvenienceFunctions)
+library(lmerTest)
+library(randomcoloR)
+library(car)
+library(predictmeans)
+
+setwd("C:/Users/rjbudnik/Desktop/R_Combined")
+df_jim<-read.csv("18CC.csv",header=T,na.strings=c("", " ", "NA"))
+
+CCF<-8.067
+df_jim<-df_jim%>%mutate(yld = (wt*CCF))
+
+###Subset data of interest:
+jim.c82a<-filter(df_jim,exp=="C82A",c(1:45))
+
+###Set factors:
+jim.c82a$entry<-factor(jim.c82a$entry)
+jim.c82a$ped.id<-factor(jim.c82a$ped.id)
+jim.c82a$code<-factor(jim.c82a$code)
+jim.c82a$rng<-factor(jim.c82a$rng)
+jim.c82a$pass<-factor(jim.c82a$pass)
+jim.c82a$rep<-factor(jim.c82a$rep)
+jim.c82a$env<-factor(jim.c82a$env)
+
+
+###RJB Suggested:
+modelc82a.ryan<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep)+ (1|rep:book.name), data=jim.c82a, REML=TRUE)
+
+
+###ALL:
+modelc82a.all<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=jim.c82a, REML=TRUE)
+
+
+###BEST:
+modelc82a.best<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=jim.c82a, REML=TRUE)
+
+
+###JIM:
+modelc82a.jim<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=jim.c82a, REML=TRUE)
+
+
+###COMPARE Mixed:
+anova(modelc82a.ryan)
+anova(modelc82a.all)
+anova(modelc82a.best)
+anova(modelc82a.jim)
+
+ranova(modelc82a.ryan)
+ranova(modelc82a.all)
+ranova(modelc82a.best)
+ranova(modelc82a.jim)
+
+anova(modelc82a.ryan, modelc82a.all, modelc82a.best, modelc82a.jim)
+
+LSDer::CVer(modelc82a.ryan)
+LSDer::CVer(modelc82a.all)
+LSDer::CVer(modelc82a.best)
+LSDer::CVer(modelc82a.jim)
+
+
+
+###LINEAR:
+c82almodel1<-lm(yld~entry + book.name + rep:book.name, data=jim.c82a)
+c82almodel2<-lm(yld~entry + book.name + rep:book.name + entry:book.name, data=jim.c82a)
+c82almodel.ryan<-lm(yld~entry+book.name+entry:book.name, data=jim.c82a)
+###COMPARE Linear:
+anova(c82almodel1)
+anova(c82almodel2)
+anova(c82almodel.ryan)
+cv.model(c82almodel1)
+cv.model(c82almodel2)
+cv.model(c82almodel.ryan)
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(LMERConvenienceFunctions)
+library(lmerTest)
+library(randomcoloR)
+library(car)
+library(predictmeans)
+
+setwd("C:/Users/rjbudnik/Desktop/R_Combined")
+df_jim<-read.csv("18CC.csv",header=T,na.strings=c("", " ", "NA"))
+
+CCF<-8.067
+df_jim<-df_jim%>%mutate(yld = (wt*CCF))
+
+###Subset data of interest:
+jim.c82a<-filter(df_jim,exp=="C82A",c(1:45))
+
+###Set factors:
+jim.c82a$entry<-factor(jim.c82a$entry)
+jim.c82a$ped.id<-factor(jim.c82a$ped.id)
+jim.c82a$code<-factor(jim.c82a$code)
+jim.c82a$rng<-factor(jim.c82a$rng)
+jim.c82a$pass<-factor(jim.c82a$pass)
+jim.c82a$rep<-factor(jim.c82a$rep)
+jim.c82a$env<-factor(jim.c82a$env)
+
+
+###RJB Suggested:
+modelc82a.ryan<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep)+ (1|rep:book.name), data=jim.c82a, REML=TRUE)
+
+
+###ALL:
+modelc82a.all<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=jim.c82a, REML=TRUE)
+
+
+###BEST:
+modelc82a.best<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=jim.c82a, REML=TRUE)
+
+
+###JIM:
+modelc82a.jim<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=jim.c82a, REML=TRUE)
+
+
+###COMPARE Mixed:
+anova(modelc82a.ryan)
+anova(modelc82a.all)
+anova(modelc82a.best)
+anova(modelc82a.jim)
+
+ranova(modelc82a.ryan)
+ranova(modelc82a.all)
+ranova(modelc82a.best)
+ranova(modelc82a.jim)
+
+anova(modelc82a.ryan, modelc82a.all, modelc82a.best, modelc82a.jim)
+
+LSDer::CVer(modelc82a.ryan)
+LSDer::CVer(modelc82a.all)
+LSDer::CVer(modelc82a.best)
+LSDer::CVer(modelc82a.jim)
+
+
+
+###LINEAR:
+c82almodel1<-lm(yld~entry + book.name + rep:book.name, data=jim.c82a)
+c82almodel2<-lm(yld~entry + book.name + rep:book.name + entry:book.name, data=jim.c82a)
+c82almodel.ryan<-lm(yld~entry+book.name+entry:book.name, data=jim.c82a)
+###COMPARE Linear:
+anova(c82almodel1)
+anova(c82almodel2)
+anova(c82almodel.ryan)
+cv.model(c82almodel1)
+cv.model(c82almodel2)
+cv.model(c82almodel.ryan)
+
+
