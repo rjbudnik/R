@@ -13,7 +13,7 @@ library(randomcoloR)
 library(car)
 library(predictmeans)
 
-setwd("C:/Users/rjbudnik/Desktop/R_Combined")
+setwd("C:/Users/Ryan.Ryan-PC/Desktop/wd")
 df<-read.csv("dis.18.csv", header=T, na.strings=c("", " ", "NA"))
 
 ###Subset data of interest:
@@ -29,8 +29,59 @@ data$rep<-factor(data$rep)
 
 bp<-Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
 
-model1<-lmer(yld~entry + book.name + (rep:book.name), data=data, REML=TRUE)
+model1<-lmer(yld~entry + book.name + rep*book.name + (1|range/book.name:rep) + (1|pass/book.name:rep) + (1|entry:book.name), data=data, REML=FALSE)
 
-model1<-lmer(yld~entry + book.name + (rep:book.name), data=data, REML=TRUE)
+model2<-lmer(yld~entry + book.name + rep*book.name + (1|range:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=FALSE)
 
-### + (1|(book.name*rep)|range)+ (1|(book.name*rep)|pass) + (1|(entry*book.name)??
+model3<-lmer(yld~entry + book.name + rep*book.name + (1|range:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=FALSE)
+
+lmodel<-lm(yld~entry + book.name + rep*book.name, data=data)
+anova(lmodel)
+
+anova(model1)
+ranova(model1)
+
+anova(model2)
+ranova(model2)
+
+anova(model3)
+ranova(model3)
+
+
+
+df1<-read.csv("18CC.csv", header=T, na.strings=c("", " ", "NA"))
+
+CCF<-8.067
+df1 <- df1%>%mutate (yld = (wt*CCF))
+
+###Subset data of interest:
+data1<-filter(df1, exp=="C81A", c(1:45))
+
+###Set factors:
+data1$entry<-factor(data1$entry)
+data1$ped.id<-factor(data1$ped.id)
+data1$code<-factor(data1$code)
+data1$range<-factor(data1$range)
+data1$pass<-factor(data1$pass)
+data1$rep<-factor(data1$rep)
+
+bp<-Boxplot(data1$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+
+model1<-lmer(yld~entry + book.name + rep*book.name + (1|range/book.name:rep) + (1|pass/book.name:rep) + (1|entry:book.name), data=data1, REML=FALSE)
+
+model2<-lmer(yld~entry + book.name + rep*book.name + (1|range:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data1, REML=FALSE)
+
+model3<-lmer(yld~entry + book.name + rep*book.name + (1|range:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data1, REML=FALSE)
+
+lmodel<-lm(yld~entry + book.name + rep*book.name, data=data1)
+anova(lmodel)
+
+anova(model1)
+ranova(model1)
+
+anova(model2)
+ranova(model2)
+
+anova(model3)
+ranova(model3)
+
