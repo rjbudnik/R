@@ -1,8 +1,80 @@
-file_list <- list.files("C:/Users/rjbudnik/Desktop/R_Cleaned")
-dis.18 <- do.call("rbind", lapply(file_list, read.csv, header = TRUE))
+---
+title: "**Yield Trial Single Loc**"
+author: "Ryan Budnik"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float:
+      collapsed: true
+params:
+  data:
+    label: "Input dataset:"
+    value: yt18.csv
+    input: select
+    choices: yt18.csv
+  book.name:
+    label: "Book Name:"
+    value: CF811
+    input: select
+    choices: [CF811, CF812, CF813, CF814, CF815, CF821, CF822,	CF823, CF824, CF825, CF831, CF832, CF833, CF834, CF835]
+  exp:
+    label: "Experiment:"
+    value: C81A
+    input: select
+    choices: [C81A,	C81B,	C82A,	C82B,	C83A,	C83B]
+  entry.start:
+    label: "Entry Start"
+    value: 1
+    input: slider
+    min: 1
+    max: 100
+    step: 1
+    sep: ""
+  entry.end:
+    label: "Entry End"
+    value: 45
+    input: slider
+    min: 1
+    max: 100
+    step: 1
+    sep: ""
+  year:
+    label: "Year"
+    value: 2018
+    input: slider
+    min: 2010
+    max: 2030
+    step: 1
+    sep: ""
+  district:
+    label: "District:"
+    value: Northern
+    input: select
+    choices: [Northern, Central, Southern]
+  season:
+    label: "Season Length:"
+    value: Early
+    input: select
+    choices: [Early, Full]
+---
 
-write.csv(dis.18, "C:/Users/rjbudnik/Desktop/R_Combined/dis.18.csv", row.names=FALSE)
+```{r logo, cache=TRUE, echo=FALSE}
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "YieldTrialSingleLoc","inst","rmarkdown","templates","report","skeleton","ICIA_logo.png")), 
+               alt = 'logo',
+               style = 'position:absolute; top:0; right:0; padding:10px;')
+```
 
+---
+
+
+# Overview:
+The following report renders a district-wide mixed model analysis with corresponding figures for the *`r params$year` `r params$district` District `r params$season`-season Test*, **`r params$exp`**.
+
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
 library(dplyr)
 library(agricolae)
 library(nlme)
@@ -12,76 +84,450 @@ library(lmerTest)
 library(randomcoloR)
 library(car)
 library(predictmeans)
+library(shiny)
+library(shinythemes)
+library(psych)
+library(emmeans)
+```
 
-setwd("C:/Users/Ryan.Ryan-PC/Desktop/wd")
-df<-read.csv("dis.18.csv", header=T, na.strings=c("", " ", "NA"))
+-Corn Coversion Factor = **8.067**
+
+-Bean Conversion Factor = **7.779**
+
+```{r setup, echo = FALSE}
+###Set wd & Import CSV Dataset:
+df_cc<-read.csv("18CC.csv",header=T,na.strings=c("", " ", "NA"))
+
+CCF<-8.067
+df_cc<-df_cc%>%mutate(yld = (wt*CCF))
 
 ###Subset data of interest:
-data<-filter(df, exp=="C81A", c(1:45))
+data<-filter(df_cc, exp==c(params$exp))
 
-###Set factors:
+
+###View Classifications & Set Factors:
+data$book.name<-factor(data$book.name)
+data$exp<-factor(data$exp)
 data$entry<-factor(data$entry)
 data$ped.id<-factor(data$ped.id)
 data$code<-factor(data$code)
-data$range<-factor(data$range)
+data$rng<-factor(data$rng)
 data$pass<-factor(data$pass)
 data$rep<-factor(data$rep)
+attach(data)
 
-bp<-Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+###Mean & IQRS:
+max.yld <- quantile(data$yld,0.75, na.rm=TRUE) + (IQR(data$yld, na.rm=TRUE) * 1.5 )
+min.yld <- quantile(data$yld,0.25, na.rm=TRUE) - (IQR(data$yld, na.rm=TRUE) * 1.5 )
+avg.yld <- mean(data$yld, na.rm = TRUE)
+```
 
-model1<-lmer(yld~entry + book.name + rep*book.name + (1|range/book.name:rep) + (1|pass/book.name:rep) + (1|entry:book.name), data=data, REML=FALSE)
+# Data Visualization: {.tabset .tabset-fade}
 
-model2<-lmer(yld~entry + book.name + rep*book.name + (1|range:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=FALSE)
+## Summary
 
-model3<-lmer(yld~entry + book.name + rep*book.name + (1|range:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=FALSE)
+```{r summary, echo = FALSE, cols.print=8, rows.print=20, warning=FALSE}
+described<-describe(data, IQR=TRUE)
+paged_table(described, options(scipen=999, digits=3))
+```
 
-lmodel<-lm(yld~entry + book.name + rep*book.name, data=data)
-anova(lmodel)
+## Aggregation
 
-anova(model1)
-ranova(model1)
+```{r aggregation, echo = FALSE, rows.print=20, warning=FALSE}
+options(digits=5)
+aggdf <- data.frame(aggregate(yld~entry, data=data, function(x) c(length(x))),aggregate(yld~entry, data=data, function(x) c(min(x))),aggregate(yld~entry, data=data, function(x) c(mean(x))),aggregate(yld~entry, data=data, function(x) c(max(x))))
+aggdf <- aggdf[,c(1,2,4,6,8)]
+colnames(aggdf)<-c("Entry", "Count", "Min", "Mean", "Max")
+paged_table(aggdf)
+```
 
-anova(model2)
-ranova(model2)
+## Histograms
 
-anova(model3)
-ranova(model3)
+```{r histo.yld, echo = FALSE, fig.width=9}
+histo<-hist(data$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yield")
+abline(v = max.yld, col="red")
+abline(v = avg.yld, col="red", lwd=c(3))
+abline(v = min.yld, col="red")
+```
+
+## Barplots
+
+``` {r bar.wt, echo = FALSE, fig.width=10, fig.height=7}
+palette <- randomColor(length(unique(data$entry)))
+data$color <- palette[as.factor(data$entry)]
+# barplot(data$wt, names.arg=data$entry, ylim=c(0,40), main="Distribution of Weight", ylab="Weight", xlab="Entry", col=data$color)
+# abline(h = max.wt, col="red")
+# abline(h = avg.wt, col="red", lwd=c(3))
+# abline(h = min.wt, col="red")
+```
+
+``` {r bar.yld, echo = FALSE, fig.width=10, fig.height=7}
+barplot(data$yld, names.arg=data$entry, ylim=c(0,300), main="Distribution of Yield", ylab="Yield", xlab="Entry", col=data$color)
+abline(h = max.yld, col="red")
+abline(h = avg.yld, col="red", lwd=c(3))
+abline(h = min.yld, col="red")
+```
+
+## Boxplot
+
+``` {r boxplot, echo = FALSE, fig.width=9}
+Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+abline(h = max.yld, col="red")
+abline(h = avg.yld, col="red", lwd=c(3))
+abline(h = min.yld, col="red")
+```
+
+# Mixed Model Analyses: {.tabset .tabset-fade}
+
+## Model - Ryan's Suggestion 1
+
+```{r model.ryan1, comment=NA, echo=FALSE, message=FALSE}
+model.ryan1<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA
+
+YIELD = ENTRY + ENV + (ENTRY x ENV)
+
+-RANDOM = -RANGE:ENV:REP
+          -PASS:ENV:REP
+          -REP:ENV
+
+```{r ryan1.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(model.ryan1)
+```
+
+### CV & BIC
+
+CV:
+
+```{r ryan1.cv, comment=NA, echo=FALSE, message=FALSE}
+LSDer::CVer(model.ryan1)
+```
+
+BIC:
+
+```{r ryan1.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(model.ryan1)
+```
 
 
 
-df1<-read.csv("18CC.csv", header=T, na.strings=c("", " ", "NA"))
+## Model - Ryan's Suggestion 2
 
-CCF<-8.067
-df1 <- df1%>%mutate (yld = (wt*CCF))
+```{r model.ryan2, comment=NA, echo=FALSE, message=FALSE}
+model.ryan2<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep), data=data, REML=TRUE)
+```
 
-###Subset data of interest:
-data1<-filter(df1, exp=="C81A", c(1:45))
+### ANOVA
 
-###Set factors:
-data1$entry<-factor(data1$entry)
-data1$ped.id<-factor(data1$ped.id)
-data1$code<-factor(data1$code)
-data1$range<-factor(data1$range)
-data1$pass<-factor(data1$pass)
-data1$rep<-factor(data1$rep)
+YIELD = ENTRY + ENV + (ENTRY x ENV)
 
-bp<-Boxplot(data1$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+-RANDOM = -RANGE:ENV:REP
+          -PASS:ENV:REP
 
-model1<-lmer(yld~entry + book.name + rep*book.name + (1|range/book.name:rep) + (1|pass/book.name:rep) + (1|entry:book.name), data=data1, REML=FALSE)
+```{r ryan2.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(model.ryan2)
+```
 
-model2<-lmer(yld~entry + book.name + rep*book.name + (1|range:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data1, REML=FALSE)
+### CV & BIC
 
-model3<-lmer(yld~entry + book.name + rep*book.name + (1|range:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data1, REML=FALSE)
+CV:
 
-lmodel<-lm(yld~entry + book.name + rep*book.name, data=data1)
-anova(lmodel)
+```{r ryan2.cv, comment=NA, echo=FALSE, message=FALSE}
+LSDer::CVer(model.ryan2)
+```
 
-anova(model1)
-ranova(model1)
+BIC:
 
-anova(model2)
-ranova(model2)
+```{r ryan2.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(model.ryan2)
+```
 
-anova(model3)
-ranova(model3)
 
+
+## Model - Jim's
+
+```{r model.jim, comment=NA, echo=FALSE, message=FALSE}
+model.jim<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA
+
+YIELD = ENTRY + ENV + (REP x ENV)
+
+-RANDOM = -RANGE:ENV:REP
+          -PASS:ENV:REP
+          -ENTRY:ENV
+
+```{r jim.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(model.jim)
+```
+
+### CV & BIC
+
+CV:
+
+```{r jim.cv, comment=NA, echo=FALSE, message=FALSE}
+LSDer::CVer(model.jim)
+```
+
+BIC:
+
+```{r jim.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(model.jim)
+```
+
+
+
+## Model - Alternative 1
+
+```{r model.alt1, comment=NA, echo=FALSE, message=FALSE}
+model.alt1<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA
+
+YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)
+
+-RANDOM = -RANGE:ENV:REP
+          -PASS:ENV:REP
+
+```{r alt1.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(model.alt1)
+```
+
+### CV & BIC
+
+CV:
+
+```{r alt1.cv, comment=NA, echo=FALSE, message=FALSE}
+LSDer::CVer(model.alt1)
+```
+
+BIC:
+
+```{r alt1.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(model.alt1)
+```
+
+
+
+## Model - Alternative 2
+
+```{r model.alt2, comment=NA, echo=FALSE, message=FALSE}
+model.alt2<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA
+
+YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)
+
+-RANDOM = -RANGE:ENV:REP
+          -PASS:ENV:REP
+          -ENTRY:ENV
+
+```{r alt2.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(model.alt2)
+```
+
+### CV & BIC
+
+CV:
+
+```{r alt2.cv, comment=NA, echo=FALSE, message=FALSE}
+LSDer::CVer(model.alt2)
+```
+
+BIC:
+
+```{r alt2.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(model.alt2)
+```
+
+
+
+## Model - Alternative 3
+
+```{r model.alt3, comment=NA, echo=FALSE, message=FALSE}
+model.alt3<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA
+
+YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)
+
+-RANDOM = -RANGE:ENV:REP
+          -PASS:ENV:REP
+          -REP:ENV
+
+```{r alt3.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(model.alt3)
+```
+
+### CV & BIC
+
+CV:
+
+```{r alt3.cv, comment=NA, echo=FALSE, message=FALSE}
+LSDer::CVer(model.alt3)
+```
+
+BIC:
+
+```{r alt3.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(model.alt3)
+```
+
+
+
+# Linear Model Analyses: {.tabset .tabset-fade}
+
+## Linear Model 1
+
+```{r lmodel1, comment=NA, echo=FALSE, message=FALSE}
+lmodel1<-lm(yld~entry, data=data)
+```
+
+### ANOVA
+
+YIELD = ENTRY
+
+```{r lmodel1.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(lmodel1)
+```
+
+### CV & BIC
+
+CV:
+
+```{r lmodel1.cv, comment=NA, echo=FALSE, message=FALSE}
+cv.model(lmodel1)
+```
+
+BIC:
+
+```{r lmodel1.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(lmodel1)
+```
+
+
+
+## Linear Model 2
+
+```{r lmodel2, comment=NA, echo=FALSE, message=FALSE}
+lmodel2<-lm(yld~entry + book.name, data=data)
+```
+
+### ANOVA
+
+YIELD = ENTRY + ENV
+
+```{r lmodel2.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(lmodel2)
+```
+
+### CV & BIC
+
+CV:
+
+```{r lmodel2.cv, comment=NA, echo=FALSE, message=FALSE}
+cv.model(lmodel2)
+```
+
+BIC:
+
+```{r lmodel2.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(lmodel2)
+```
+
+
+
+## Linear Model 3
+
+```{r lmodel3, comment=NA, echo=FALSE, message=FALSE}
+lmodel3<-lm(yld~entry + book.name + rep:book.name, data=data)
+```
+
+### ANOVA
+
+YIELD = ENTRY + ENV + (REP x ENV)
+
+```{r lmodel3.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(lmodel3)
+```
+
+### CV & BIC
+
+CV:
+
+```{r lmodel3.cv, comment=NA, echo=FALSE, message=FALSE}
+cv.model(lmodel3)
+```
+
+BIC:
+
+```{r lmodel3.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(lmodel3)
+```
+
+
+
+## Linear Model 4
+
+```{r lmodel4, comment=NA, echo=FALSE, message=FALSE}
+lmodel4<-lm(yld~entry + book.name + entry:book.name, data=data)
+```
+
+### ANOVA
+
+YIELD = ENTRY + ENV + (ENTRY x ENV)
+
+```{r lmodel4.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(lmodel4)
+```
+
+### CV & BIC
+
+CV:
+
+```{r lmodel4.cv, comment=NA, echo=FALSE, message=FALSE}
+cv.model(lmodel4)
+```
+
+BIC:
+
+```{r lmodel4.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(lmodel4)
+```
+
+
+
+## Linear Model 5
+
+```{r lmodel5, comment=NA, echo=FALSE, message=FALSE}
+lmodel5<-lm(yld~entry + book.name + entry:book.name + rep:book.name, data=data)
+```
+
+### ANOVA
+
+YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)
+
+```{r lmodel5.anova, comment=NA, echo=FALSE, message=FALSE}
+anova(lmodel5)
+```
+
+### CV & BIC
+
+CV:
+
+```{r lmodel5.cv, comment=NA, echo=FALSE, message=FALSE}
+cv.model(lmodel5)
+```
+
+BIC:
+
+```{r lmodel5.bic, comment=NA, echo=FALSE, message=FALSE}
+BIC(lmodel5)
+```
