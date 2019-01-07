@@ -1,5 +1,5 @@
 ---
-title: "**Yield Trial Single Loc**"
+title: "**District Wide Model Analysis**"
 author: "Ryan Budnik"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: 
@@ -11,35 +11,14 @@ output:
 params:
   data:
     label: "Input dataset:"
-    value: yt18.csv
+    value: 18CC.csv
     input: select
-    choices: yt18.csv
-  book.name:
-    label: "Book Name:"
-    value: CF811
-    input: select
-    choices: [CF811, CF812, CF813, CF814, CF815, CF821, CF822,	CF823, CF824, CF825, CF831, CF832, CF833, CF834, CF835]
+    choices: [16CC.csv, 17CC.csv, 18CC.csv]
   exp:
     label: "Experiment:"
     value: C81A
     input: select
-    choices: [C81A,	C81B,	C82A,	C82B,	C83A,	C83B]
-  entry.start:
-    label: "Entry Start"
-    value: 1
-    input: slider
-    min: 1
-    max: 100
-    step: 1
-    sep: ""
-  entry.end:
-    label: "Entry End"
-    value: 45
-    input: slider
-    min: 1
-    max: 100
-    step: 1
-    sep: ""
+    choices: [C61A,	C61B,	C62A,	C62B,	C63A,	C63B, C71A,	C71B,	C72A,	C72B,	C73A,	C73B, C81A,	C81B,	C82A, C82B,	C83A,	C83B]
   year:
     label: "Year"
     value: 2018
@@ -61,13 +40,12 @@ params:
 ---
 
 ```{r logo, cache=TRUE, echo=FALSE}
-htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "YieldTrialSingleLoc","inst","rmarkdown","templates","report","skeleton","ICIA_logo.png")), 
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","Ryan.Ryan-PC","Documents", "District.Analysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), 
                alt = 'logo',
                style = 'position:absolute; top:0; right:0; padding:10px;')
 ```
 
 ---
-
 
 # Overview:
 The following report renders a district-wide mixed model analysis with corresponding figures for the *`r params$year` `r params$district` District `r params$season`-season Test*, **`r params$exp`**.
@@ -90,13 +68,12 @@ library(psych)
 library(emmeans)
 ```
 
--Corn Coversion Factor = **8.067**
-
--Bean Conversion Factor = **7.779**
+- Corn Coversion Factor = **8.067**
+- Bean Conversion Factor = **7.779**
 
 ```{r setup, echo = FALSE}
 ###Set wd & Import CSV Dataset:
-df_cc<-read.csv("18CC.csv",header=T,na.strings=c("", " ", "NA"))
+df_cc<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
 
 CCF<-8.067
 df_cc<-df_cc%>%mutate(yld = (wt*CCF))
@@ -114,6 +91,7 @@ data$code<-factor(data$code)
 data$rng<-factor(data$rng)
 data$pass<-factor(data$pass)
 data$rep<-factor(data$rep)
+data$plot<-factor(data$plot)
 attach(data)
 
 ###Mean & IQRS:
@@ -126,8 +104,9 @@ avg.yld <- mean(data$yld, na.rm = TRUE)
 
 ## Summary
 
-```{r summary, echo = FALSE, cols.print=8, rows.print=20, warning=FALSE}
-described<-describe(data, IQR=TRUE)
+```{r summary, echo = FALSE, cols.print=10, rows.print=20, warning=FALSE}
+sum.less<-data %>% select("exp", "book.name", "rep", "entry", "plot", "pass", "rng", "wt", "moist", "yld")
+described<-describe(sum.less, IQR=TRUE)
 paged_table(described, options(scipen=999, digits=3))
 ```
 
@@ -144,7 +123,7 @@ paged_table(aggdf)
 ## Histograms
 
 ```{r histo.yld, echo = FALSE, fig.width=9}
-histo<-hist(data$yld, breaks=seq(0,300, l=90), col="purple", main="Distribution of Yield", xlab="Yield")
+histo<-hist(data$yld, breaks=seq(0,350, l=250), col="purple", main="Distribution of Yield", xlab="Yield")
 abline(v = max.yld, col="red")
 abline(v = avg.yld, col="red", lwd=c(3))
 abline(v = min.yld, col="red")
@@ -185,32 +164,19 @@ abline(h = min.yld, col="red")
 model.ryan1<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA
+### ANOVA Ryan1
 
-YIELD = ENTRY + ENV + (ENTRY x ENV)
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
--RANDOM = -RANGE:ENV:REP
-          -PASS:ENV:REP
-          -REP:ENV
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + REP:ENV
 
 ```{r ryan1.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(model.ryan1)
+options(scipen=7)
+paged_table(anova(model.ryan1))
 ```
-
-### CV & BIC
-
-CV:
-
-```{r ryan1.cv, comment=NA, echo=FALSE, message=FALSE}
-LSDer::CVer(model.ryan1)
-```
-
-BIC:
-
-```{r ryan1.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(model.ryan1)
-```
-
 
 
 ## Model - Ryan's Suggestion 2
@@ -219,31 +185,18 @@ BIC(model.ryan1)
 model.ryan2<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA
+### ANOVA Ryan2
 
-YIELD = ENTRY + ENV + (ENTRY x ENV)
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
--RANDOM = -RANGE:ENV:REP
-          -PASS:ENV:REP
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
 
-```{r ryan2.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(model.ryan2)
+```{r ryan2.anova, comment=NA, echo=FALSE, cols.print=9, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.ryan2))
 ```
-
-### CV & BIC
-
-CV:
-
-```{r ryan2.cv, comment=NA, echo=FALSE, message=FALSE}
-LSDer::CVer(model.ryan2)
-```
-
-BIC:
-
-```{r ryan2.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(model.ryan2)
-```
-
 
 
 ## Model - Jim's
@@ -252,30 +205,18 @@ BIC(model.ryan2)
 model.jim<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA
+### ANOVA Jim
 
-YIELD = ENTRY + ENV + (REP x ENV)
+**YIELD = ENTRY + ENV + (REP x ENV)**
 
--RANDOM = -RANGE:ENV:REP
-          -PASS:ENV:REP
-          -ENTRY:ENV
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + ENTRY:ENV
 
-```{r jim.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(model.jim)
-```
-
-### CV & BIC
-
-CV:
-
-```{r jim.cv, comment=NA, echo=FALSE, message=FALSE}
-LSDer::CVer(model.jim)
-```
-
-BIC:
-
-```{r jim.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(model.jim)
+```{r jim.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.jim))
 ```
 
 
@@ -286,31 +227,18 @@ BIC(model.jim)
 model.alt1<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA
+### ANOVA Alt1
 
-YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
--RANDOM = -RANGE:ENV:REP
-          -PASS:ENV:REP
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
 
-```{r alt1.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(model.alt1)
+```{r alt1.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.alt1))
 ```
-
-### CV & BIC
-
-CV:
-
-```{r alt1.cv, comment=NA, echo=FALSE, message=FALSE}
-LSDer::CVer(model.alt1)
-```
-
-BIC:
-
-```{r alt1.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(model.alt1)
-```
-
 
 
 ## Model - Alternative 2
@@ -320,32 +248,19 @@ model.alt2<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rn
 
 ```
 
-### ANOVA
+### ANOVA Alt2
 
-YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
--RANDOM = -RANGE:ENV:REP
-          -PASS:ENV:REP
-          -ENTRY:ENV
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + ENTRY:ENV
 
-```{r alt2.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(model.alt2)
+```{r alt2.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.alt2))
 ```
-
-### CV & BIC
-
-CV:
-
-```{r alt2.cv, comment=NA, echo=FALSE, message=FALSE}
-LSDer::CVer(model.alt2)
-```
-
-BIC:
-
-```{r alt2.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(model.alt2)
-```
-
 
 
 ## Model - Alternative 3
@@ -354,32 +269,40 @@ BIC(model.alt2)
 model.alt3<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA
+### ANOVA Alt3
 
-YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
--RANDOM = -RANGE:ENV:REP
-          -PASS:ENV:REP
-          -REP:ENV
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + REP:ENV
 
-```{r alt3.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(model.alt3)
+```{r alt3.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.alt3))
 ```
 
-### CV & BIC
 
-CV:
 
-```{r alt3.cv, comment=NA, echo=FALSE, message=FALSE}
-LSDer::CVer(model.alt3)
+## **Mixed Model Comparisons**
+
+```{r model.comp, comment=NA, echo=FALSE, message=FALSE}
+paged_table(anova(model.ryan1, model.ryan2, model.jim, model.alt1, model.alt2, model.alt3, refit=FALSE))
 ```
 
-BIC:
+## **CV Comparisons**
 
-```{r alt3.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(model.alt3)
+```{r model.cvcalc, comment=NA, echo=FALSE, message=FALSE}
+jim<-LSDer::CVer(model.jim)
+ry2<-LSDer::CVer(model.ryan2)
+ry1<-LSDer::CVer(model.ryan1)
+alt1<-LSDer::CVer(model.alt1)
+alt2<-LSDer::CVer(model.alt2)
+alt3<-LSDer::CVer(model.alt3)
+model.cvs<-data.frame("Model"=c("Jim", "Ryan1", "Ryan2", "Alt1", "Alt2", "Alt3"), "CV" = c(jim, ry1, ry2, alt1, alt2, alt3))
+paged_table(model.cvs)
 ```
-
 
 
 # Linear Model Analyses: {.tabset .tabset-fade}
@@ -390,28 +313,13 @@ BIC(model.alt3)
 lmodel1<-lm(yld~entry, data=data)
 ```
 
-### ANOVA
+### ANOVA Linear1
 
-YIELD = ENTRY
+**YIELD = ENTRY**
 
-```{r lmodel1.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(lmodel1)
+```{r lmodel1.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel1))
 ```
-
-### CV & BIC
-
-CV:
-
-```{r lmodel1.cv, comment=NA, echo=FALSE, message=FALSE}
-cv.model(lmodel1)
-```
-
-BIC:
-
-```{r lmodel1.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(lmodel1)
-```
-
 
 
 ## Linear Model 2
@@ -420,28 +328,13 @@ BIC(lmodel1)
 lmodel2<-lm(yld~entry + book.name, data=data)
 ```
 
-### ANOVA
+### ANOVA Linear2
 
-YIELD = ENTRY + ENV
+**YIELD = ENTRY + ENV**
 
-```{r lmodel2.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(lmodel2)
+```{r lmodel2.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel2))
 ```
-
-### CV & BIC
-
-CV:
-
-```{r lmodel2.cv, comment=NA, echo=FALSE, message=FALSE}
-cv.model(lmodel2)
-```
-
-BIC:
-
-```{r lmodel2.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(lmodel2)
-```
-
 
 
 ## Linear Model 3
@@ -450,28 +343,13 @@ BIC(lmodel2)
 lmodel3<-lm(yld~entry + book.name + rep:book.name, data=data)
 ```
 
-### ANOVA
+### ANOVA Linear 3
 
-YIELD = ENTRY + ENV + (REP x ENV)
+**YIELD = ENTRY + ENV + (REP x ENV)**
 
-```{r lmodel3.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(lmodel3)
+```{r lmodel3.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel3))
 ```
-
-### CV & BIC
-
-CV:
-
-```{r lmodel3.cv, comment=NA, echo=FALSE, message=FALSE}
-cv.model(lmodel3)
-```
-
-BIC:
-
-```{r lmodel3.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(lmodel3)
-```
-
 
 
 ## Linear Model 4
@@ -480,28 +358,13 @@ BIC(lmodel3)
 lmodel4<-lm(yld~entry + book.name + entry:book.name, data=data)
 ```
 
-### ANOVA
+### ANOVA Linear4
 
-YIELD = ENTRY + ENV + (ENTRY x ENV)
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
-```{r lmodel4.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(lmodel4)
+```{r lmodel4.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel4))
 ```
-
-### CV & BIC
-
-CV:
-
-```{r lmodel4.cv, comment=NA, echo=FALSE, message=FALSE}
-cv.model(lmodel4)
-```
-
-BIC:
-
-```{r lmodel4.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(lmodel4)
-```
-
 
 
 ## Linear Model 5
@@ -510,24 +373,38 @@ BIC(lmodel4)
 lmodel5<-lm(yld~entry + book.name + entry:book.name + rep:book.name, data=data)
 ```
 
-### ANOVA
+### ANOVA Linear5
 
-YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
-```{r lmodel5.anova, comment=NA, echo=FALSE, message=FALSE}
-anova(lmodel5)
+```{r lmodel5.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel5))
 ```
 
-### CV & BIC
 
-CV:
+## **Linear Model Comparison**
 
-```{r lmodel5.cv, comment=NA, echo=FALSE, message=FALSE}
-cv.model(lmodel5)
+```{r model.lbiccalc, comment=NA, echo=FALSE, message=FALSE}
+options(digits=7)
+bicl1<-BIC(lmodel1)
+bicl2<-BIC(lmodel2)
+bicl3<-BIC(lmodel3)
+bicl4<-BIC(lmodel4)
+bicl5<-BIC(lmodel5)
+model.lcvs<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5"), "BIC" = as.factor(c(bicl1, bicl2, bicl3, bicl4, bicl5)))
+paged_table(model.lcvs)
 ```
 
-BIC:
 
-```{r lmodel5.bic, comment=NA, echo=FALSE, message=FALSE}
-BIC(lmodel5)
+## **Linear CV Comparisons**
+
+```{r model.lcvcalc, comment=NA, echo=FALSE, message=FALSE}
+options(digits=3)
+l1<-cv.model(lmodel1)
+l2<-cv.model(lmodel2)
+l3<-cv.model(lmodel3)
+l4<-cv.model(lmodel4)
+l5<-cv.model(lmodel5)
+model.lcvs<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5"), "CV" = as.factor(c(l1, l2, l3, l4, l5)))
+paged_table(model.lcvs)
 ```
