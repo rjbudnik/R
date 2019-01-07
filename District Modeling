@@ -1,0 +1,1330 @@
+---
+title: "**District Wide Model Analysis**"
+author: "Ryan Budnik"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float:
+      collapsed: true
+params:
+  data:
+    label: "Input dataset:"
+    value: 18CC.csv
+    input: select
+    choices: [16CC.csv, 17CC.csv, 18CC.csv]
+  exp:
+    label: "Experiment:"
+    value: C81A
+    input: select
+    choices: [C61A,	C61B,	C62A,	C62B,	C63A,	C63B, C71A,	C71B,	C72A,	C72B,	C73A,	C73B, C81A,	C81B,	C82A, C82B,	C83A,	C83B]
+  year:
+    label: "Year"
+    value: 2018
+    input: slider
+    min: 2010
+    max: 2030
+    step: 1
+    sep: ""
+  district:
+    label: "District:"
+    value: Northern
+    input: select
+    choices: [Northern, Central, Southern]
+  season:
+    label: "Season Length:"
+    value: Early
+    input: select
+    choices: [Early, Full]
+---
+
+```{r logo, cache=TRUE, echo=FALSE}
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "DistrictAnalysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), 
+               alt = 'logo',
+               style = 'position:absolute; top:0; right:0; padding:10px;')
+```
+
+---
+
+# Overview:
+The following report renders a district-wide mixed model analysis with corresponding figures for the *`r params$year` `r params$district` District `r params$season`-season Test*, **`r params$exp`**.
+
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(LMERConvenienceFunctions)
+library(lmerTest)
+library(randomcoloR)
+library(car)
+library(predictmeans)
+library(shiny)
+library(shinythemes)
+library(psych)
+library(emmeans)
+```
+
+- Corn Coversion Factor = **8.067**
+- Bean Conversion Factor = **7.779**
+
+```{r setup, echo = FALSE}
+###Set wd & Import CSV Dataset:
+df_cc<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+
+CCF<-8.067
+df_cc<-df_cc%>%mutate(yld = (wt*CCF))
+
+###Subset data of interest:
+data<-filter(df_cc, exp==c(params$exp))
+
+
+###View Classifications & Set Factors:
+data$book.name<-factor(data$book.name)
+data$exp<-factor(data$exp)
+data$entry<-factor(data$entry)
+data$ped.id<-factor(data$ped.id)
+data$code<-factor(data$code)
+data$rng<-factor(data$rng)
+data$pass<-factor(data$pass)
+data$rep<-factor(data$rep)
+data$plot<-factor(data$plot)
+attach(data)
+
+###Mean & IQRS:
+max.yld <- quantile(data$yld,0.75, na.rm=TRUE) + (IQR(data$yld, na.rm=TRUE) * 1.5 )
+min.yld <- quantile(data$yld,0.25, na.rm=TRUE) - (IQR(data$yld, na.rm=TRUE) * 1.5 )
+avg.yld <- mean(data$yld, na.rm = TRUE)
+```
+
+# Data Visualization: {.tabset .tabset-fade}
+
+## Summary
+
+```{r summary, echo = FALSE, cols.print=10, rows.print=20, warning=FALSE}
+sum.less<-data %>% select("exp", "book.name", "rep", "entry", "plot", "pass", "rng", "wt", "moist", "yld")
+described<-describe(sum.less, IQR=TRUE)
+paged_table(described, options(scipen=999, digits=3))
+```
+
+## Aggregation
+
+```{r aggregation, echo = FALSE, rows.print=20, warning=FALSE}
+options(digits=5)
+aggdf <- data.frame(aggregate(yld~entry, data=data, function(x) c(length(x))),aggregate(yld~entry, data=data, function(x) c(min(x))),aggregate(yld~entry, data=data, function(x) c(mean(x))),aggregate(yld~entry, data=data, function(x) c(max(x))))
+aggdf <- aggdf[,c(1,2,4,6,8)]
+colnames(aggdf)<-c("Entry", "Count", "Min", "Mean", "Max")
+paged_table(aggdf)
+```
+
+## Histograms
+
+```{r histo.yld, echo = FALSE, fig.width=9}
+histo<-hist(data$yld, breaks=seq(0,350, l=150), col="purple", main="Distribution of Yield", xlab="Yield")
+abline(v = max.yld, col="red")
+abline(v = avg.yld, col="red", lwd=c(3))
+abline(v = min.yld, col="red")
+```
+
+## Barplots
+
+``` {r bar.wt, echo = FALSE, fig.width=10, fig.height=7}
+palette <- randomColor(length(unique(data$entry)))
+data$color <- palette[as.factor(data$entry)]
+# barplot(data$wt, names.arg=data$entry, ylim=c(0,40), main="Distribution of Weight", ylab="Weight", xlab="Entry", col=data$color)
+# abline(h = max.wt, col="red")
+# abline(h = avg.wt, col="red", lwd=c(3))
+# abline(h = min.wt, col="red")
+```
+
+``` {r bar.yld, echo = FALSE, fig.width=10, fig.height=7}
+barplot(data$yld, names.arg=data$entry, ylim=c(0,300), main="Distribution of Yield", ylab="Yield", xlab="Entry", col=data$color)
+abline(h = max.yld, col="red")
+abline(h = avg.yld, col="red", lwd=c(3))
+abline(h = min.yld, col="red")
+```
+
+## Boxplot
+
+``` {r boxplot, echo = FALSE, fig.width=9}
+Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+abline(h = max.yld, col="red")
+abline(h = avg.yld, col="red", lwd=c(3))
+abline(h = min.yld, col="red")
+```
+
+# Mixed Model Analyses: {.tabset .tabset-fade}
+
+## Model - Build 1
+
+```{r model.build1, echo=FALSE}
+model.build1<-lmer(yld~entry + book.name + (1|rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build1
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + REP
+
+```{r build1.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build1))
+```
+
+
+
+## Model - Build 2
+
+```{r model.build2, echo=FALSE}
+model.build2<-lmer(yld~entry + book.name + (1|pass), data=data, REML=TRUE)
+```
+
+### ANOVA Build2
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + PASS
+
+```{r build2.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build2))
+```
+
+
+
+## Model - Build 3
+
+```{r model.build3, echo=FALSE}
+model.build3<-lmer(yld~entry + book.name + (1|rng), data=data, REML=TRUE)
+```
+
+### ANOVA Build3
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE
+
+```{r buil3.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build3))
+```
+
+
+
+## Model - Build 4
+
+```{r model.build4, echo=FALSE}
+model.build4<-lmer(yld~entry + book.name + (1|rep) + (1|pass) + (1|rng), data=data, REML=TRUE)
+```
+
+### ANOVA Build4
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE
+    + PASS
+    + REP
+
+```{r build4.anova, comment=NA, echo=FALSE, cols.print=7}
+options(scipen=7)
+paged_table(anova(model.build4))
+```
+
+
+
+## Model - Build 5
+
+```{r model.build5, echo=FALSE}
+model.build5<-lmer(yld~entry + book.name + (1|rep:pass), data=data, REML=TRUE)
+```
+
+### ANOVA Build5
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + REP:PASS
+
+```{r build5.anova, comment=NA, echo=FALSE, cols.print=7}
+options(scipen=7)
+paged_table(anova(model.build5))
+```
+
+
+
+## Model - Build 6
+
+```{r model.build6, echo=FALSE}
+model.build6<-lmer(yld~entry + book.name + (1|rep:rng), data=data, REML=TRUE)
+```
+
+### ANOVA Build6
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + REP:RANGE
+
+```{r build6.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build6))
+```
+
+
+
+## Model - Build 7
+
+```{r model.build7, echo=FALSE}
+model.build7<-lmer(yld~entry + book.name + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build7
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + REP:ENV
+
+```{r build7.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build7))
+```
+
+
+
+## Model - Build 8
+
+```{r model.build8, echo=FALSE}
+model.build8<-lmer(yld~entry + book.name + (1|rep:pass) + (1|rep:rng), data=data, REML=TRUE)
+```
+
+### ANOVA Build8
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE:REP
+    + PASS:REP
+
+```{r build8.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build8))
+```
+
+
+
+## Model - Build 9
+
+```{r model.build9, echo=FALSE}
+model.build9<-lmer(yld~entry + book.name + (1|rep) + (1|rep:pass) + (1|rep:rng), data=data, REML=TRUE)
+```
+
+### ANOVA Build9
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE:REP
+    + PASS:REP
+    + REP
+
+```{r build9.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build9))
+```
+
+
+
+## Model - Build 10
+
+```{r model.build10, echo=FALSE}
+model.build10<-lmer(yld~entry + book.name + (1|rep:pass)+ (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build10
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + PASS:REP
+    + ENV:REP
+
+```{r build10.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build10))
+```
+
+
+
+## Model - Build 11
+
+```{r model.build11, echo=FALSE}
+model.build11<-lmer(yld~entry + book.name + (1|rep:rng)+ (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build11
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE:REP
+    + ENV:REP
+
+```{r build11.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build11))
+```
+
+
+
+## Model - Build 12
+
+```{r model.build12, echo=FALSE}
+model.build12<-lmer(yld~entry + book.name + (1|rep:pass) + (1|rep:rng) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build12
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE:REP
+    + PASS:REP
+    + ENV:REP
+
+```{r build12.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build12))
+```
+
+
+
+## Model - Build 13
+
+```{r model.build13, echo=FALSE}
+model.build13<-lmer(yld~entry + book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build13
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + PASS:ENV:REP
+
+```{r build13.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build13))
+```
+
+
+
+## Model - Build 14
+
+```{r model.build14, echo=FALSE}
+model.build14<-lmer(yld~entry + book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build14
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+
+```{r build14.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build14))
+```
+
+
+
+## Model - Build 15
+
+```{r model.build15, echo=FALSE}
+model.build15<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build15
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+
+```{r build15.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build15))
+```
+
+
+
+## Model - Build 16
+
+```{r model.build16, echo=FALSE}
+model.build16<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep)  + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build16
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build16.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build16))
+```
+
+
+
+## Model - Build 17
+
+```{r model.build17, echo=FALSE}
+model.build17<-lmer(yld~entry + book.name + (1|pass:book.name:rep)+ (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build17
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build17.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build17))
+```
+
+
+
+## Model - Build 18
+
+```{r model.build18, echo=FALSE}
+model.build18<-lmer(yld~entry + book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build18
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + ENTRY:ENV
+
+```{r build18.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build18))
+```
+
+
+
+## Model - Build 19
+
+```{r model.build19, echo=FALSE}
+model.build19<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build19
+
+**YIELD = ENTRY + ENV**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build19.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build19))
+```
+
+
+
+## Model - Build 20
+
+```{r model.build20, echo=FALSE}
+model.build20<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build20
+
+**YIELD = ENTRY + ENV + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+
+```{r build20.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build20))
+```
+
+
+
+## Model - Build 21
+
+```{r model.build21, echo=FALSE}
+model.build21<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build21
+
+**YIELD = ENTRY + ENV + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+
+```{r build21.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build21))
+```
+
+
+
+## Model - Build 22
+
+```{r model.build22, echo=FALSE}
+model.build22<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build22
+
+**YIELD = ENTRY + ENV + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+
+```{r build22.anova, echo=FALSE, cols.print=7}
+options(scipen=6)
+paged_table(anova(model.build22))
+```
+
+
+
+## Model - Build 23
+
+```{r model.build23, echo=FALSE, message=FALSE}
+model.build23<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build23
+
+**YIELD = ENTRY + ENV + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build23.anova, echo=FALSE, cols.print=7}
+options(scipen=6)
+paged_table(anova(model.build23))
+```
+
+
+
+## Model - Build 24
+
+```{r model.build24, echo=FALSE}
+model.build24<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build24
+
+**YIELD = ENTRY + ENV + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + REP:ENV
+
+```{r build24.anova, echo=FALSE, cols.print=7}
+options(scipen=6)
+paged_table(anova(model.build24))
+```
+
+
+
+## Model - Build 25
+
+```{r model.build25, echo=FALSE}
+model.build25<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build25
+
+**YIELD = ENTRY + ENV + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build25.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build25))
+```
+
+
+
+## Model - Build 26
+
+```{r model.build26, echo=FALSE}
+model.build26<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build26
+
+**YIELD = ENTRY + ENV + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build26.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build26))
+```
+
+
+
+## Model - Build 27
+
+```{r model.build27, echo=FALSE}
+model.build27<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build27
+
+**YIELD = ENTRY + ENV + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + ENTRY:ENV
+
+```{r build27.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build27))
+```
+
+
+
+## Model - Jim
+
+```{r model.build28, echo=FALSE}
+model.jim<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Jim
+
+**YIELD = ENTRY + ENV + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build28.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.jim))
+```
+
+
+
+## Model - Build 29
+
+```{r model.build29, echo=FALSE}
+model.build29<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build29
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+
+```{r build29.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build29))
+```
+
+
+
+## Model - Build 30
+
+```{r model.build30, echo=FALSE}
+model.build30<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build30
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+
+```{r build30.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build30))
+```
+
+
+
+## Model - Ryan Suggestion 1
+
+```{r model.build31, echo=FALSE}
+model.ryan1<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
+
+```
+
+### ANOVA Ryan1
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+
+```{r build31.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.ryan1))
+```
+
+
+
+## Model - Build 32
+
+```{r model.build32, echo=FALSE}
+model.build32<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build32
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build32.anova, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build32))
+```
+
+
+
+## Model - Build 33
+
+```{r model.build33, echo=FALSE}
+model.build33<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build33
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + REP:ENV
+
+```{r build33.anova, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build33))
+```
+
+
+
+## Model - Ryan Suggestion 2
+
+```{r model.build34, echo=FALSE}
+model.ryan2<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Ryan2
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build34.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.ryan2))
+```
+
+
+
+## Model - Build 35
+
+```{r model.build35, echo=FALSE}
+model.build35<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build35
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build35.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build35))
+```
+
+
+
+## Model - Build 36
+
+```{r model.build36, echo=FALSE}
+model.build36<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build36
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + ENTRY:ENV
+
+```{r build36.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build36))
+```
+
+
+
+## Model - Build 37
+
+```{r model.build37, echo=FALSE}
+model.build37<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+```
+
+### ANOVA Build37
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build37.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=6)
+paged_table(anova(model.build37))
+```
+
+
+
+## Model - Build 38
+
+```{r model.build38, echo=FALSE}
+model.build38<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build38
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + REP:ENV
+
+```{r build38.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build38))
+```
+
+
+
+## Model - Build 39
+
+```{r model.build39, echo=FALSE}
+model.build39<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build39
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+
+```{r build39.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build39))
+```
+
+
+
+## Model - Build 40
+
+```{r model.build40, echo=FALSE}
+model.build40<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build40
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+
+```{r build40.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build40))
+```
+
+
+
+## Model - Build 41
+
+```{r model.build41, echo=FALSE}
+model.build41<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build41
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+
+```{r build41.anova, echo=FALSE, col.prints=7}
+options(scipen=7)
+paged_table(anova(model.build41))
+```
+
+
+
+## Model - Build 42
+
+```{r model.build42, echo=FALSE}
+model.build42<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build42
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build42.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build42))
+```
+
+
+
+## Model - Build 43
+
+```{r model.build43, echo=FALSE}
+model.build43<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build43
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + REP:ENV
+
+```{r build43.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build43))
+```
+
+
+
+## Model - Build 44
+
+```{r model.build44, echo=FALSE}
+model.build44<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build44
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build44.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build44))
+```
+
+
+
+## Model - Build 45
+
+```{r model.build45, echo=FALSE}
+model.build45<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build45
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build45.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build45))
+```
+
+
+
+## Model - Build 46
+
+```{r model.build46, echo=FALSE}
+model.build46<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build46
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + ENTRY:ENV
+
+```{r build46.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build46))
+```
+
+
+
+## Model - Build 47
+
+```{r model.build47, echo=FALSE}
+model.build47<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build47
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build47.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build47))
+```
+
+
+
+## **Mixed Model Comparisons**
+
+```{r model.comp, comment=NA, echo=FALSE, rows.print=20, message=FALSE}
+paged_table(anova(model.ryan1, model.ryan2, model.jim, model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.build29, model.build30, model.build32, model.build33, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, refit=FALSE))
+```
+
+## **CV Comparisons**
+
+```{r model.cvcalc, comment=NA, echo=FALSE, rows.print=20, message=FALSE}
+jim<-LSDer::CVer(model.jim)
+ry1<-LSDer::CVer(model.ryan1)
+ry2<-LSDer::CVer(model.ryan2)
+build1<-LSDer::CVer(model.build1)
+build2<-LSDer::CVer(model.build2)
+build3<-LSDer::CVer(model.build3)
+build4<-LSDer::CVer(model.build4)
+build5<-LSDer::CVer(model.build5)
+build6<-LSDer::CVer(model.build6)
+build7<-LSDer::CVer(model.build7)
+build8<-LSDer::CVer(model.build8)
+build9<-LSDer::CVer(model.build9)
+build10<-LSDer::CVer(model.build10)
+build11<-LSDer::CVer(model.build11)
+build12<-LSDer::CVer(model.build12)
+build13<-LSDer::CVer(model.build13)
+build14<-LSDer::CVer(model.build14)
+build15<-LSDer::CVer(model.build15)
+build16<-LSDer::CVer(model.build16)
+build17<-LSDer::CVer(model.build17)
+build18<-LSDer::CVer(model.build18)
+build19<-LSDer::CVer(model.build19)
+build20<-LSDer::CVer(model.build20)
+build21<-LSDer::CVer(model.build21)
+build22<-LSDer::CVer(model.build22)
+build23<-LSDer::CVer(model.build23)
+build24<-LSDer::CVer(model.build24)
+build25<-LSDer::CVer(model.build25)
+build26<-LSDer::CVer(model.build26)
+build27<-LSDer::CVer(model.build27)
+build29<-LSDer::CVer(model.build29)
+build30<-LSDer::CVer(model.build30)
+build32<-LSDer::CVer(model.build32)
+build33<-LSDer::CVer(model.build33)
+build35<-LSDer::CVer(model.build35)
+build36<-LSDer::CVer(model.build36)
+build37<-LSDer::CVer(model.build37)
+build38<-LSDer::CVer(model.build38)
+build39<-LSDer::CVer(model.build39)
+build40<-LSDer::CVer(model.build40)
+build41<-LSDer::CVer(model.build41)
+build42<-LSDer::CVer(model.build42)
+build43<-LSDer::CVer(model.build43)
+build44<-LSDer::CVer(model.build44)
+build45<-LSDer::CVer(model.build45)
+build46<-LSDer::CVer(model.build46)
+build47<-LSDer::CVer(model.build47)
+model.cvs<-data.frame("Model"=c("Build1", "Build2", "Build3", "Build4", "Build5", "Build6", "Build7", "Build8", "Build9", "Build10", "Build11", "Build12", "Build13", "Build14", "Build15", "Build16", "Build17", "Build18", "Build19", "Build20", "Build21", "Build22", "Build23", "Build24", "Build25", "Build26", "Build27", "Jim", "Build30", "Ryan1", "Build31",  "Build32", "Build33", "Ryan2", "Build35", "Build36", "Build37", "Build38", "Build39", "Build40", "Build41", "Build42", "Build43", "Build44", "Build45", "Build46", "Build47"), "CV" = c(build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25, build26, build27, jim, build29, build30, ry1, build32, build33, ry2, build35, build36, build37, build38, build39, build40, build41, build42, build43, build44, build45, build46, build47))
+paged_table(model.cvs)
+```
+
+
+# Linear Model Analyses: {.tabset .tabset-fade}
+
+## Linear Model 1
+
+```{r lmodel1, comment=NA, echo=FALSE, message=FALSE}
+lmodel1<-lm(yld~entry, data=data)
+```
+
+### ANOVA Linear1
+
+**YIELD = ENTRY**
+
+```{r lmodel1.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel1))
+```
+
+
+## Linear Model 2
+
+```{r lmodel2, comment=NA, echo=FALSE, message=FALSE}
+lmodel2<-lm(yld~entry + book.name, data=data)
+```
+
+### ANOVA Linear2
+
+**YIELD = ENTRY + ENV**
+
+```{r lmodel2.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel2))
+```
+
+
+## Linear Model 3
+
+```{r lmodel3, comment=NA, echo=FALSE, message=FALSE}
+lmodel3<-lm(yld~entry + book.name + rep:book.name, data=data)
+```
+
+### ANOVA Linear 3
+
+**YIELD = ENTRY + ENV + (REP x ENV)**
+
+```{r lmodel3.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel3))
+```
+
+
+## Linear Model 4
+
+```{r lmodel4, comment=NA, echo=FALSE, message=FALSE}
+lmodel4<-lm(yld~entry + book.name + entry:book.name, data=data)
+```
+
+### ANOVA Linear4
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV)**
+
+```{r lmodel4.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel4))
+```
+
+
+## Linear Model 5
+
+```{r lmodel5, comment=NA, echo=FALSE, message=FALSE}
+lmodel5<-lm(yld~entry + book.name + entry:book.name + rep:book.name, data=data)
+```
+
+### ANOVA Linear5
+
+**YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
+
+```{r lmodel5.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel5))
+```
+
+
+## **Linear Model Comparison**
+
+```{r model.lbiccalc, comment=NA, echo=FALSE, message=FALSE}
+options(digits=5)
+bicl1<-BIC(lmodel1)
+bicl2<-BIC(lmodel2)
+bicl3<-BIC(lmodel3)
+bicl4<-BIC(lmodel4)
+bicl5<-BIC(lmodel5)
+aicl1<-AIC(lmodel1)
+aicl2<-AIC(lmodel2)
+aicl3<-AIC(lmodel3)
+aicl4<-AIC(lmodel4)
+aicl5<-AIC(lmodel5)
+model.lcomp<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5"), "BIC" = as.factor(c(bicl1, bicl2, bicl3, bicl4, bicl5)), "AIC" = as.factor(c(aicl1, aicl2, aicl3, aicl4, aicl5)))
+paged_table(model.lcomp)
+```
+
+
+## **Linear CV Comparisons**
+
+```{r model.lcvcalc, comment=NA, echo=FALSE, message=FALSE}
+options(digits=3)
+l1<-cv.model(lmodel1)
+l2<-cv.model(lmodel2)
+l3<-cv.model(lmodel3)
+l4<-cv.model(lmodel4)
+l5<-cv.model(lmodel5)
+model.lcvs<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5"), "CV" = as.factor(c(l1, l2, l3, l4, l5)))
+paged_table(model.lcvs)
+```
