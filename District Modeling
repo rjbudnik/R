@@ -123,7 +123,7 @@ paged_table(aggdf)
 ## Histograms
 
 ```{r histo.yld, echo = FALSE, fig.width=9}
-histo<-hist(data$yld, breaks=seq(0,350, l=150), col="purple", main="Distribution of Yield", xlab="Yield")
+histo<-hist(data$yld, breaks=seq(0,350, l=120), col="purple", main="Distribution of Yield", xlab="Yield")
 abline(v = max.yld, col="red")
 abline(v = avg.yld, col="red", lwd=c(3))
 abline(v = min.yld, col="red")
@@ -569,7 +569,7 @@ model.build20<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:re
     + PASS:ENV:REP
 
 ```{r build20.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build20))
 ```
 
@@ -590,7 +590,7 @@ model.build21<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep
     + RANGE:ENV:REP
 
 ```{r build21.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build21))
 ```
 
@@ -612,7 +612,7 @@ model.build22<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep
     + PASS:ENV:REP
 
 ```{r build22.anova, echo=FALSE, cols.print=7}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build22))
 ```
 
@@ -634,7 +634,7 @@ model.build23<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:re
     + REP:ENV
 
 ```{r build23.anova, echo=FALSE, cols.print=7}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build23))
 ```
 
@@ -656,7 +656,7 @@ model.build24<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep
     + REP:ENV
 
 ```{r build24.anova, echo=FALSE, cols.print=7}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build24))
 ```
 
@@ -679,7 +679,7 @@ model.build25<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep
     + REP:ENV
 
 ```{r build25.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build25))
 ```
 
@@ -701,7 +701,7 @@ model.build26<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:re
     + ENTRY:ENV
 
 ```{r build26.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build26))
 ```
 
@@ -723,7 +723,7 @@ model.build27<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep
     + ENTRY:ENV
 
 ```{r build27.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build27))
 ```
 
@@ -746,7 +746,7 @@ model.jim<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + 
     + ENTRY:ENV
 
 ```{r build28.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.jim))
 ```
 
@@ -767,7 +767,7 @@ model.build29<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:
     + PASS:ENV:REP
 
 ```{r build29.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build29))
 ```
 
@@ -788,7 +788,7 @@ model.build30<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:r
     + RANGE:ENV:REP
 
 ```{r build30.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build30))
 ```
 
@@ -798,7 +798,6 @@ paged_table(anova(model.build30))
 
 ```{r model.build31, echo=FALSE}
 model.ryan1<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
-
 ```
 
 ### ANOVA Ryan1
@@ -810,7 +809,7 @@ model.ryan1<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep
     + PASS:ENV:REP
 
 ```{r build31.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.ryan1))
 ```
 
@@ -832,7 +831,7 @@ model.build32<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:
     + REP:ENV
 
 ```{r build32.anova, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build32))
 ```
 
@@ -854,7 +853,7 @@ model.build33<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:r
     + REP:ENV
 
 ```{r build33.anova, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build33))
 ```
 
@@ -864,7 +863,6 @@ paged_table(anova(model.build33))
 
 ```{r model.build34, echo=FALSE}
 model.ryan2<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
-
 ```
 
 ### ANOVA Ryan2
@@ -877,7 +875,7 @@ model.ryan2<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep
     + REP:ENV
 
 ```{r build34.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.ryan2))
 ```
 
@@ -899,7 +897,7 @@ model.build35<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:
     + ENTRY:ENV
 
 ```{r build35.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build35))
 ```
 
@@ -921,7 +919,7 @@ model.build36<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:r
     + ENTRY:ENV
 
 ```{r build36.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build36))
 ```
 
@@ -944,7 +942,7 @@ model.build37<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:r
     + ENTRY:ENV
 
 ```{r build37.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-options(scipen=6)
+options(scipen=7)
 paged_table(anova(model.build37))
 ```
 
@@ -1161,13 +1159,18 @@ paged_table(anova(model.build47))
 
 ## **Mixed Model Comparisons**
 
-```{r model.comp, comment=NA, echo=FALSE, rows.print=20, message=FALSE}
-paged_table(anova(model.ryan1, model.ryan2, model.jim, model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.build29, model.build30, model.build32, model.build33, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, refit=FALSE))
+```{r model.comp, comment=NA, echo=FALSE, rows.print=24, message=FALSE}
+# paged_table(anova(model.ryan1, model.ryan2, model.jim, model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.build29, model.build30, model.build32, model.build33, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, refit=FALSE))
+
+bic<-BIC(model.ryan1, model.ryan2, model.jim, model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.build29, model.build30, model.build32, model.build33, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47)
+BIC<-bic$BIC
+aic<-AIC(model.ryan1, model.ryan2, model.jim, model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.build29, model.build30, model.build32, model.build33, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47)
+paged_table(cbind(aic, BIC))
 ```
 
 ## **CV Comparisons**
 
-```{r model.cvcalc, comment=NA, echo=FALSE, rows.print=20, message=FALSE}
+```{r model.cvcalc, comment=NA, echo=FALSE, rows.print=24, message=FALSE}
 jim<-LSDer::CVer(model.jim)
 ry1<-LSDer::CVer(model.ryan1)
 ry2<-LSDer::CVer(model.ryan2)
