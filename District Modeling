@@ -1,44 +1,3 @@
----
-title: "**District Wide Model Analysis**"
-author: "Ryan Budnik"
-date: '`r format(Sys.time(), "%d %B, %Y")`'
-output: 
-  html_document:
-    theme: darkly
-    toc: true
-    toc_float:
-      collapsed: true
-params:
-  data:
-    label: "Input dataset:"
-    value: 18CC.csv
-    input: select
-    choices: [16CC.csv, 17CC.csv, 18CC.csv]
-  exp:
-    label: "Experiment:"
-    value: C81A
-    input: select
-    choices: [C61A,	C61B,	C62A,	C62B,	C63A,	C63B, C71A,	C71B,	C72A,	C72B,	C73A,	C73B, C81A,	C81B,	C82A, C82B,	C83A,	C83B]
-  year:
-    label: "Year"
-    value: 2018
-    input: slider
-    min: 2010
-    max: 2030
-    step: 1
-    sep: ""
-  district:
-    label: "District:"
-    value: Northern
-    input: select
-    choices: [Northern, Central, Southern]
-  season:
-    label: "Season Length:"
-    value: Early
-    input: select
-    choices: [Early, Full]
----
-
 ```{r logo, cache=TRUE, echo=FALSE}
 htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "DistrictAnalysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), 
                alt = 'logo',
@@ -1171,7 +1130,7 @@ paged_table(cbind(aic, BIC))
 
 
 
-## **RSME Comparisons**
+## **CV & RSME Comparisons**
 
 ```{r rsme, echo=FALSE, rows.print=25}
 mse.jim<-sqrt(mean(residuals(model.jim)^2))
@@ -1221,15 +1180,6 @@ mse.build44<-sqrt(mean(residuals(model.build44)^2))
 mse.build45<-sqrt(mean(residuals(model.build45)^2))
 mse.build46<-sqrt(mean(residuals(model.build46)^2))
 mse.build47<-sqrt(mean(residuals(model.build47)^2))
-model.rmse<-data.frame("Model"=c("Build1", "Build2", "Build3", "Build4", "Build5", "Build6", "Build7", "Build8", "Build9", "Build10", "Build11", "Build12", "Build13", "Build14", "Build15", "Build16", "Build17", "Build18", "Build19", "Build20", "Build21", "Build22", "Build23", "Build24", "Build25", "Build26", "Build27", "Jim", "Build30", "Ryan1", "Build31",  "Build32", "Build33", "Ryan2", "Build35", "Build36", "Build37", "Build38", "Build39", "Build40", "Build41", "Build42", "Build43", "Build44", "Build45", "Build46", "Build47"), "RMSE" = c(mse.build1, mse.build2, mse.build3, mse.build4, mse.build5, mse.build6, mse.build7, mse.build8, mse.build9, mse.build10, mse.build11, mse.build12, mse.build13, mse.build14, mse.build15, mse.build16, mse.build17, mse.build18, mse.build19, mse.build20, mse.build21, mse.build22, mse.build23, mse.build24, mse.build25, mse.build26, mse.build27, mse.jim, mse.build29, mse.build30, mse.ry1, mse.build32, mse.build33, mse.ry2, mse.build35, mse.build36, mse.build37, mse.build38, mse.build39, mse.build40, mse.build41, mse.build42, mse.build43, mse.build44, mse.build45, mse.build46, mse.build47))
-paged_table(model.rmse)
-```
-
-
-
-## **CV Comparisons**
-
-```{r model.cvcalc, comment=NA, echo=FALSE, rows.print=25, message=FALSE}
 jim<-LSDer::CVer(model.jim)
 ry1<-LSDer::CVer(model.ryan1)
 ry2<-LSDer::CVer(model.ryan2)
@@ -1277,7 +1227,7 @@ build44<-LSDer::CVer(model.build44)
 build45<-LSDer::CVer(model.build45)
 build46<-LSDer::CVer(model.build46)
 build47<-LSDer::CVer(model.build47)
-model.cvs<-data.frame("Model"=c("Build1", "Build2", "Build3", "Build4", "Build5", "Build6", "Build7", "Build8", "Build9", "Build10", "Build11", "Build12", "Build13", "Build14", "Build15", "Build16", "Build17", "Build18", "Build19", "Build20", "Build21", "Build22", "Build23", "Build24", "Build25", "Build26", "Build27", "Jim", "Build30", "Ryan1", "Build31",  "Build32", "Build33", "Ryan2", "Build35", "Build36", "Build37", "Build38", "Build39", "Build40", "Build41", "Build42", "Build43", "Build44", "Build45", "Build46", "Build47"), "CV" = c(build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25, build26, build27, jim, build29, build30, ry1, build32, build33, ry2, build35, build36, build37, build38, build39, build40, build41, build42, build43, build44, build45, build46, build47))
+model.cvs<-data.frame("Model"=c("Build1", "Build2", "Build3", "Build4", "Build5", "Build6", "Build7", "Build8", "Build9", "Build10", "Build11", "Build12", "Build13", "Build14", "Build15", "Build16", "Build17", "Build18", "Build19", "Build20", "Build21", "Build22", "Build23", "Build24", "Build25", "Build26", "Build27", "Jim", "Build30", "Ryan1", "Build31",  "Build32", "Build33", "Ryan2", "Build35", "Build36", "Build37", "Build38", "Build39", "Build40", "Build41", "Build42", "Build43", "Build44", "Build45", "Build46", "Build47"), "CV" = c(build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25, build26, build27, jim, build29, build30, ry1, build32, build33, ry2, build35, build36, build37, build38, build39, build40, build41, build42, build43, build44, build45, build46, build47), "RMSE" = c(mse.build1, mse.build2, mse.build3, mse.build4, mse.build5, mse.build6, mse.build7, mse.build8, mse.build9, mse.build10, mse.build11, mse.build12, mse.build13, mse.build14, mse.build15, mse.build16, mse.build17, mse.build18, mse.build19, mse.build20, mse.build21, mse.build22, mse.build23, mse.build24, mse.build25, mse.build26, mse.build27, mse.jim, mse.build29, mse.build30, mse.ry1, mse.build32, mse.build33, mse.ry2, mse.build35, mse.build36, mse.build37, mse.build38, mse.build39, mse.build40, mse.build41, mse.build42, mse.build43, mse.build44, mse.build45, mse.build46, mse.build47))
 paged_table(model.cvs)
 ```
 
@@ -1379,7 +1329,7 @@ paged_table(model.lcomp)
 
 
 
-## **RMSE Comparisons**
+## **Linear CV & RMSE Comparisons**
 
 ```{r lrmse, echo=FALSE}
 mse.linear1<-sqrt(mean(residuals(lmodel1)^2))
@@ -1387,16 +1337,6 @@ mse.linear2<-sqrt(mean(residuals(lmodel2)^2))
 mse.linear3<-sqrt(mean(residuals(lmodel3)^2))
 mse.linear4<-sqrt(mean(residuals(lmodel4)^2))
 mse.linear5<-sqrt(mean(residuals(lmodel5)^2))
-model.lmse<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5"), "RMSE" = c(mse.linear1, mse.linear2, mse.linear3, mse.linear4, mse.linear5))
-paged_table(model.lmse)
-```
-
-
-
-## **Linear CV Comparisons**
-
-```{r model.lcvcalc, comment=NA, echo=FALSE, message=FALSE}
-
 l1<-cv.model(lmodel1)
 l2<-cv.model(lmodel2)
 l3<-cv.model(lmodel3)
@@ -1405,6 +1345,6 @@ l5<-cv.model(lmodel5)
 percent <- function(x, digits = 2, format = "f", ...) {paste0(formatC( x, format = format, digits = digits, ...), "%")}
 l.cvs<-c(l1, l2, l3, l4, l5)
 pl.cvs<-percent(l.cvs)
-model.lcvs<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5"), "CV" = c(pl.cvs))
+model.lcvs<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5"), "CV" = c(pl.cvs), "RMSE" = c(mse.linear1, mse.linear2, mse.linear3, mse.linear4, mse.linear5))
 paged_table(model.lcvs)
 ```
