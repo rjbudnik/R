@@ -1,0 +1,429 @@
+---
+title: "**District Wide Model Analysis**"
+author: "Ryan Budnik"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float:
+      collapsed: true
+params:
+  data:
+    label: "Input dataset:"
+    value: 18CC.csv
+    input: select
+    choices: [16CC.csv, 17CC.csv, 18CC.csv]
+  exp:
+    label: "Experiment:"
+    value: C81A
+    input: select
+    choices: [C61A,	C61B,	C62A,	C62B,	C63A,	C63B, C71A,	C71B,	C72A,	C72B,	C73A,	C73B, C81A,	C81B,	C82A, C82B,	C83A,	C83B]
+  year:
+    label: "Year"
+    value: 2018
+    input: slider
+    min: 2010
+    max: 2030
+    step: 1
+    sep: ""
+  district:
+    label: "District:"
+    value: Northern
+    input: select
+    choices: [Northern, Central, Southern]
+  season:
+    label: "Season Length:"
+    value: Early
+    input: select
+    choices: [Early, Full]
+---
+
+# Overview
+
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(LMERConvenienceFunctions)
+library(lmerTest)
+library(shiny)
+library(shinythemes)
+```
+
+**`r params$exp`**
+
+- Corn Coversion Factor = **8.067**
+- Bean Conversion Factor = **7.779**
+
+```{r setup, echo = FALSE}
+###Set wd & Import CSV Dataset:
+df_cc<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+
+CCF<-8.067
+df_cc<-df_cc%>%mutate(yld = (wt*CCF))
+
+###Subset data of interest:
+data<-filter(df_cc, exp==c(params$exp))
+
+
+###View Classifications & Set Factors:
+data$book.name<-factor(data$book.name)
+data$exp<-factor(data$exp)
+data$entry<-factor(data$entry)
+data$ped.id<-factor(data$ped.id)
+data$code<-factor(data$code)
+data$rng<-factor(data$rng)
+data$pass<-factor(data$pass)
+data$rep<-factor(data$rep)
+data$plot<-factor(data$plot)
+attach(data)
+```
+
+
+# Mixed Model Analyses: {.tabset .tabset-fade}
+
+<!-- ## 48 -->
+<!-- ```{r model.build48, echo=FALSE} -->
+<!-- model.build48<-lmer(yld~entry + book.name + rep + (1|pass:book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build48.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build48)) -->
+<!-- ``` -->
+
+<!-- ## 49 -->
+
+<!-- ```{r model.build49, echo=FALSE} -->
+<!-- model.build49<-lmer(yld~entry + book.name + rep + (1|rng:book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build49.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build49)) -->
+<!-- ``` -->
+
+<!-- ## 50 -->
+
+<!-- ```{r model.build50, echo=FALSE} -->
+<!-- model.build50<-lmer(yld~entry + book.name + rep + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build50.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build50)) -->
+<!-- ``` -->
+
+<!-- ## 51 -->
+
+<!-- ```{r model.build51, echo=FALSE} -->
+<!-- model.build51<-lmer(yld~entry + book.name + rep + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build51.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build51)) -->
+<!-- ``` -->
+
+<!-- ## 52 -->
+
+<!-- ```{r model.build52, echo=FALSE} -->
+<!-- model.build52<-lmer(yld~entry + book.name + rep + entry:book.name + (1|book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build52.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build52)) -->
+<!-- ``` -->
+
+<!-- ## 53 -->
+
+<!-- ```{r model.build53, echo=FALSE} -->
+<!-- model.build53<-lmer(yld~entry + book.name + rep + entry:book.name  + (1|pass:book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build53.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build53)) -->
+<!-- ``` -->
+
+<!-- ## 54 -->
+
+<!-- ```{r model.build54, echo=FALSE} -->
+<!-- model.build54<-lmer(yld~entry + book.name + rep + entry:book.name + (1|rng:book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build54.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build54)) -->
+<!-- ``` -->
+
+<!-- ## 55 -->
+
+<!-- ```{r model.build55, echo=FALSE} -->
+<!-- model.build55<-lmer(yld~entry + book.name + rep + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build55.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build55)) -->
+<!-- ``` -->
+
+<!-- ## 56 -->
+
+<!-- ```{r model.build56, echo=FALSE} -->
+<!-- model.build56<-lmer(yld~entry + book.name + rep + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build56.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build56)) -->
+<!-- ``` -->
+
+<!-- ## 57 -->
+
+<!-- ```{r model.build57, echo=FALSE} -->
+<!-- model.build57<-lmer(yld~entry + book.name + rep + rep:book.name + (1|book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build57.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build49)) -->
+<!-- ``` -->
+
+<!-- ## 58 -->
+
+<!-- ```{r model.build58, echo=FALSE} -->
+<!-- model.build58<-lmer(yld~entry + book.name + rep + rep:book.name + (1|pass:book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build58.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build58)) -->
+<!-- ``` -->
+
+<!-- ## 59 -->
+
+<!-- ```{r model.build59, echo=FALSE} -->
+<!-- model.build59<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build59.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build59)) -->
+<!-- ``` -->
+
+<!-- ## 60 -->
+
+<!-- ```{r model.build60, echo=FALSE} -->
+<!-- model.build60<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build60.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build60)) -->
+<!-- ``` -->
+
+<!-- ## 61 -->
+
+<!-- ```{r model.build61, echo=FALSE} -->
+<!-- model.build61<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ```{r build61.anova, echo=FALSE, col.prints=7} -->
+<!-- options(scipen=6) -->
+<!-- paged_table(anova(model.build61)) -->
+<!-- ``` -->
+
+
+## 62
+
+```{r model.build62, echo=FALSE}
+model.build62<-lmer(yld~entry + book.name + rep + rep:book.name + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build62.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build62))
+```
+
+
+## 63
+
+```{r model.build63, echo=FALSE}
+model.build63<-lmer(yld~entry + book.name + rep + rep:book.name + (1|pass:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build63.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build63))
+```
+
+
+## 64
+
+```{r model.build64, echo=FALSE}
+model.build64<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build64.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build64))
+```
+
+
+## 65
+
+```{r model.build65, echo=FALSE}
+model.build65<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build65.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build65))
+```
+
+
+## 66
+
+```{r model.build66, echo=FALSE}
+model.build66<-lmer(yld~entry + book.name + rep + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build66.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build66))
+```
+
+
+## 67
+
+```{r model.build67, echo=FALSE}
+model.build67<-lmer(yld~entry + book.name + rep + (1|pass:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build67.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build67))
+```
+
+
+## 68
+
+```{r model.build68, echo=FALSE}
+model.build68<-lmer(yld~entry + book.name + rep + (1|rng:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build68.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build68))
+```
+
+
+## 69
+
+```{r model.build69, echo=FALSE}
+model.build69<-lmer(yld~entry + book.name + rep + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build69.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build69))
+```
+
+
+## 70
+
+```{r model.build70, echo=FALSE}
+model.build70<-lmer(yld~entry + book.name + rep + entry:book.name + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build70.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build70))
+```
+
+
+## 71
+
+```{r model.build71, echo=FALSE}
+model.build71<-lmer(yld~entry + book.name + rep + entry:book.name + (1|pass:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build71.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build71))
+```
+
+
+## 72
+
+```{r model.build72, echo=FALSE}
+model.build72<-lmer(yld~entry + book.name + rep + entry:book.name + (1|rng:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build72.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build72))
+```
+
+
+## 73
+
+```{r model.build73, echo=FALSE}
+model.build73<-lmer(yld~entry + book.name + rep + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+```{r build73.anova, echo=FALSE, col.prints=7}
+options(scipen=6)
+paged_table(anova(model.build73))
+```
+
+
+
+# Compare: {.tabset .tabset-fade}
+
+## CV & RSME
+
+```{r, echo=FALSE, rows.print=25}
+build62<-LSDer::CVer(model.build62)
+build63<-LSDer::CVer(model.build63)
+build64<-LSDer::CVer(model.build64)
+build65<-LSDer::CVer(model.build65)
+build66<-LSDer::CVer(model.build66)
+build67<-LSDer::CVer(model.build67)
+build68<-LSDer::CVer(model.build68)
+build69<-LSDer::CVer(model.build69)
+build70<-LSDer::CVer(model.build70)
+build71<-LSDer::CVer(model.build71)
+build72<-LSDer::CVer(model.build72)
+build73<-LSDer::CVer(model.build72)
+
+mse.build62<-sqrt(mean(residuals(model.build62)^2))
+mse.build63<-sqrt(mean(residuals(model.build63)^2))
+mse.build64<-sqrt(mean(residuals(model.build64)^2))
+mse.build65<-sqrt(mean(residuals(model.build65)^2))
+mse.build66<-sqrt(mean(residuals(model.build66)^2))
+mse.build67<-sqrt(mean(residuals(model.build67)^2))
+mse.build68<-sqrt(mean(residuals(model.build68)^2))
+mse.build69<-sqrt(mean(residuals(model.build69)^2))
+mse.build70<-sqrt(mean(residuals(model.build70)^2))
+mse.build71<-sqrt(mean(residuals(model.build71)^2))
+mse.build72<-sqrt(mean(residuals(model.build72)^2))
+mse.build73<-sqrt(mean(residuals(model.build73)^2))
+model.cvs<-data.frame("Model"=c("Build62", "Build63", "Build64", "Build65", "Build66", "Build67", "Build68", "Build69", "Build70", "Build71", "Build72", "Build73"), "CV" = c(build62, build63, build64, build65, build66, build67, build68, build69, build70, build71, build72, build73), "RMSE" = c(mse.build62, mse.build63, mse.build64, mse.build65, mse.build66, mse.build67, mse.build68, mse.build69, mse.build70, mse.build71, mse.build72, mse.build73))
+paged_table(model.cvs)
+```
+
+## AIC & BIC
+
+```{r, echo=FALSE, rows.print=25}
+bic<-BIC(model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73)
+BIC<-bic$BIC
+aic<-AIC(model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73)
+paged_table(cbind(aic, BIC))
+```
