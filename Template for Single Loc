@@ -10,7 +10,7 @@ output:
       collapsed: true
 params:
   data:
-    label: "Input dataset:"
+    label: "Dataset:"
     value: yt18.csv
     input: select
     choices: yt18.csv
@@ -18,28 +18,12 @@ params:
     label: "Book Name:"
     value: CF811
     input: select
-    choices: [CF811, CF812, CF813, CF814, CF815, CF821, CF822,	CF823, CF824, CF825, CF831, CF832, CF833, CF834, CF835, F83.MN.Mor.105, F83.MN.Oli.106, F83.ND.Cas.123,	F83.ND.Fes.126,	F83.ND.Oak.129,	F83.ND.Pri.130,	F83.ND.Was.131, F83.SD.Abe.143,	F83.SD.Cas.145,	F83.SD.Dim.146,	F83.SD.Wes.148,	F8C.IA.Atl.9, F8C.IA.Bod.12, F8C.IA.Cla.17,	F8C.IA.Cle.18,	F8C.IA.Dow,	F8C.IA.Est.28, F8C.IA.Gra.31,	F8C.IA.Har,	F8C.IA.Hux.33, F8C.IA.Lut.39,	F8C.IA.Rei.49, F8C.IA.Ric.50,	F8C.IA.Sla.53,	F8C.IL.Cha.161,	F8C.IL.Gen.61, F8C.IL.Har.162, F8C.IL.MtP.163, F8C.IL.Roc.74, F8C.IL.Ros.75,	F8C.IL.Ton.164,	F8C.IN.Bro.165, F8C.IN.Far.166,	F8C.MN.Bro.100,	F8C.MN.Mad.104,	F8C.MN.Pip.107,	F8C.MN.Pla.108, F8C.MN.San.111,	F8C.MN.Sle.113,	F8C.MN.StC.114,	F8C.MN.Ste.115,	F8C.MN.Wel.116, F8C.NE.Arl.132,	F8H.MB.Win,	F8I.MB.Mor,	F8I.MB.Por,	F8I.MB.War,	F8K.IA.Gri, F8K.MN.Rou.110,	F8K.NE.Tek.135,	F8K.SD.Can.144,	F8P.IL.DGr.167,	F8P.IL.Mal.169, F8P.IL.Tam.168,	F8P.PA.Lew.171,	F8P.PA.MtJ.172,	F8P.WI.Ran.170,	F8R.MN.Gly.101, F8R.MN.Rad.109,	F8R.ND.Cha.124,	F8R.ND.Don.125,	F8R.ND.Min.128,	F8T.IA.Ced.15, F8T.IA.Cre.23,	F8T.IA.Dec.24,	F8T.IA.Lak.36,	F8T.IA.Spe.54,	F8T.IL.Blo.57, F8T.IL.Mon.69,	F8T.MI.Ree.96,	F8T.MN.Alb.97,	F8T.MN.Hay.102,	F8T.MN.Jac.103, F8T.WI.Jan.149,	F8T.WI.Pla.150]
+    choices: [CF811, CF812, CF813, CF814, CF815, CF821, CF822,	CF823, CF824, CF825, CF831, CF832, CF833, CF834, CF835]
   exp:
     label: "Experiment:"
     value: C81A
     input: select
-    choices: [C81A,	C81B,	C82A,	C82B,	C83A,	C83B,	R18-101, R18-102, R18-103, R18-104, R18-105, R18-106, R18-107, R18-108, R18-201, R18-202, R18-203, R18-204, R18-205, R18-206-Olivia,	R18-301,	R18-302, R18-303, R18-401, R18-402, R18-501, R18-601, R18-602, YT01P18_UE, YT02P18_E,	YT03P18_M1,	YT04P18_L1,	YT05P18_WL2, YT06P18_RE, YT07P18_RM,	YT08P18_RL,	YT09P18_D1E1,	YT10P18_D1E2,	YT11P18_D1E3,	YT12P18_D1M4, YT13P18_D2A, YT14P18_D2B,	YT15P18_D2C, YT16P18_D3, YT17P18_JE,	YT18P18_JL, YT19P18_WES, YT20P18_WLS, YT21P18_PSN, YT22P18_PSL,	YT23P18_KM,	YT24P18_KL, YT25P18_DG,	YTNL_Obs,	YTNL01,	YTNL02,	YTNL03,	YTNL04,	YTNL05,	YTNL06,	YTNL07,	YTNL08, YTNL09,	YTNL10,	YTNL11,	YTNL12]
-  entry.start:
-    label: "Entry Start"
-    value: 1
-    input: slider
-    min: 1
-    max: 100
-    step: 1
-    sep: ""
-  entry.end:
-    label: "Entry End"
-    value: 45
-    input: slider
-    min: 1
-    max: 100
-    step: 1
-    sep: ""
+    choices: [C81A,	C81B,	C82A,	C82B,	C83A,	C83B]
   year:
     label: "Year"
     value: 2018
@@ -77,7 +61,6 @@ library(predictmeans)
 library(shiny)
 library(shinythemes)
 library(psych)
-library(skimr)
 ```
 
 -Corn Coversion Factor = **8.067**
@@ -95,10 +78,11 @@ df <- df%>%mutate (yld = (wt*CCF))
 # BCF<-7.779
 # df <- df%>%mutate (yld = (wt*BCF))
 
-df <- df%>%mutate(yld=replace(yld, plot.discarded=="Yes", NA))
-
 ###Subset data of interest:
-data<-filter(df, book.name==c(params$book.name) & exp==c(params$exp), entry %in% c(params$entry.start:params$entry.end))
+data.withdiscards<-filter(df, book.name==c(params$book.name) & exp==c(params$exp))
+
+###Replace Discarded Plots with NA:
+data <- data.withdiscards%>%mutate(yld=replace(yld, plot.discarded=="Yes", NA))
 
 ###View Classifications & Set Factors:
 data$book.name<-factor(data$book.name)
@@ -125,14 +109,14 @@ avg.yld <- mean(data$yld, na.rm = TRUE)
 ## Summary
 
 ```{r summary, echo = FALSE, cols.print=8, rows.print=20, warning=FALSE}
-dfNo_rec.id<-subset(data, select = -c(rec.id))
-des<-describe(dfNo_rec.id, IQR=TRUE)
+sum.less<-data %>% select("exp", "book.name", "rep", "entry", "plot", "pass", "range", "wt", "moist", "yld")
+des<-describe(sum.less, IQR=TRUE)
 paged_table(des, options(scipen=999, digits=3))
 ```
 
 ## Aggregation
 
-```{r aggregation, echo = FALSE, rows.print=20, warning=FALSE}
+```{r aggregation, echo = FALSE, rows.print=15, warning=FALSE}
 options(digits=5)
 aggdf <- data.frame(aggregate(yld~entry, data=data, function(x) c(length(x))),aggregate(yld~entry, data=data, function(x) c(min(x))),aggregate(yld~entry, data=data, function(x) c(mean(x))),aggregate(yld~entry, data=data, function(x) c(max(x))))
 aggdf <- aggdf[,c(1,2,4,6,8)]
@@ -187,13 +171,17 @@ abline(h = min.yld, col="red")
 
 ## Summary
 
-**Model: Yield = Entry**
+**Model: YIELD = ENTRY**
 
-Random Effects: rep, pass(rep), range(rep)
+* Random Effects: 
+  - REP
+  - PASS(REP)
+  - RANGE(REP)
 
 ```{r model, comment=NA, echo=FALSE, message=FALSE}
 model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=data, REML=TRUE)
 summary(model1)
+model1
 ```
 
 ## Random-Effects Table
@@ -221,23 +209,25 @@ ANOVA uses the *F-statistic* to determine whether the variability between group 
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
-```{r modelanova1, echo = FALSE}
-kable(anovalmer(model1))
+```{r modelanova1, cols.print=9, echo = FALSE}
+paged_table(anovalmer(model1))
 ```
 
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelanova2, echo = FALSE}
-kable(anova(model1))
+paged_table(anova(model1))
 ```
 
 ## CV & LSD
 
 **Coefficient of Vairance (CV):**
 
-The CV for a model aims to describe the model fit in terms of the relative sizes of the squared residuals and outcome values.  The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit.
+The CV for a model aims to describe the model fit in terms of the relative sizes of the squared residuals and outcome values.  The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. The CV is the physical ratio of the standard deviation to the mean. Thus the higher the coefficient of variation, the greater the level of dispersion around the mean.
 
-The advantage of the CV is that it is unitless.  This allows CVs to be compared to each other in ways that other measures, like standard deviations or root mean squared residuals, cannot be. 
+The advantage of the CV is that it is unitless.  This allows CVs to be compared to each other in ways that other measures, like standard deviations or root mean squared residuals, cannot be.
+
+  **SMALLER IS BETTER!!!!**
 
 **The model with the smaller CV has predicted values that are closer to the actual values.**
 
@@ -264,6 +254,16 @@ LSDer::LSDer(model1, "entry", level=0.90)
 LSDer::LSDer(model1, "entry", level=0.75)
 ```
 
+OR
+
+```{r modellsdeq.25, comment=NA, echo = FALSE}
+vcor<-as.data.frame(VarCorr(model1))
+t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1))
+V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
+n_rep<-n_distinct(data[,"rep"])
+n_rep<-as.numeric(n_rep)
+t_alpha*sqrt(2*(V_R/n_rep))
+```
 
 # Outlier Detection: {.tabset .tabset-fade}
 
@@ -271,15 +271,20 @@ LSDer::LSDer(model1, "entry", level=0.75)
 
 QQ plot (or quantile-quantile plot) draws the correlation between a given sample and the normal distribution. A 45-degree reference line is also plotted. QQ plots are used to visually check the normality of the data.
 
-```{r qq, echo = FALSE, warning = FALSE}
-qq<-qqnorm(resid(model1))
+```{r qq, echo = FALSE, fig.width=9, warning = FALSE}
+qq<-qqnorm(resid(model1), pch=23, bg="gray40")
 qqline(resid(model1), col="red", lwd=c(2))
-text(qq, rownames(data), cex=1.2, font=2)
+text(qq, rownames(data), cex=0.8, pos=4, offset = 0.5)
+text(qq, label=(data$entry), cex=0.8, col= "red4", pos=4, offset = 1.6)
 ```
+
+1. Data Points = Residuals for linear mixed model.
+2. Black Labels = **Row** number.
+3. Red Labels = **Entry** number.
 
 ## Cook's Distance
 
-Cook’s distance is useful for identifying outliers in the X values (observations for predictor variables). It also shows the influence of each observation on the fitted response values. An observation with Cook’s distance larger than three times the mean Cook’s distance might be an outlier.
+Cook's distance is useful for identifying outliers in the X values (observations for predictor variables). It also shows the influence of each observation on the fitted response values. An observation with Cook's distance larger than three times the mean Cook's distance might be an outlier.
 
   + Graphical Reference Thresholds:
       1. 10/*n*-*k*-1
@@ -292,7 +297,7 @@ Cook’s distance is useful for identifying outliers in the X values (observatio
       
       *k* = number of independent variables
 
-```{r cook, cache=TRUE, echo = FALSE}
+```{r cook, echo = FALSE, message=FALSE}
 sample_size<-nrow(data)
 Cooksd<-CookD(model1, newwd=FALSE)
 abline(h = (10/(sample_size-params$entry.end-1)), col="red")
@@ -300,6 +305,15 @@ abline(h = (8/(sample_size-params$entry.end-1)), col="red", lwd=c(2))
 abline(h = (4/(sample_size-params$entry.end-1)), col="red", lwd=c(3))
 ```
 
+
+# Discards: {.tabset .tabset-fade}
+
+**Plot Discards Identified Pre-Analysis:**
+
+```{r discards, echo = FALSE}
+Discards<-subset(data.withdiscards, plot.discarded=="Yes")
+paged_table(Discards)
+```
 
 # Cleaned Models: {.tabset .tabset-fade}
 
@@ -315,7 +329,7 @@ Low yielding rows in which yield values were replaced with NA.
 ##Replace All Low Values Identified in  Histogram (e.g.< IQR Minimum bu/ac) with NA:
 IQRNoLow<-subset(data, data$yld < min.yld)
 NoLowRows<-as.numeric(rownames(IQRNoLow))
-NoLowRows
+paged_table(data[NoLowRows, ])
 IQRClean1<-data
 IQRClean1$yld<-replace(IQRClean1$yld, NoLowRows, NA)
 ##Model Without Histogram Identified Low Yields:
@@ -342,14 +356,14 @@ kable(ranova(model2))
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
-```{r modelc1.anova1, echo=FALSE}
-kable(anovalmer(model2))
+```{r modelc1.anova1, cols.print=9, echo=FALSE}
+paged_table(anovalmer(model2))
 ```
 
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelc1.anova2, echo=FALSE}
-kable(anova(model2))
+paged_table(anova(model2))
 ```
 
 ### CV & LSD
@@ -374,25 +388,44 @@ LSDer::LSDer(model2, "entry", level=0.95)
 LSDer::LSDer(model2, "entry", level=0.75)
 ```
 
+OR
+
+```{r modelc1.lsdeq.25, comment=NA, echo = FALSE}
+vcor<-as.data.frame(VarCorr(model2))
+t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1))
+V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
+n_rep<-n_distinct(data[,"rep"])
+n_rep<-as.numeric(n_rep)
+t_alpha*sqrt(2*(V_R/n_rep))
+```
+
 ## Outside Min/Max IQRs: {.tabset .tabset-fade}
 
 Replaced all values outside the minimum and maximum IQRs with NA, as visualized in the barplot.
 
 ### Summary
 
-Low yielding, followed by high yielding rows in which yield values were replaced with NA.
-
 ```{r modelc2, comment=NA, echo = FALSE}
 ##Replace values outside the minimum and maximum IQR values with NA:
 IQRNoHigh<-subset(data, data$yld > max.yld)
 NoHighRows<-as.numeric(rownames(IQRNoHigh))
-NoLowRows
-NoHighRows
 IQRClean2<-data
 IQRClean2$yld<-replace(IQRClean2$yld, NoLowRows, NA)
 IQRClean2$yld<-replace(IQRClean2$yld, NoHighRows, NA)
 ##Model Without Histogram Identified Low Yields:
 model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRClean2, REML=TRUE)
+```
+
+**Low** yielding rows in which yield values were replaced with NA.
+
+```{r modelc2.datarl, comment=NA, echo = FALSE}
+paged_table(data[NoLowRows, ])
+```
+
+**High** yielding rows in which yield values were replaced with NA.
+
+```{r modelc2.datarhl, comment=NA, echo = FALSE}
+paged_table(data[NoHighRows, ])
 ```
 
 **Summary**
@@ -415,14 +448,14 @@ kable(ranova(model3))
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
-```{r modelc2.1, echo=FALSE}
-kable(anovalmer(model3))
+```{r modelc2.anova1, cols.print=9, echo=FALSE}
+paged_table(anovalmer(model3))
 ```
 
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelc2.anova3, echo=FALSE}
-kable(anova(model3))
+paged_table(anova(model3))
 ```
 
 ### CV & LSD
@@ -447,6 +480,17 @@ LSDer::LSDer(model3, "entry", level=0.90)
 LSDer::LSDer(model3, "entry", level=0.75)
 ```
 
+OR
+
+```{r modelc2.lsdeq.25, comment=NA, echo = FALSE}
+vcor<-as.data.frame(VarCorr(model3))
+t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1))
+V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
+n_rep<-n_distinct(data[,"rep"])
+n_rep<-as.numeric(n_rep)
+t_alpha*sqrt(2*(V_R/n_rep))
+```
+
 ## Residual Deviations: {.tabset .tabset-fade}
 
 Replace residual outliers identified in  Q-Q Plot with NA for all resdiual values 2.5 times the standard deviation above/below the residual mean. 
@@ -460,7 +504,7 @@ Influential residual deviating rows in which yield values were replaced with NA.
 # ##residual mean in  Q-Q Plot with NA:
 influentialQQ<-resid(model1)[abs(resid(model1)-mean(resid(model1)))>2.5*sd(resid(model1))]
 influentialQQ<-as.numeric(names(influentialQQ))
-influentialQQ
+paged_table(data[influentialQQ, ])
 QQClean<-data
 QQClean$yld<-replace(QQClean$yld, influentialQQ, NA)
 model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=QQClean, REML=TRUE)
@@ -489,14 +533,14 @@ kable(ranova(model4))
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
-```{r modelc3.anova1, echo=FALSE}
-kable(anovalmer(model4))
+```{r modelc3.anova1, cols.print=9, echo=FALSE}
+paged_table(anovalmer(model4))
 ```
 
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelc3.anova2, echo=FALSE}
-kable(anova(model4))
+paged_table(anova(model4))
 ```
 
 ### CV & LSD
@@ -521,6 +565,17 @@ LSDer::LSDer(model4, "entry", level=0.90)
 LSDer::LSDer(model4, "entry", level=0.75)
 ```
 
+OR
+
+```{r modelc3.lsdeq.25, comment=NA, echo = FALSE}
+vcor<-as.data.frame(VarCorr(model4))
+t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1))
+V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
+n_rep<-n_distinct(data[,"rep"])
+n_rep<-as.numeric(n_rep)
+t_alpha*sqrt(2*(V_R/n_rep))
+```
+
 ## Cook's Distance: {.tabset .tabset-fade}
 
 Replace influential Values determined Via Cook's Distance with NA.
@@ -536,7 +591,7 @@ Influential Cook's Distance rows in which yield values were replaced with NA.
 ```{r modelc4, comment=NA, echo = FALSE}
 ##Replace "Influential" Values Determined Via Cook's Distance, with NA:
 influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=(10/(sample_size-params$entry.end-1))))])
-influentialcooks
+paged_table(data[influentialcooks, ])
 CooksClean<-data
 CooksClean$yld<-replace(CooksClean$yld, influentialcooks, NA)
 ##Cooks Clean Model:
@@ -559,14 +614,14 @@ kable(ranova(model5))
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
-```{r modelc4.anova1, echo=FALSE}
-kable(anovalmer(model5))
+```{r modelc4.anova1, cols.print=9, echo=FALSE}
+paged_table(anovalmer(model5))
 ```
 
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelc4.anova2, echo=FALSE}
-kable(anova(model5))
+paged_table(anova(model5))
 ```
 
 ### CV & LSD
@@ -591,14 +646,46 @@ LSDer::LSDer(model5, "entry", level=0.90)
 LSDer::LSDer(model5, "entry", level=0.75)
 ```
 
+OR
+
+```{r modelc4.lsdeq.25, comment=NA, echo = FALSE}
+vcor<-as.data.frame(VarCorr(model5))
+t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1))
+V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
+n_rep<-n_distinct(data[,"rep"])
+n_rep<-as.numeric(n_rep)
+t_alpha*sqrt(2*(V_R/n_rep))
+```
+
 # Export Clean Dataset: {.tabset .tabset-fade}
 
-```{r export, echo = FALSE}
-# write.csv(CooksClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/CooksClean_CF811_C81A.csv")
-# write.csv(QQClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/QQClean_CF811_C81A.csv")
-# write.csv(HistoClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_CF811_C81A.csv")
-# write.csv(ResidualClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/ResidualClean_CF811_C81A.csv")
-```
+**-Uncomment specfic cleaned dataset you wish to export.**
+**-MUST specify & manually change output filename within code!**
+
+
+<!-- Cleaned w/NO Low IQR Yields: -->
+
+<!-- ```{r export, echo = FALSE} -->
+<!-- write.csv(IQRClean1, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_xbook.name_x.exp.csv", row.names=FALSE) -->
+<!-- ``` -->
+
+<!-- Cleaned w/NO Low/High IQR Yields: -->
+
+<!-- ```{r export, echo = FALSE} -->
+<!-- write.csv(IQRClean2, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_xbook.name_x.exp.csv", row.names=FALSE) -->
+<!-- ``` -->
+
+<!-- Residual Anomalies Cleaned: -->
+
+<!-- ```{r export, echo = FALSE} -->
+<!-- write.csv(QQClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/QQClean_CF815_C81A.csv", row.names=FALSE) -->
+<!-- ``` -->
+
+<!-- Cook's Distance Cleaned: -->
+
+<!-- ```{r export, echo = FALSE} -->
+<!-- write.csv(CooksClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/CooksClean_xbook.name_x.exp.csv", row.names=FALSE) -->
+<!-- ``` -->
 
 # References:
 1. **Hair, J., Anderson, R., Tatham, R. and Black W.** (1998). Multivariate Data Analysis (fifth edition). Englewood Cliffs, NJ: Prentice-Hall.
