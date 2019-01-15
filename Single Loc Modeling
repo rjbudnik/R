@@ -1,0 +1,955 @@
+---
+title: "**District Wide Model Analysis**"
+author: "Ryan Budnik"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float:
+      collapsed: true
+params:
+  data:
+    label: "Input dataset:"
+    value: yt18.csv
+    input: select
+    choices: [16CC.csv, 17CC.csv, 18CC.csv, yt18.csv]
+  exp:
+    label: "Experiment:"
+    value: C81A
+    input: select
+    choices: [C61A,	C61B,	C62A,	C62B,	C63A,	C63B, C71A,	C71B,	C72A,	C72B,	C73A,	C73B, C81A,	C81B,	C82A, C82B,	C83A,	C83B]
+  book.name:
+    label: "Book Name:"
+    value: CF811
+    input: select
+    choices: [CF811, CF812, CF813, CF814, CF815, CF821, CF822,	CF823, CF824, CF825, CF831, CF832, CF833, CF834, CF835, CF711, CF712, CF713, CF714, CF715, CF721, CF722,	CF723, CF724, CF725, CF731, CF732, CF733, CF734, CF735, CF611, CF612, CF613, CF614, CF615, CF621, CF622,	CF623, CF624, CF625, CF631, CF632, CF633, CF634, CF635]
+  year:
+    label: "Year"
+    value: 2018
+    input: select
+    choices: [2018, 2017, 2016]
+  district:
+    label: "District:"
+    value: Northern
+    input: select
+    choices: [Northern, Central, Southern]
+  season:
+    label: "Season Length:"
+    value: Early
+    input: select
+    choices: [Early, Full]
+---
+
+```{r logo, cache=TRUE, echo=FALSE}
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "SingleLocModeling","inst","rmarkdown","templates","report","SingleLocModels","ICIA_logo.png")), 
+               alt = 'logo',
+               style = 'position:absolute; top:0; right:0; padding:10px;')
+```
+
+---
+
+**`r params$exp`** Trial, at the **`r params$book.name`** Location
+
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
+library(shiny)
+library(shinythemes)
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(LMERConvenienceFunctions)
+library(lmerTest)
+library(predictmeans)
+library(emmeans)
+```
+
+```{r setup, echo = FALSE}
+###Set wd & Import CSV Dataset:
+df<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+
+CCF<-8.067
+df<-df%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+
+###Subset data of interest:
+data<-filter(df, book.name==c(params$book.name) & exp==c(params$exp))
+
+###Replace Discarded Plots with NA:
+# data <- data%>%mutate(yld=replace(yld, plot.discarded=="Yes", NA))
+
+###View Classifications & Set Factors:
+data$book.name<-factor(data$book.name)
+data$exp<-factor(data$exp)
+data$entry<-factor(data$entry)
+data$ped.id<-factor(data$ped.id)
+data$code<-factor(data$code)
+data$rng<-factor(data$rng)
+data$pass<-factor(data$pass)
+data$rep<-factor(data$rep)
+data$plot<-factor(data$plot)
+attach(data)
+```
+# Linear Model Analyses: {.tabset .tabset-fade}
+
+## Linear 1
+
+```{r lmodel1, comment=NA, echo=FALSE, message=FALSE}
+lmodel1<-lm(yld~entry, data=data)
+```
+
+### ANOVA L1
+
+**YIELD = ENTRY**
+
+```{r lmodel1.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel1))
+```
+
+
+## Linear 2
+
+```{r lmodel2, comment=NA, echo=FALSE, message=FALSE}
+lmodel2<-lm(yld~entry + rep, data=data)
+```
+
+### ANOVA L2
+
+**YIELD = ENTRY + REP**
+
+```{r lmodel2.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel2))
+```
+
+
+## Linear 3
+
+```{r lmodel3, comment=NA, echo=FALSE, message=FALSE}
+lmodel3<-lm(yld~entry + pass, data=data)
+```
+
+### ANOVA L3
+
+**YIELD = ENTRY + PASS**
+
+```{r lmodel3.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel3))
+```
+
+
+<!-- ## Linear 4 -->
+
+<!-- ```{r lmodel4, comment=NA, echo=FALSE, message=FALSE} -->
+<!-- lmodel4<-lm(yld~entry + rng, data=data) -->
+<!-- ``` -->
+
+<!-- ### ANOVA L4 -->
+
+<!-- **YIELD = ENTRY + RANGE** -->
+
+<!-- ```{r lmodel4.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- paged_table(anova(lmodel4)) -->
+<!-- ``` -->
+
+
+## Linear 5
+
+```{r lmodel5, comment=NA, echo=FALSE, message=FALSE}
+lmodel5<-lm(yld~entry + rep + pass, data=data)
+```
+
+### ANOVA L5
+
+**YIELD = ENTRY + REP + PASS**
+
+```{r lmodel5.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel5))
+```
+
+
+<!-- ## Linear 6 -->
+
+<!-- ```{r lmodel6, comment=NA, echo=FALSE, message=FALSE} -->
+<!-- lmodel6<-lm(yld~entry + rep + rng, data=data) -->
+<!-- ``` -->
+
+<!-- ### ANOVA L6 -->
+
+<!-- **YIELD = ENTRY + REP + RANGE** -->
+
+<!-- ```{r lmodel6.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- paged_table(anova(lmodel6)) -->
+<!-- ``` -->
+
+
+## Linear 7
+
+```{r lmodel7, comment=NA, echo=FALSE, message=FALSE}
+lmodel7<-lm(yld~entry + rng + pass, data=data)
+```
+
+### ANOVA L7
+
+**YIELD = ENTRY + RANGE + PASS**
+
+```{r lmodel7.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel7))
+```
+
+
+<!-- ## Linear 8 -->
+
+<!-- ```{r lmodel8, comment=NA, echo=FALSE, message=FALSE} -->
+<!-- lmodel8<-lm(yld~entry + rep + rng + pass, data=data) -->
+<!-- ``` -->
+
+<!-- ### ANOVA L8 -->
+
+<!-- **YIELD = ENTRY + REP + RANGE + PASS** -->
+
+<!-- ```{r lmodel8.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- paged_table(anova(lmodel8)) -->
+<!-- ``` -->
+
+
+## Linear 9
+
+```{r lmodel9, comment=NA, echo=FALSE, message=FALSE}
+lmodel9<-lm(yld~entry + rep:pass, data=data)
+```
+
+### ANOVA L9
+
+**YIELD = ENTRY + REP:PASS**
+
+```{r lmodel9.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel9))
+```
+
+
+## Linear 10
+
+```{r lmodel10, comment=NA, echo=FALSE, message=FALSE}
+lmodel10<-lm(yld~entry + rep:rng, data=data)
+```
+
+### ANOVA L10
+
+**YIELD = ENTRY + REP:RANGE**
+
+```{r lmodel10.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel10))
+```
+
+
+<!-- ## Linear 11 -->
+
+<!-- ```{r lmodel11, comment=NA, echo=FALSE, message=FALSE} -->
+<!-- lmodel11<-lm(yld~entry + rng:pass, data=data) -->
+<!-- ``` -->
+
+<!-- ### ANOVA L11 -->
+
+<!-- **YIELD = ENTRY + RANGE:PASS** -->
+
+<!-- ```{r lmodel11.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- paged_table(anova(lmodel11)) -->
+<!-- ``` -->
+
+
+## Linear 12
+
+```{r lmodel12, comment=NA, echo=FALSE, message=FALSE}
+lmodel12<-lm(yld~entry + rep:rng + rep:pass, data=data)
+```
+
+### ANOVA L12
+
+**YIELD = ENTRY + REP:RANGE + REP:PASS**
+
+```{r lmodel12.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel12))
+```
+
+
+<!-- ## Linear 13 -->
+
+<!-- ```{r lmodel13, comment=NA, echo=FALSE, message=FALSE} -->
+<!-- lmodel13<-lm(yld~entry + rep + rep:rng + rep:pass, data=data) -->
+<!-- ``` -->
+
+<!-- ### ANOVA L13 -->
+
+<!-- **YIELD = ENTRY + REP + REP:RANGE + REP:PASS** -->
+
+<!-- ```{r lmodel13.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- paged_table(anova(lmodel13)) -->
+<!-- ``` -->
+
+
+
+## **Linear Model Comparison**
+
+```{r model.lbiccalc, comment=NA, echo=FALSE, rows.print=15, message=FALSE}
+options(digits=7)
+bicl1<-BIC(lmodel1)
+bicl2<-BIC(lmodel2)
+bicl3<-BIC(lmodel3)
+
+bicl5<-BIC(lmodel5)
+
+bicl7<-BIC(lmodel7)
+
+bicl9<-BIC(lmodel9)
+bicl10<-BIC(lmodel10)
+
+bicl12<-BIC(lmodel12)
+
+aicl1<-AIC(lmodel1)
+aicl2<-AIC(lmodel2)
+aicl3<-AIC(lmodel3)
+
+aicl5<-AIC(lmodel5)
+
+aicl7<-AIC(lmodel7)
+
+aicl9<-AIC(lmodel9)
+aicl10<-AIC(lmodel10)
+
+aicl12<-AIC(lmodel12)
+
+model.lcomp<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear5", "Linear7", "Linear9", "Linear10", "Linear12"), "AIC" = as.numeric(c(aicl1, aicl2, aicl3, aicl5, aicl7, aicl9, aicl10, aicl12)), "BIC" = as.numeric(c(bicl1, bicl2, bicl3, bicl5, bicl7, bicl9, bicl10, bicl12)))
+paged_table(model.lcomp)
+```
+
+
+
+## **Linear CV & RMSE Comparisons**
+
+```{r lrmse, echo=FALSE, rows.print=15}
+mse.linear1<-sqrt(mean(residuals(lmodel1)^2))
+mse.linear2<-sqrt(mean(residuals(lmodel2)^2))
+mse.linear3<-sqrt(mean(residuals(lmodel3)^2))
+
+mse.linear5<-sqrt(mean(residuals(lmodel5)^2))
+
+mse.linear7<-sqrt(mean(residuals(lmodel7)^2))
+
+mse.linear9<-sqrt(mean(residuals(lmodel9)^2))
+mse.linear10<-sqrt(mean(residuals(lmodel10)^2))
+
+mse.linear12<-sqrt(mean(residuals(lmodel12)^2))
+
+
+l1<-cv.model(lmodel1)
+l2<-cv.model(lmodel2)
+l3<-cv.model(lmodel3)
+
+l5<-cv.model(lmodel5)
+
+l7<-cv.model(lmodel7)
+
+l9<-cv.model(lmodel9)
+l10<-cv.model(lmodel10)
+
+l12<-cv.model(lmodel12)
+
+percent <- function(x, digits = 2, format = "f", ...) {paste0(formatC( x, format = format, digits = digits, ...), "%")}
+l.cvs<-c(l1, l2, l3, l5, l7, l9, l10, l12)
+pl.cvs<-percent(l.cvs)
+model.lcvs<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear5", "Linear7", "Linear9", "Linear10", "Linear12"), "CV" = c(pl.cvs), "RMSE" = c(mse.linear1, mse.linear2, mse.linear3, mse.linear5, mse.linear7, mse.linear9, mse.linear10, mse.linear12))
+paged_table(model.lcvs)
+```
+
+
+
+# Mixed Model Analyses: {.tabset .tabset-fade}
+
+
+## 1
+
+```{r model1, echo=FALSE}
+model1<-lmer(yld~entry + (1|rep), data=data, REML=TRUE)
+```
+
+### ANOVA 1
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + REP
+
+```{r 1anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model1))
+```
+
+
+## 2
+
+```{r model2, echo=FALSE}
+model2<-lmer(yld~entry + (1|pass), data=data, REML=TRUE)
+```
+
+### ANOVA 2
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + PASS
+
+```{r 2anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model2))
+```
+
+
+<!-- ## 3 -->
+
+<!-- ```{r model3, echo=FALSE} -->
+<!-- model3<-lmer(yld~entry + (1|rng), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 3 -->
+
+<!-- **YIELD = ENTRY** -->
+
+<!-- * RANDOM =  -->
+<!--     + RANGE -->
+
+<!-- ```{r 3anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model3)) -->
+<!-- ``` -->
+
+
+## 4
+
+```{r model4, echo=FALSE}
+model4<-lmer(yld~entry + (1|rep) + (1|pass), data=data, REML=TRUE)
+```
+
+### ANOVA 4
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + REP
+    + PASS
+
+```{r 4anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model4))
+```
+
+
+<!-- ## 5 -->
+
+<!-- ```{r model5, echo=FALSE} -->
+<!-- model5<-lmer(yld~entry + (1|rep) + (1|rng), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 5 -->
+
+<!-- **YIELD = ENTRY** -->
+
+<!-- * RANDOM =  -->
+<!--     + REP -->
+<!--     + RANGE -->
+
+<!-- ```{r 5anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model5)) -->
+<!-- ``` -->
+
+## 6
+
+```{r model6, echo=FALSE}
+model6<-lmer(yld~entry + (1|rng) + (1|pass), data=data, REML=TRUE)
+```
+
+### ANOVA 6
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + RANGE
+    + PASS
+
+```{r 6anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model6))
+```
+
+
+## 7
+
+```{r model7, echo=FALSE}
+model7<-lmer(yld~entry + (1|rep) + (1|rng) + (1|pass), data=data, REML=TRUE)
+```
+
+### ANOVA 7
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + REP
+    + RANGE
+    + PASS
+
+```{r 7anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model7))
+```
+
+## 8
+
+```{r model8, echo=FALSE}
+model8<-lmer(yld~entry + (1|rep:pass), data=data, REML=TRUE)
+```
+
+### ANOVA 8
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + REP:PASS
+
+```{r 8anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model8))
+```
+
+
+## 9
+
+```{r model9, echo=FALSE}
+model9<-lmer(yld~entry + (1|rep:rng), data=data, REML=TRUE)
+```
+
+### ANOVA 9
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + REP:RANGE
+
+```{r 9anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model9))
+```
+
+
+<!-- ## 10 -->
+
+<!-- ```{r model10, echo=FALSE} -->
+<!-- model10<-lmer(yld~entry + (1|rep:rng), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 10 -->
+
+<!-- **YIELD = ENTRY** -->
+
+<!-- * RANDOM =  -->
+<!--     + RANGE:PASS -->
+
+<!-- ```{r 10anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model10)) -->
+<!-- ``` -->
+
+
+## 11
+
+```{r model11, echo=FALSE}
+model11<-lmer(yld~entry + (1|rep) + (1 | rep:pass), data=data, REML=TRUE)
+```
+
+### ANOVA 11
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + REP
+    + REP:PASS
+
+```{r 11anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model11))
+```
+
+
+## 12
+
+```{r model12, echo=FALSE}
+model12<-lmer(yld~entry + (1|rep) + (1 | rep:rng), data=data, REML=TRUE)
+```
+
+### ANOVA 12
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + REP
+    + REP:RANGE
+
+```{r 12anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model12))
+```
+
+
+## 13
+
+```{r model13, echo=FALSE}
+model13<-lmer(yld~entry + (1|rep:pass) + (1 | rep:rng), data=data, REML=TRUE)
+```
+
+### ANOVA 13
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + REP:RANGE
+    + REP:PASS
+
+```{r 13anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model13))
+```
+
+
+## Jim
+
+```{r model14, echo=FALSE}
+model.jim<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=data, REML=TRUE)
+```
+
+### ANOVA Jim
+
+**YIELD = ENTRY**
+
+* RANDOM = 
+    + REP
+    + REP:RANGE
+    + REP:PASS
+
+```{r 14anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.jim))
+```
+
+
+## 15
+
+```{r model15, echo=FALSE}
+model15<-lmer(yld~entry + rep + (1|pass), data=data, REML=TRUE)
+```
+
+### ANOVA 15
+
+**YIELD = ENTRY + REP**
+
+* RANDOM = 
+    + PASS
+
+```{r 15anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model15))
+```
+
+
+<!-- ## 16 -->
+
+<!-- ```{r model16, echo=FALSE} -->
+<!-- model16<-lmer(yld~entry + rep + (1|rng), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 16 -->
+
+<!-- **YIELD = ENTRY + REP** -->
+
+<!-- * RANDOM =  -->
+<!--     + RANGE -->
+
+<!-- ```{r 16anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model16)) -->
+<!-- ``` -->
+
+
+## 17
+
+```{r model17, echo=FALSE}
+model17<-lmer(yld~entry + rep + (1|rep:pass), data=data, REML=TRUE)
+```
+
+### ANOVA 17
+
+**YIELD = ENTRY + REP**
+
+* RANDOM = 
+    + REP:PASS
+
+```{r 17anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model17))
+```
+
+
+## 18
+
+```{r model18, echo=FALSE}
+model18<-lmer(yld~entry + rep + (1|rep:rng), data=data, REML=TRUE)
+```
+
+### ANOVA 18
+
+**YIELD = ENTRY + REP**
+
+* RANDOM = 
+    + REP:RANGE
+
+```{r 18anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model18))
+```
+
+
+<!-- ## 19 -->
+
+<!-- ```{r model19, echo=FALSE} -->
+<!-- model19<-lmer(yld~entry + rep + (1|rng:pass), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 19 -->
+
+<!-- **YIELD = ENTRY + REP** -->
+
+<!-- * RANDOM =  -->
+<!--     + RANGE:PASS -->
+
+<!-- ```{r 19anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model19)) -->
+<!-- ``` -->
+
+
+## 20
+
+```{r model20, echo=FALSE}
+model20<-lmer(yld~entry + rep + (1|rep:rng) + (1|rep:pass), data=data, REML=TRUE)
+```
+
+### ANOVA 20
+
+**YIELD = ENTRY + REP**
+
+* RANDOM = 
+    + REP:RANGE
+    + REP:PASS
+
+```{r 20anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model20))
+```
+
+
+<!-- ## 21 -->
+
+<!-- ```{r model21, echo=FALSE} -->
+<!-- model21<-lmer(yld~entry + rep:pass + (1|rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+
+<!-- ### ANOVA 21 -->
+
+<!-- **YIELD = ENTRY + REP:PASS** -->
+
+<!-- * RANDOM =  -->
+<!--     + REP -->
+
+<!-- ```{r 21anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model21)) -->
+<!-- ``` -->
+
+
+<!-- ## 22 -->
+
+<!-- ```{r model22, echo=FALSE} -->
+<!-- model22<-lmer(yld~entry + rep:pass + (1|rep:rng), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 22 -->
+
+<!-- **YIELD = ENTRY + REP:PASS** -->
+
+<!-- * RANDOM =  -->
+<!--     + REP:RANGE -->
+
+<!-- ```{r 22anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model22)) -->
+<!-- ``` -->
+
+
+<!-- ## 23 -->
+
+<!-- ```{r model23, echo=FALSE} -->
+<!-- model23<-lmer(yld~entry + rep:pass + + (1|rep) + (1|rep:rng), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 23 -->
+
+<!-- **YIELD = ENTRY + REP:PASS** -->
+
+<!-- * RANDOM =  -->
+<!--     + REP -->
+<!--     + REP:RANGE -->
+
+<!-- ```{r 23anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model23)) -->
+<!-- ``` -->
+
+
+<!-- ## 24 -->
+
+<!-- ```{r model24, echo=FALSE} -->
+<!-- model24<-lmer(yld~entry + rep:rng + (1|rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 24 -->
+
+<!-- **YIELD = ENTRY + REP:RANGE** -->
+
+<!-- * RANDOM =  -->
+<!--     + REP -->
+
+<!-- ```{r 24anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model24)) -->
+<!-- ``` -->
+
+
+<!-- ## 25 -->
+
+<!-- ```{r model25, echo=FALSE} -->
+<!-- model25<-lmer(yld~entry + rep:rng + (1|rep:pass), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 25 -->
+
+<!-- **YIELD = ENTRY + REP:RANGE** -->
+
+<!-- * RANDOM =  -->
+<!--     + REP:PASS -->
+
+<!-- ```{r 25anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model25)) -->
+<!-- ``` -->
+
+
+<!-- ## 26 -->
+
+<!-- ```{r model26, echo=FALSE} -->
+<!-- model26<-lmer(yld~entry + rep:rng + (1|rep) + (1|rep:pass), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 26 -->
+
+<!-- **YIELD = ENTRY + REP:RANGE** -->
+
+<!-- * RANDOM =  -->
+<!--     + REP -->
+<!--     + REP:PASS -->
+
+<!-- ```{r 26anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model26)) -->
+<!-- ``` -->
+
+
+<!-- ## 27 -->
+
+<!-- ```{r model27, echo=FALSE} -->
+<!-- model27<-lmer(yld~entry + rep:rng + rep:pass + (1|rep), data=data, REML=TRUE) -->
+<!-- ``` -->
+
+<!-- ### ANOVA 27 -->
+
+<!-- **YIELD = ENTRY + REP:RANGE** -->
+
+<!-- * RANDOM =  -->
+<!--     + REP -->
+<!--     + REP:PASS -->
+
+<!-- ```{r 27anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
+<!-- options(scipen=7) -->
+<!-- paged_table(anova(model27)) -->
+<!-- ``` -->
+
+
+## **Mixed Model Comparisons**
+
+```{r model.comp, comment=NA, echo=FALSE, rows.print=25, message=FALSE}
+options(digits=6)
+bic<-BIC(model1, model2, model4, model6, model7, model8, model9, model11, model12, model13, model.jim, model15, model17, model18, model20)
+BIC<-bic$BIC
+aic<-AIC(model1, model2, model4, model6, model7, model8, model9, model11, model12, model13, model.jim, model15, model17, model18, model20)
+paged_table(cbind(aic, BIC))
+```
+
+
+
+## **CV & RSME Comparisons**
+
+```{r rsme, echo=FALSE, rows.print=25}
+m1<-sqrt(mean(residuals(model1)^2))
+m2<-sqrt(mean(residuals(model2)^2))
+
+m4<-sqrt(mean(residuals(model4)^2))
+
+m6<-sqrt(mean(residuals(model6)^2))
+m7<-sqrt(mean(residuals(model7)^2))
+m8<-sqrt(mean(residuals(model8)^2))
+m9<-sqrt(mean(residuals(model9)^2))
+
+m11<-sqrt(mean(residuals(model11)^2))
+m12<-sqrt(mean(residuals(model12)^2))
+m13<-sqrt(mean(residuals(model13)^2))
+mjim<-sqrt(mean(residuals(model.jim)^2))
+m15<-sqrt(mean(residuals(model15)^2))
+
+m17<-sqrt(mean(residuals(model17)^2))
+m18<-sqrt(mean(residuals(model18)^2))
+
+m20<-sqrt(mean(residuals(model20)^2))
+
+cv1<-LSDer::CVer(model1)
+cv2<-LSDer::CVer(model2)
+
+cv4<-LSDer::CVer(model4)
+
+cv6<-LSDer::CVer(model6)
+cv7<-LSDer::CVer(model7)
+cv8<-LSDer::CVer(model8)
+cv9<-LSDer::CVer(model9)
+
+cv11<-LSDer::CVer(model11)
+cv12<-LSDer::CVer(model12)
+cv13<-LSDer::CVer(model13)
+cvjim<-LSDer::CVer(model.jim)
+cv15<-LSDer::CVer(model15)
+
+cv17<-LSDer::CVer(model17)
+cv18<-LSDer::CVer(model18)
+
+cv20<-LSDer::CVer(model20)
+
+cvs<-data.frame("Model"=c("Model1", "Model2", "Model4", "Model6", "Model7", "Model8", "Model9", "Model11", "Model12", "Jim", "Model14", "Model15", "Model 17", "Model 18", "Model 20"), "CV" = c(cv1, cv2, cv4, cv6, cv7, cv8, cv9, cv11, cv12, cv13, cvjim, cv15, cv17, cv18, cv20), "RMSE" = c(m1, m2, m4, m6, m7, m8, m9, m11, m12, m13, mjim, m15, m17, m18, m20))
+paged_table(cvs)
+```
