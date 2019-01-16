@@ -69,7 +69,6 @@ library(cAIC4)
 ```
 
 - Corn Coversion Factor = **8.067**
-- Bean Conversion Factor = **7.779**
 
 ```{r setup, echo = FALSE}
 ###Set wd & Import CSV Dataset:
@@ -1669,21 +1668,228 @@ paged_table(anova(model.build73))
 ```
 
 
+## Model - Build74
+
+```{r model.build74, echo=FALSE}
+model.build74<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build74
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + REP:ENV
+
+```{r build74.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=8)
+paged_table(anova(model.build74))
+```
+
+
+
+## Model - Build75
+
+```{r model.build75, echo=FALSE}
+model.build75<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build75
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+
+```{r build75.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build75))
+```
+
+
+
+## Model - Build76
+
+```{r model.build76, echo=FALSE}
+model.build76<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build76
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+
+```{r build76.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build76))
+```
+
+
+
+## Model - Build77
+
+```{r model.build77, echo=FALSE}
+model.build77<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build77
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+
+```{r build77.anova, echo=FALSE, col.prints=7}
+options(scipen=7)
+paged_table(anova(model.build77))
+```
+
+
+
+## Model - Build78
+
+```{r model.build78, echo=FALSE}
+model.build78<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build78
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build78.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build78))
+```
+
+
+
+## Model - Build79
+
+```{r model.build79, echo=FALSE}
+model.build79<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build79
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + REP:ENV
+
+```{r build79.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build79))
+```
+
+
+
+## Model - Build80
+
+```{r model.build80, echo=FALSE}
+model.build80<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build80
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build80.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build80))
+```
+
+
+
+## Model - Build81
+
+```{r model.build81, echo=FALSE}
+model.build81<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build81
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build81.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build81))
+```
+
+
+
+## Model - Build82
+
+```{r model.build82, echo=FALSE}
+model.build82<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build82
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + ENTRY:ENV
+
+```{r build82.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build82))
+```
+
+
+
+## Model - Build83
+
+```{r model.build83, echo=FALSE}
+model.build83<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build83
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build83.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build83))
+```
+
 
 ## **ANOVA Comparisons**
 
 ```{r model.comp, comment=NA, echo=FALSE, rows.print=25, message=FALSE}
 options(digits=6)
-bic<-BIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73)
+bic<-BIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
 BIC<-bic$BIC
 
-dic<-DIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73)
+dic<-DIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
 DIC<-dic$DIC
 
-aicc<-AICc(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73)
+aicc<-AICc(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
 AICc<-aicc$AICc
 
-aic<-AIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73)
+aic<-AIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
 paged_table(cbind(aic, BIC, DIC, AICc))
 ```
 
@@ -1765,6 +1971,16 @@ mse.build70<-sqrt(mean(residuals(model.build70)^2))
 mse.build71<-sqrt(mean(residuals(model.build71)^2))
 mse.build72<-sqrt(mean(residuals(model.build72)^2))
 mse.build73<-sqrt(mean(residuals(model.build73)^2))
+mse.build74<-sqrt(mean(residuals(model.build74)^2))
+mse.build75<-sqrt(mean(residuals(model.build75)^2))
+mse.build76<-sqrt(mean(residuals(model.build76)^2))
+mse.build77<-sqrt(mean(residuals(model.build77)^2))
+mse.build78<-sqrt(mean(residuals(model.build78)^2))
+mse.build79<-sqrt(mean(residuals(model.build79)^2))
+mse.build80<-sqrt(mean(residuals(model.build80)^2))
+mse.build81<-sqrt(mean(residuals(model.build81)^2))
+mse.build82<-sqrt(mean(residuals(model.build82)^2))
+mse.build83<-sqrt(mean(residuals(model.build83)^2))
 jim<-LSDer::CVer(model.jim)
 ry1<-LSDer::CVer(model.ryan1)
 ry2<-LSDer::CVer(model.ryan2)
@@ -1837,8 +2053,18 @@ build69<-LSDer::CVer(model.build69)
 build70<-LSDer::CVer(model.build70)
 build71<-LSDer::CVer(model.build71)
 build72<-LSDer::CVer(model.build72)
-build73<-LSDer::CVer(model.build72)
-model.cvs<-data.frame("Model"=c("Build1", "Build2", "Build3", "Build4", "Build5", "Build6", "Build7", "Build8", "Build9", "Build10", "Build11", "Build12", "Build13", "Build14", "Build15", "Build16", "Build17", "Build18", "Build19", "Build20", "Build21", "Build22", "Build23", "Build24", "Build25", "Build26", "Build27", "Jim", "Build30", "Ryan1", "Build31",  "Build32", "Build33", "Ryan2", "Build35", "Build36", "Build37", "Build38", "Build39", "Build40", "Build41", "Build42", "Build43", "Build44", "Build45", "Build46", "Build47", "Build48", "Build49", "Build50", "Build51", "Build52", "Build53", "Build54", "Build55", "Build56", "Build57", "Build58", "Build59", "Build60", "Build61", "Build62", "Build63", "Build64", "Build65", "Build66", "Build67", "Build68", "Build69", "Build70", "Build71", "Build72", "Build73"), "CV" = c(build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25, build26, build27, jim, build29, build30, ry1, build32, build33, ry2, build35, build36, build37, build38, build39, build40, build41, build42, build43, build44, build45, build46, build47, build48, build49, build50, build51, build52, build53, build54, build55, build56, build57, build58, build59, build60, build61, build62, build63, build64, build65, build66, build67, build68, build69, build70, build71, build72, build73), "RMSE" = c(mse.build1, mse.build2, mse.build3, mse.build4, mse.build5, mse.build6, mse.build7, mse.build8, mse.build9, mse.build10, mse.build11, mse.build12, mse.build13, mse.build14, mse.build15, mse.build16, mse.build17, mse.build18, mse.build19, mse.build20, mse.build21, mse.build22, mse.build23, mse.build24, mse.build25, mse.build26, mse.build27, mse.jim, mse.build29, mse.build30, mse.ry1, mse.build32, mse.build33, mse.ry2, mse.build35, mse.build36, mse.build37, mse.build38, mse.build39, mse.build40, mse.build41, mse.build42, mse.build43, mse.build44, mse.build45, mse.build46, mse.build47, mse.build48, mse.build49, mse.build50, mse.build51, mse.build52, mse.build53, mse.build54, mse.build55, mse.build56, mse.build57, mse.build58, mse.build59, mse.build60, mse.build61, mse.build62, mse.build63, mse.build64, mse.build65, mse.build66, mse.build67, mse.build68, mse.build69, mse.build70, mse.build71, mse.build72, mse.build73))
+build73<-LSDer::CVer(model.build73)
+build74<-LSDer::CVer(model.build74)
+build75<-LSDer::CVer(model.build75)
+build76<-LSDer::CVer(model.build76)
+build77<-LSDer::CVer(model.build77)
+build78<-LSDer::CVer(model.build78)
+build79<-LSDer::CVer(model.build79)
+build80<-LSDer::CVer(model.build80)
+build81<-LSDer::CVer(model.build81)
+build82<-LSDer::CVer(model.build82)
+build83<-LSDer::CVer(model.build83)
+model.cvs<-data.frame("Model"=c("Build1", "Build2", "Build3", "Build4", "Build5", "Build6", "Build7", "Build8", "Build9", "Build10", "Build11", "Build12", "Build13", "Build14", "Build15", "Build16", "Build17", "Build18", "Build19", "Build20", "Build21", "Build22", "Build23", "Build24", "Build25", "Build26", "Build27", "Jim", "Build30", "Ryan1", "Build31",  "Build32", "Build33", "Ryan2", "Build35", "Build36", "Build37", "Build38", "Build39", "Build40", "Build41", "Build42", "Build43", "Build44", "Build45", "Build46", "Build47", "Build48", "Build49", "Build50", "Build51", "Build52", "Build53", "Build54", "Build55", "Build56", "Build57", "Build58", "Build59", "Build60", "Build61", "Build62", "Build63", "Build64", "Build65", "Build66", "Build67", "Build68", "Build69", "Build70", "Build71", "Build72", "Build73", "Build74", "Build75", "Build76", "Build77", "Build78", "Build79", "Build80", "Build81", "Build82", "Build83"), "CV" = c(build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25, build26, build27, jim, build29, build30, ry1, build32, build33, ry2, build35, build36, build37, build38, build39, build40, build41, build42, build43, build44, build45, build46, build47, build48, build49, build50, build51, build52, build53, build54, build55, build56, build57, build58, build59, build60, build61, build62, build63, build64, build65, build66, build67, build68, build69, build70, build71, build72, build73, build74, build75, build76, build77, build78, build79, build80, build81, build82, build83), "RMSE" = c(mse.build1, mse.build2, mse.build3, mse.build4, mse.build5, mse.build6, mse.build7, mse.build8, mse.build9, mse.build10, mse.build11, mse.build12, mse.build13, mse.build14, mse.build15, mse.build16, mse.build17, mse.build18, mse.build19, mse.build20, mse.build21, mse.build22, mse.build23, mse.build24, mse.build25, mse.build26, mse.build27, mse.jim, mse.build29, mse.build30, mse.ry1, mse.build32, mse.build33, mse.ry2, mse.build35, mse.build36, mse.build37, mse.build38, mse.build39, mse.build40, mse.build41, mse.build42, mse.build43, mse.build44, mse.build45, mse.build46, mse.build47, mse.build48, mse.build49, mse.build50, mse.build51, mse.build52, mse.build53, mse.build54, mse.build55, mse.build56, mse.build57, mse.build58, mse.build59, mse.build60, mse.build61, mse.build62, mse.build63, mse.build64, mse.build65, mse.build66, mse.build67, mse.build68, mse.build69, mse.build70, mse.build71, mse.build72, mse.build73, mse.build74, mse.build75, mse.build76, mse.build77, mse.build78, mse.build79, mse.build80, mse.build81, mse.build82, mse.build83))
 paged_table(model.cvs)
 ```
 
