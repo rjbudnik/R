@@ -22,11 +22,8 @@ params:
   year:
     label: "Year"
     value: 2018
-    input: slider
-    min: 2010
-    max: 2030
-    step: 1
-    sep: ""
+    input: select
+    choices: [2018, 2017, 2016]
   district:
     label: "District:"
     value: Northern
@@ -67,6 +64,8 @@ library(shinythemes)
 library(psych)
 library(emmeans)
 library(sjstats)
+library(MuMIn)
+library(cAIC4)
 ```
 
 - Corn Coversion Factor = **8.067**
@@ -77,7 +76,7 @@ library(sjstats)
 df_cc<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
 
 CCF<-8.067
-df_cc<-df_cc%>%mutate(yld = (wt*CCF))
+df_cc<-df_cc%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
 
 ###Subset data of interest:
 data<-filter(df_cc, exp==c(params$exp))
@@ -1674,12 +1673,18 @@ paged_table(anova(model.build73))
 ## **ANOVA Comparisons**
 
 ```{r model.comp, comment=NA, echo=FALSE, rows.print=25, message=FALSE}
-# paged_table(anova(model.ryan1, model.ryan2, model.jim, model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.build29, model.build30, model.build32, model.build33, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, refit=FALSE))
 options(digits=6)
 bic<-BIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73)
 BIC<-bic$BIC
+
+dic<-DIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73)
+DIC<-dic$DIC
+
+aicc<-AICc(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73)
+AICc<-aicc$AICc
+
 aic<-AIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73)
-paged_table(cbind(aic, BIC))
+paged_table(cbind(aic, BIC, DIC, AICc))
 ```
 
 
@@ -1915,6 +1920,21 @@ paged_table(anova(lmodel5))
 ```
 
 
+## Linear Model 6
+
+```{r lmodel6, comment=NA, echo=FALSE, message=FALSE}
+lmodel6<-lm(yld~entry + book.name + rep:rng + rep:pass, data=data)
+```
+
+### ANOVA Linear6
+
+**YIELD = ENTRY + ENV + (REP x RANGE) + (REP x PASS)**
+
+```{r lmodel6.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
+paged_table(anova(lmodel6))
+```
+
+
 ## **Linear Model Comparison**
 
 ```{r model.lbiccalc, comment=NA, echo=FALSE, message=FALSE}
@@ -1924,12 +1944,20 @@ bicl2<-BIC(lmodel2)
 bicl3<-BIC(lmodel3)
 bicl4<-BIC(lmodel4)
 bicl5<-BIC(lmodel5)
+bicl6<-BIC(lmodel6)
 aicl1<-AIC(lmodel1)
 aicl2<-AIC(lmodel2)
 aicl3<-AIC(lmodel3)
 aicl4<-AIC(lmodel4)
 aicl5<-AIC(lmodel5)
-model.lcomp<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5"), "AIC" = as.numeric(c(aicl1, aicl2, aicl3, aicl4, aicl5)), "BIC" = as.numeric(c(bicl1, bicl2, bicl3, bicl4, bicl5)))
+aicl6<-AIC(lmodel6)
+aiccl1<-AICc(lmodel1)
+aiccl2<-AICc(lmodel2)
+aiccl3<-AICc(lmodel3)
+aiccl4<-AICc(lmodel4)
+aiccl5<-AICc(lmodel5)
+aiccl6<-AICc(lmodel6)
+model.lcomp<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6"), "AIC" = as.numeric(c(aicl1, aicl2, aicl3, aicl4, aicl5, aicl6)), "BIC" = as.numeric(c(bicl1, bicl2, bicl3, bicl4, bicl5, bicl6)),"AICc" = as.numeric(c(aiccl1, aiccl2, aiccl3, aiccl4, aiccl5, aiccl6)))
 paged_table(model.lcomp)
 ```
 
@@ -1943,14 +1971,16 @@ mse.linear2<-sqrt(mean(residuals(lmodel2)^2))
 mse.linear3<-sqrt(mean(residuals(lmodel3)^2))
 mse.linear4<-sqrt(mean(residuals(lmodel4)^2))
 mse.linear5<-sqrt(mean(residuals(lmodel5)^2))
+mse.linear6<-sqrt(mean(residuals(lmodel6)^2))
 l1<-cv.model(lmodel1)
 l2<-cv.model(lmodel2)
 l3<-cv.model(lmodel3)
 l4<-cv.model(lmodel4)
 l5<-cv.model(lmodel5)
+l6<-cv.model(lmodel6)
 percent <- function(x, digits = 2, format = "f", ...) {paste0(formatC( x, format = format, digits = digits, ...), "%")}
-l.cvs<-c(l1, l2, l3, l4, l5)
+l.cvs<-c(l1, l2, l3, l4, l5, l6)
 pl.cvs<-percent(l.cvs)
-model.lcvs<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5"), "CV" = c(pl.cvs), "RMSE" = c(mse.linear1, mse.linear2, mse.linear3, mse.linear4, mse.linear5))
+model.lcvs<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6"), "CV" = c(pl.cvs), "RMSE" = c(mse.linear1, mse.linear2, mse.linear3, mse.linear4, mse.linear5, mse.linear6))
 paged_table(model.lcvs)
 ```
