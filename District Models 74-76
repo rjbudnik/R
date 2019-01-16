@@ -1,0 +1,334 @@
+---
+title: "**District Wide Model Analysis**"
+author: "Ryan Budnik"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float:
+      collapsed: true
+params:
+  data:
+    label: "Input dataset:"
+    value: 18CC.csv
+    input: select
+    choices: [16CC.csv, 17CC.csv, 18CC.csv]
+  exp:
+    label: "Experiment:"
+    value: C81A
+    input: select
+    choices: [C61A,	C61B,	C62A,	C62B,	C63A,	C63B, C71A,	C71B,	C72A,	C72B,	C73A,	C73B, C81A,	C81B,	C82A, C82B,	C83A,	C83B]
+  year:
+    label: "Year"
+    value: 2018
+    input: select
+    choices: [2018, 2017, 2016]
+  district:
+    label: "District:"
+    value: Northern
+    input: select
+    choices: [Northern, Central, Southern]
+  season:
+    label: "Season Length:"
+    value: Early
+    input: select
+    choices: [Early, Full]
+---
+
+# Overview:
+The following report renders a district-wide mixed model analysis with corresponding figures for the *`r params$year` `r params$district` District `r params$season`-season Test*, **`r params$exp`**.
+
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(predictmeans)
+library(shiny)
+library(shinythemes)
+library(sjstats)
+library(MuMIn)
+library(cAIC4)
+```
+- Corn Coversion Factor = **8.067**
+
+```{r setup, echo = FALSE}
+###Set wd & Import CSV Dataset:
+df_cc<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+
+CCF<-8.067
+df_cc<-df_cc%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+
+###Subset data of interest:
+data<-filter(df_cc, exp==c(params$exp))
+
+
+###View Classifications & Set Factors:
+data$book.name<-factor(data$book.name)
+data$exp<-factor(data$exp)
+data$entry<-factor(data$entry)
+data$ped.id<-factor(data$ped.id)
+data$code<-factor(data$code)
+data$rng<-factor(data$rng)
+data$pass<-factor(data$pass)
+data$rep<-factor(data$rep)
+data$plot<-factor(data$plot)
+attach(data)
+```
+
+## Model - Build 74
+
+```{r model.build74, echo=FALSE}
+model.build74<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build74
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + REP:ENV
+
+```{r build74.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=8)
+paged_table(anova(model.build74))
+```
+
+
+
+## Model - Build 75
+
+```{r model.build75, echo=FALSE}
+model.build75<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build75
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+
+```{r build75.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build75))
+```
+
+
+
+## Model - Build 76
+
+```{r model.build76, echo=FALSE}
+model.build76<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build76
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+
+```{r build76.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build76))
+```
+
+
+
+## Model - Build 77
+
+```{r model.build77, echo=FALSE}
+model.build77<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
+```
+
+### ANOVA Build77
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+
+```{r build77.anova, echo=FALSE, col.prints=7}
+options(scipen=7)
+paged_table(anova(model.build77))
+```
+
+
+
+## Model - Build 78
+
+```{r model.build78, echo=FALSE}
+model.build78<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build78
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build78.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build78))
+```
+
+
+
+## Model - Build 79
+
+```{r model.build79, echo=FALSE}
+model.build79<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build79
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + REP:ENV
+
+```{r build79.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build79))
+```
+
+
+
+## Model - Build 80
+
+```{r model.build80, echo=FALSE}
+model.build80<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build80
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + REP:ENV
+
+```{r build80.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build80))
+```
+
+
+
+## Model - Build 81
+
+```{r model.build81, echo=FALSE}
+model.build81<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build81
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build81.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build81))
+```
+
+
+
+## Model - Build 82
+
+```{r model.build82, echo=FALSE}
+model.build82<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build82
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + ENTRY:ENV
+
+```{r build82.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build82))
+```
+
+
+
+## Model - Build 83
+
+```{r model.build83, echo=FALSE}
+model.build83<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+```
+
+### ANOVA Build83
+
+**YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
+
+* RANDOM = 
+    + RANGE:ENV:REP
+    + PASS:ENV:REP
+    + ENTRY:ENV
+
+```{r build83.anova, comment=NA, echo=FALSE, col.prints=7, message=FALSE}
+options(scipen=7)
+paged_table(anova(model.build83))
+```
+
+## **ANOVA Comparisons**
+
+```{r model.comp, comment=NA, echo=FALSE, rows.print=25, message=FALSE}
+options(digits=6)
+bic<-BIC(model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
+BIC<-bic$BIC
+
+dic<-DIC(model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
+DIC<-dic$DIC
+
+aicc<-AICc(model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
+AICc<-aicc$AICc
+
+aic<-AIC(model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
+paged_table(cbind(aic, BIC, DIC, AICc))
+```
+
+
+
+## **CV & RSME Comparisons**
+
+```{r rsme, echo=FALSE, rows.print=25}
+mse.build74<-sqrt(mean(residuals(model.build74)^2))
+mse.build75<-sqrt(mean(residuals(model.build75)^2))
+mse.build76<-sqrt(mean(residuals(model.build76)^2))
+mse.build77<-sqrt(mean(residuals(model.build77)^2))
+mse.build78<-sqrt(mean(residuals(model.build78)^2))
+mse.build79<-sqrt(mean(residuals(model.build79)^2))
+mse.build80<-sqrt(mean(residuals(model.build80)^2))
+mse.build81<-sqrt(mean(residuals(model.build81)^2))
+mse.build82<-sqrt(mean(residuals(model.build82)^2))
+mse.build83<-sqrt(mean(residuals(model.build83)^2))
+build74<-LSDer::CVer(model.build74)
+build75<-LSDer::CVer(model.build75)
+build76<-LSDer::CVer(model.build76)
+build77<-LSDer::CVer(model.build77)
+build78<-LSDer::CVer(model.build78)
+build79<-LSDer::CVer(model.build79)
+build80<-LSDer::CVer(model.build80)
+build81<-LSDer::CVer(model.build81)
+build82<-LSDer::CVer(model.build82)
+build83<-LSDer::CVer(model.build82)
+model.cvs<-data.frame("Model"=c("74", "75", "76", "77", "78", "79", "80", "81", "82", "83"), "CV" = c(build74, build75, build76, build77, build78, build79, build80, build81, build82, build83), "RMSE" = c(mse.build74, mse.build75, mse.build76, mse.build77, mse.build78, mse.build79, mse.build80, mse.build81, mse.build82, mse.build83))
+paged_table(model.cvs)
+```
