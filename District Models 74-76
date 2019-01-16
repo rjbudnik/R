@@ -80,6 +80,8 @@ data$plot<-factor(data$plot)
 attach(data)
 ```
 
+# Mixed Model Analyses: {.tabset .tabset-fade}
+
 ## Model - Build 74
 
 ```{r model.build74, echo=FALSE}
