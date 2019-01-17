@@ -36,14 +36,6 @@ params:
     choices: [Early, Full]
 ---
 
-```{r logo, cache=TRUE, echo=FALSE}
-htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "DistrictAnalysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), 
-               alt = 'logo',
-               style = 'position:absolute; top:0; right:0; padding:10px;')
-```
-
----
-
 # Overview:
 The following report renders a district-wide mixed model analysis with corresponding figures for the *`r params$year` `r params$district` District `r params$season`-season Test*, **`r params$exp`**.
 
@@ -157,13 +149,13 @@ abline(h = min.yld, col="red")
 
 # Mixed Model Analyses: {.tabset .tabset-fade}
 
-## Model - Build 1
+## 1
 
 ```{r model.build1, echo=FALSE}
 model.build1<-lmer(yld~entry + book.name + (1|rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build1
+### Model 1
 
 **YIELD = ENTRY + ENV**
 
@@ -177,13 +169,13 @@ paged_table(anova(model.build1))
 
 
 
-## Model - Build 2
+## 2
 
 ```{r model.build2, echo=FALSE}
 model.build2<-lmer(yld~entry + book.name + (1|pass), data=data, REML=TRUE)
 ```
 
-### ANOVA Build2
+### Model 2
 
 **YIELD = ENTRY + ENV**
 
@@ -197,13 +189,13 @@ paged_table(anova(model.build2))
 
 
 
-## Model - Build 3
+## 3
 
 ```{r model.build3, echo=FALSE}
 model.build3<-lmer(yld~entry + book.name + (1|rng), data=data, REML=TRUE)
 ```
 
-### ANOVA Build3
+### Model 3
 
 **YIELD = ENTRY + ENV**
 
@@ -217,13 +209,13 @@ paged_table(anova(model.build3))
 
 
 
-## Model - Build 4
+## 4
 
 ```{r model.build4, echo=FALSE}
 model.build4<-lmer(yld~entry + book.name + (1|rep) + (1|pass) + (1|rng), data=data, REML=TRUE)
 ```
 
-### ANOVA Build4
+### Model 4
 
 **YIELD = ENTRY + ENV**
 
@@ -239,13 +231,13 @@ paged_table(anova(model.build4))
 
 
 
-## Model - Build 5
+## 5
 
 ```{r model.build5, echo=FALSE}
 model.build5<-lmer(yld~entry + book.name + (1|rep:pass), data=data, REML=TRUE)
 ```
 
-### ANOVA Build5
+### Model 5
 
 **YIELD = ENTRY + ENV**
 
@@ -259,13 +251,13 @@ paged_table(anova(model.build5))
 
 
 
-## Model - Build 6
+## 6
 
 ```{r model.build6, echo=FALSE}
 model.build6<-lmer(yld~entry + book.name + (1|rep:rng), data=data, REML=TRUE)
 ```
 
-### ANOVA Build6
+### Model 6
 
 **YIELD = ENTRY + ENV**
 
@@ -279,13 +271,13 @@ paged_table(anova(model.build6))
 
 
 
-## Model - Build 7
+## 7
 
 ```{r model.build7, echo=FALSE}
 model.build7<-lmer(yld~entry + book.name + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build7
+### Model 7
 
 **YIELD = ENTRY + ENV**
 
@@ -299,13 +291,13 @@ paged_table(anova(model.build7))
 
 
 
-## Model - Build 8
+## 8
 
 ```{r model.build8, echo=FALSE}
 model.build8<-lmer(yld~entry + book.name + (1|rep:pass) + (1|rep:rng), data=data, REML=TRUE)
 ```
 
-### ANOVA Build8
+### Model 8
 
 **YIELD = ENTRY + ENV**
 
@@ -320,13 +312,13 @@ paged_table(anova(model.build8))
 
 
 
-## Model - Build 9
+## 9
 
 ```{r model.build9, echo=FALSE}
 model.build9<-lmer(yld~entry + book.name + (1|rep) + (1|rep:pass) + (1|rep:rng), data=data, REML=TRUE)
 ```
 
-### ANOVA Build9
+### Model 9
 
 **YIELD = ENTRY + ENV**
 
@@ -342,13 +334,13 @@ paged_table(anova(model.build9))
 
 
 
-## Model - Build 10
+## 10
 
 ```{r model.build10, echo=FALSE}
 model.build10<-lmer(yld~entry + book.name + (1|rep:pass)+ (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build10
+### Model 10
 
 **YIELD = ENTRY + ENV**
 
@@ -363,13 +355,13 @@ paged_table(anova(model.build10))
 
 
 
-## Model - Build 11
+## 11
 
 ```{r model.build11, echo=FALSE}
 model.build11<-lmer(yld~entry + book.name + (1|rep:rng)+ (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build11
+### Model 11
 
 **YIELD = ENTRY + ENV**
 
@@ -384,13 +376,13 @@ paged_table(anova(model.build11))
 
 
 
-## Model - Build 12
+## 12
 
 ```{r model.build12, echo=FALSE}
 model.build12<-lmer(yld~entry + book.name + (1|rep:pass) + (1|rep:rng) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build12
+### Model 12
 
 **YIELD = ENTRY + ENV**
 
@@ -406,13 +398,13 @@ paged_table(anova(model.build12))
 
 
 
-## Model - Build 13
+## 13
 
 ```{r model.build13, echo=FALSE}
 model.build13<-lmer(yld~entry + book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build13
+### Model 13
 
 **YIELD = ENTRY + ENV**
 
@@ -426,13 +418,13 @@ paged_table(anova(model.build13))
 
 
 
-## Model - Build 14
+## 14
 
 ```{r model.build14, echo=FALSE}
 model.build14<-lmer(yld~entry + book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build14
+### Model 14
 
 **YIELD = ENTRY + ENV**
 
@@ -446,13 +438,13 @@ paged_table(anova(model.build14))
 
 
 
-## Model - Build 15
+## 15
 
 ```{r model.build15, echo=FALSE}
 model.build15<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build15
+### Model 15
 
 **YIELD = ENTRY + ENV**
 
@@ -467,13 +459,13 @@ paged_table(anova(model.build15))
 
 
 
-## Model - Build 16
+## 16
 
 ```{r model.build16, echo=FALSE}
 model.build16<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep)  + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build16
+### Model 16
 
 **YIELD = ENTRY + ENV**
 
@@ -489,13 +481,13 @@ paged_table(anova(model.build16))
 
 
 
-## Model - Build 17
+## 17
 
 ```{r model.build17, echo=FALSE}
 model.build17<-lmer(yld~entry + book.name + (1|pass:book.name:rep)+ (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build17
+### Model 17
 
 **YIELD = ENTRY + ENV**
 
@@ -510,13 +502,13 @@ paged_table(anova(model.build17))
 
 
 
-## Model - Build 18
+## 18
 
 ```{r model.build18, echo=FALSE}
 model.build18<-lmer(yld~entry + book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build18
+### Model 18
 
 **YIELD = ENTRY + ENV**
 
@@ -531,13 +523,13 @@ paged_table(anova(model.build18))
 
 
 
-## Model - Build 19
+## 19
 
 ```{r model.build19, echo=FALSE}
 model.build19<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build19
+### Model 19
 
 **YIELD = ENTRY + ENV**
 
@@ -553,14 +545,14 @@ paged_table(anova(model.build19))
 
 
 
-## Model - Build 20
+## 20
 
 ```{r model.build20, echo=FALSE}
 model.build20<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build20
+### Model 20
 
 **YIELD = ENTRY + ENV + (REP x ENV)**
 
@@ -574,14 +566,14 @@ paged_table(anova(model.build20))
 
 
 
-## Model - Build 21
+## 21
 
 ```{r model.build21, echo=FALSE}
 model.build21<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build21
+### Model 21
 
 **YIELD = ENTRY + ENV + (REP x ENV)**
 
@@ -595,14 +587,14 @@ paged_table(anova(model.build21))
 
 
 
-## Model - Build 22
+## 22
 
 ```{r model.build22, echo=FALSE}
 model.build22<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build22
+### Model 22
 
 **YIELD = ENTRY + ENV + (REP x ENV)**
 
@@ -617,14 +609,14 @@ paged_table(anova(model.build22))
 
 
 
-## Model - Build 23
+## 23
 
 ```{r model.build23, echo=FALSE, message=FALSE}
 model.build23<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build23
+### Model 23
 
 **YIELD = ENTRY + ENV + (REP x ENV)**
 
@@ -639,14 +631,14 @@ paged_table(anova(model.build23))
 
 
 
-## Model - Build 24
+## 24
 
 ```{r model.build24, echo=FALSE}
 model.build24<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build24
+### Model 24
 
 **YIELD = ENTRY + ENV + (REP x ENV)**
 
@@ -661,14 +653,14 @@ paged_table(anova(model.build24))
 
 
 
-## Model - Build 25
+## 25
 
 ```{r model.build25, echo=FALSE}
 model.build25<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build25
+### Model 25
 
 **YIELD = ENTRY + ENV + (REP x ENV)**
 
@@ -684,14 +676,14 @@ paged_table(anova(model.build25))
 
 
 
-## Model - Build 26
+## 6
 
 ```{r model.build26, echo=FALSE}
 model.build26<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build26
+### Model 26
 
 **YIELD = ENTRY + ENV + (REP x ENV)**
 
@@ -706,14 +698,14 @@ paged_table(anova(model.build26))
 
 
 
-## Model - Build 27
+## 27
 
 ```{r model.build27, echo=FALSE}
 model.build27<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build27
+### Model 27
 
 **YIELD = ENTRY + ENV + (REP x ENV)**
 
@@ -728,14 +720,14 @@ paged_table(anova(model.build27))
 
 
 
-## Model - Jim
+## 28
 
 ```{r model.build28, echo=FALSE}
-model.jim<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+model.build28<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Jim
+### Model 28
 
 **YIELD = ENTRY + ENV + (REP x ENV)**
 
@@ -746,19 +738,19 @@ model.jim<-lmer(yld~entry + book.name + rep:book.name + (1|rng:book.name:rep) + 
 
 ```{r build28.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
 options(scipen=7)
-paged_table(anova(model.jim))
+paged_table(anova(model.build28))
 ```
 
 
 
-## Model - Build 29
+## 29
 
 ```{r model.build29, echo=FALSE}
 model.build29<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build29
+### Model 29
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
@@ -772,14 +764,14 @@ paged_table(anova(model.build29))
 
 
 
-## Model - Build 30
+## 30
 
 ```{r model.build30, echo=FALSE}
 model.build30<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build30
+### Model 30
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
@@ -793,13 +785,13 @@ paged_table(anova(model.build30))
 
 
 
-## Model - Ryan Suggestion 1
+## Ryan 1
 
 ```{r model.build31, echo=FALSE}
 model.ryan1<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Ryan1
+### Model Ryan1
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
@@ -814,14 +806,14 @@ paged_table(anova(model.ryan1))
 
 
 
-## Model - Build 32
+## 32
 
 ```{r model.build32, echo=FALSE}
 model.build32<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build32
+### Model 32
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
@@ -836,14 +828,14 @@ paged_table(anova(model.build32))
 
 
 
-## Model - Build 33
+## 33
 
 ```{r model.build33, echo=FALSE}
 model.build33<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build33
+### Model 33
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
@@ -858,13 +850,13 @@ paged_table(anova(model.build33))
 
 
 
-## Model - Ryan Suggestion 2
+## Ryan2
 
 ```{r model.build34, echo=FALSE}
 model.ryan2<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Ryan2
+### Model Ryan2
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
@@ -880,14 +872,14 @@ paged_table(anova(model.ryan2))
 
 
 
-## Model - Build 35
+## 35
 
 ```{r model.build35, echo=FALSE}
 model.build35<-lmer(yld~entry + book.name + entry:book.name + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build35
+### Model 35
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
@@ -902,14 +894,14 @@ paged_table(anova(model.build35))
 
 
 
-## Model - Build 36
+## 36
 
 ```{r model.build36, echo=FALSE}
 model.build36<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build36
+### Model 36
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
@@ -924,14 +916,14 @@ paged_table(anova(model.build36))
 
 
 
-## Model - Build 37
+## 37
 
 ```{r model.build37, echo=FALSE}
 model.build37<-lmer(yld~entry + book.name + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 
 ```
 
-### ANOVA Build37
+### Model 37
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV)**
 
@@ -947,13 +939,13 @@ paged_table(anova(model.build37))
 
 
 
-## Model - Build 38
+## 38
 
 ```{r model.build38, echo=FALSE}
 model.build38<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build38
+### Model 38
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
@@ -967,13 +959,13 @@ paged_table(anova(model.build38))
 
 
 
-## Model - Build 39
+## 39
 
 ```{r model.build39, echo=FALSE}
 model.build39<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build39
+### Model 39
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
@@ -987,13 +979,13 @@ paged_table(anova(model.build39))
 
 
 
-## Model - Build 40
+## 40
 
 ```{r model.build40, echo=FALSE}
 model.build40<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build40
+### Model 40
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1007,13 +999,13 @@ paged_table(anova(model.build40))
 
 
 
-## Model - Build 41
+## 41
 
 ```{r model.build41, echo=FALSE}
 model.build41<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build41
+### Model 41
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1028,13 +1020,13 @@ paged_table(anova(model.build41))
 
 
 
-## Model - Build 42
+## 42
 
 ```{r model.build42, echo=FALSE}
 model.build42<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build42
+### Model 42
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1049,13 +1041,13 @@ paged_table(anova(model.build42))
 
 
 
-## Model - Build 43
+## 43
 
 ```{r model.build43, echo=FALSE}
 model.build43<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build43
+### Model 43
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1070,13 +1062,13 @@ paged_table(anova(model.build43))
 
 
 
-## Model - Build 44
+## 44
 
 ```{r model.build44, echo=FALSE}
 model.build44<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build44
+### Model 44
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1092,13 +1084,13 @@ paged_table(anova(model.build44))
 
 
 
-## Model - Build 45
+## 45
 
 ```{r model.build45, echo=FALSE}
 model.build45<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build45
+### Model 45
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1113,13 +1105,13 @@ paged_table(anova(model.build45))
 
 
 
-## Model - Build 46
+## 46
 
 ```{r model.build46, echo=FALSE}
 model.build46<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build46
+### Model 46
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1134,13 +1126,13 @@ paged_table(anova(model.build46))
 
 
 
-## Model - Build 47
+## 47
 
 ```{r model.build47, echo=FALSE}
 model.build47<-lmer(yld~entry + book.name + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build47
+### Model 47
 
 **YIELD = ENTRY + ENV + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1155,13 +1147,13 @@ paged_table(anova(model.build47))
 ```
 
 
-## Model - Build48
+## 48
 
 ```{r model.build48, echo=FALSE}
 model.build48<-lmer(yld~entry + book.name + rep + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build48
+### Model 48
 
 **YIELD = ENTRY + ENV + REP**
 
@@ -1174,13 +1166,13 @@ paged_table(anova(model.build48))
 ```
 
 
-## Model - Build49
+## 49
 
 ```{r model.build49, echo=FALSE}
 model.build49<-lmer(yld~entry + book.name + rep + (1|rng:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build49
+### Model 49
 
 **YIELD = ENTRY + ENV + REP**
 
@@ -1193,13 +1185,13 @@ paged_table(anova(model.build49))
 ```
 
 
-## Model - Build50
+## 50
 
 ```{r model.build50, echo=FALSE}
 model.build50<-lmer(yld~entry + book.name + rep + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build50
+### Model 50
 
 **YIELD = ENTRY + ENV + REP**
 
@@ -1213,13 +1205,13 @@ paged_table(anova(model.build50))
 ```
 
 
-## Model - Build51
+## 51
 
 ```{r model.build51, echo=FALSE}
 model.build51<-lmer(yld~entry + book.name + rep + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build51
+### Model 51
 
 **YIELD = ENTRY + ENV + REP**
 
@@ -1234,13 +1226,13 @@ paged_table(anova(model.build51))
 ```
 
 
-## Model - Build52
+## 52
 
 ```{r model.build52, echo=FALSE}
 model.build52<-lmer(yld~entry + book.name + rep + entry:book.name + (1|book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build52
+### Model 52
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV)**
 
@@ -1253,13 +1245,13 @@ paged_table(anova(model.build52))
 ```
 
 
-## Model - Build53
+## 53
 
 ```{r model.build53, echo=FALSE}
 model.build53<-lmer(yld~entry + book.name + rep + entry:book.name  + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build53
+### Model 53
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV)**
 
@@ -1272,13 +1264,13 @@ paged_table(anova(model.build53))
 ```
 
 
-## Model - Build54
+## 54
 
 ```{r model.build54, echo=FALSE}
 model.build54<-lmer(yld~entry + book.name + rep + entry:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build54
+### Model 54
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV)**
 
@@ -1291,13 +1283,13 @@ paged_table(anova(model.build54))
 ```
 
 
-## Model - Build55
+## 55
 
 ```{r model.build55, echo=FALSE}
 model.build55<-lmer(yld~entry + book.name + rep + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build55
+### Model 55
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV)**
 
@@ -1311,13 +1303,13 @@ paged_table(anova(model.build55))
 ```
 
 
-## Model - Build56
+## 56
 
 ```{r model.build56, echo=FALSE}
 model.build56<-lmer(yld~entry + book.name + rep + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build56
+### Model 56
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV)**
 
@@ -1332,13 +1324,13 @@ paged_table(anova(model.build56))
 ```
 
 
-## Model - Build57
+## 57
 
 ```{r model.build57, echo=FALSE}
 model.build57<-lmer(yld~entry + book.name + rep + rep:book.name + (1|book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build57
+### Model 57
 
 **YIELD = ENTRY + ENV + REP + (REP x ENV)**
 
@@ -1351,13 +1343,13 @@ paged_table(anova(model.build49))
 ```
 
 
-## Model - Build58
+## 58
 
 ```{r model.build58, echo=FALSE}
 model.build58<-lmer(yld~entry + book.name + rep + rep:book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build58
+### Model 58
 
 **YIELD = ENTRY + ENV + REP + (REP x ENV)**
 
@@ -1370,13 +1362,13 @@ paged_table(anova(model.build58))
 ```
 
 
-## Model - Build59
+## 59
 
 ```{r model.build59, echo=FALSE}
 model.build59<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build59
+### Model 59
 
 **YIELD = ENTRY + ENV + REP + (REP x ENV)**
 
@@ -1389,13 +1381,13 @@ paged_table(anova(model.build59))
 ```
 
 
-## Model - Build60
+## 60
 
 ```{r model.build60, echo=FALSE}
 model.build60<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build60
+### Model 60
 
 **YIELD = ENTRY + ENV + REP + (REP x ENV)**
 
@@ -1409,13 +1401,13 @@ paged_table(anova(model.build60))
 ```
 
 
-## Model - Build61
+## 61
 
 ```{r model.build61, echo=FALSE}
 model.build61<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build61
+### Model 61
 
 **YIELD = ENTRY + ENV + REP + (REP x ENV)**
 
@@ -1429,13 +1421,13 @@ options(scipen=6)
 paged_table(anova(model.build61))
 ```
 
-## Model - Build62
+## 62
 
 ```{r model.build62, echo=FALSE}
 model.build62<-lmer(yld~entry + book.name + rep + rep:book.name + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build62
+### Model 62
 
 **YIELD = ENTRY + ENV + REP + (REP x ENV)**
 
@@ -1447,13 +1439,13 @@ options(scipen=6)
 paged_table(anova(model.build62))
 ```
 
-## Model - Build63
+## 3
 
 ```{r model.build63, echo=FALSE}
 model.build63<-lmer(yld~entry + book.name + rep + rep:book.name + (1|pass:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build63
+### Model 63
 
 **YIELD = ENTRY + ENV + REP + (REP x ENV)**
 
@@ -1467,13 +1459,13 @@ paged_table(anova(model.build63))
 ```
 
 
-## Model - Build64
+## 64
 
 ```{r model.build64, echo=FALSE}
 model.build64<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build64
+### Model 64
 
 **YIELD = ENTRY + ENV + REP + (REP x ENV)**
 
@@ -1487,13 +1479,13 @@ paged_table(anova(model.build64))
 ```
 
 
-## Model - Build65
+## Jim
 
 ```{r model.build65, echo=FALSE}
-model.build65<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+model.jim<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build65
+### Model Jim
 
 **YIELD = ENTRY + ENV + REP + (REP x ENV)**
 
@@ -1504,17 +1496,17 @@ model.build65<-lmer(yld~entry + book.name + rep + rep:book.name + (1|rng:book.na
 
 ```{r build65.anova, echo=FALSE, col.prints=7}
 options(scipen=6)
-paged_table(anova(model.build65))
+paged_table(anova(model.jim))
 ```
 
 
-## Model - Build66
+## 66
 
 ```{r model.build66, echo=FALSE}
 model.build66<-lmer(yld~entry + book.name + rep + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build66
+### Model 66
 
 **YIELD = ENTRY + ENV + REP**
 
@@ -1527,13 +1519,13 @@ paged_table(anova(model.build66))
 ```
 
 
-## Model - Build67
+## 67
 
 ```{r model.build67, echo=FALSE}
 model.build67<-lmer(yld~entry + book.name + rep + (1|pass:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build67
+### Model 67
 
 **YIELD = ENTRY + ENV + REP**
 
@@ -1547,13 +1539,13 @@ paged_table(anova(model.build67))
 ```
 
 
-## Model - Build68
+## 68
 
 ```{r model.build68, echo=FALSE}
 model.build68<-lmer(yld~entry + book.name + rep + (1|rng:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build68
+### Model 68
 
 **YIELD = ENTRY + ENV + REP**
 
@@ -1567,13 +1559,13 @@ paged_table(anova(model.build68))
 ```
 
 
-## Model - Build69
+## 69
 
 ```{r model.build69, echo=FALSE}
 model.build69<-lmer(yld~entry + book.name + rep + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build69
+### Model 69
 
 **YIELD = ENTRY + ENV + REP**
 
@@ -1588,13 +1580,13 @@ paged_table(anova(model.build69))
 ```
 
 
-## Model - Build70
+## 70
 
 ```{r model.build70, echo=FALSE}
 model.build70<-lmer(yld~entry + book.name + rep + entry:book.name + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build70
+### Model 70
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV)**
 
@@ -1607,13 +1599,13 @@ paged_table(anova(model.build70))
 ```
 
 
-## Model - Build71
+## 71
 
 ```{r model.build71, echo=FALSE}
 model.build71<-lmer(yld~entry + book.name + rep + entry:book.name + (1|pass:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build71
+### Model 71
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV)**
 
@@ -1627,13 +1619,13 @@ paged_table(anova(model.build71))
 ```
 
 
-## Model - Build72
+## 72
 
 ```{r model.build72, echo=FALSE}
 model.build72<-lmer(yld~entry + book.name + rep + entry:book.name + (1|rng:book.name:rep) +  (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build72
+### Model 72
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV)**
 
@@ -1647,13 +1639,13 @@ paged_table(anova(model.build72))
 ```
 
 
-## Model - Build73
+## 73
 
 ```{r model.build73, echo=FALSE}
 model.build73<-lmer(yld~entry + book.name + rep + entry:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build73
+### Model 73
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV)**
 
@@ -1668,13 +1660,13 @@ paged_table(anova(model.build73))
 ```
 
 
-## Model - Build74
+## 74
 
 ```{r model.build74, echo=FALSE}
 model.build74<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build74
+### Model 74
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1688,13 +1680,13 @@ paged_table(anova(model.build74))
 
 
 
-## Model - Build75
+## 75
 
 ```{r model.build75, echo=FALSE}
 model.build75<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build75
+### Model 75
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1708,13 +1700,13 @@ paged_table(anova(model.build75))
 
 
 
-## Model - Build76
+## 76
 
 ```{r model.build76, echo=FALSE}
 model.build76<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build76
+### Model 76
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1728,13 +1720,13 @@ paged_table(anova(model.build76))
 
 
 
-## Model - Build77
+## 77
 
 ```{r model.build77, echo=FALSE}
 model.build77<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep), data=data, REML=TRUE)
 ```
 
-### ANOVA Build77
+### Model 77
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1749,13 +1741,13 @@ paged_table(anova(model.build77))
 
 
 
-## Model - Build78
+## 78
 
 ```{r model.build78, echo=FALSE}
 model.build78<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build78
+### Model 78
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1770,13 +1762,13 @@ paged_table(anova(model.build78))
 
 
 
-## Model - Build79
+## 79
 
 ```{r model.build79, echo=FALSE}
 model.build79<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build79
+### Model 79
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1791,13 +1783,13 @@ paged_table(anova(model.build79))
 
 
 
-## Model - Build80
+## 80
 
 ```{r model.build80, echo=FALSE}
 model.build80<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|rep:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build80
+### Model 80
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1813,13 +1805,13 @@ paged_table(anova(model.build80))
 
 
 
-## Model - Build81
+## 81
 
 ```{r model.build81, echo=FALSE}
 model.build81<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build81
+### Model 81
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1834,13 +1826,13 @@ paged_table(anova(model.build81))
 
 
 
-## Model - Build82
+## 82
 
 ```{r model.build82, echo=FALSE}
 model.build82<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build82
+### Model 82
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1855,13 +1847,13 @@ paged_table(anova(model.build82))
 
 
 
-## Model - Build83
+## 83
 
 ```{r model.build83, echo=FALSE}
 model.build83<-lmer(yld~entry + book.name + rep + entry:book.name + rep:book.name + (1|rng:book.name:rep) + (1|pass:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-### ANOVA Build83
+### Model 83
 
 **YIELD = ENTRY + ENV + REP + (ENTRY x ENV) + (REP x ENV)**
 
@@ -1880,16 +1872,16 @@ paged_table(anova(model.build83))
 
 ```{r model.comp, comment=NA, echo=FALSE, rows.print=25, message=FALSE}
 options(digits=6)
-bic<-BIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
+bic<-BIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.build28, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.jim, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
 BIC<-bic$BIC
 
-dic<-DIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
+dic<-DIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.build28, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.jim, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
 DIC<-dic$DIC
 
-aicc<-AICc(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
+aicc<-AICc(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.build28, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.jim, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
 AICc<-aicc$AICc
 
-aic<-AIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.jim, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.build65, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
+aic<-AIC(model.build1, model.build2, model.build3, model.build4, model.build5, model.build6, model.build7, model.build8, model.build9, model.build10, model.build11, model.build12, model.build13, model.build14, model.build15, model.build16, model.build17, model.build18, model.build19, model.build20, model.build21, model.build22, model.build23, model.build24, model.build25, model.build26, model.build27, model.build28, model.build29, model.build30, model.ryan1, model.build32, model.build33, model.ryan2, model.build35, model.build36, model.build37, model.build38, model.build39, model.build40, model.build41, model.build42, model.build43, model.build44, model.build45, model.build46, model.build47, model.build48, model.build49, model.build50, model.build51, model.build52, model.build53, model.build54, model.build55, model.build56, model.build57, model.build58, model.build59, model.build60, model.build61, model.build62, model.build63, model.build64, model.jim, model.build66, model.build67, model.build68, model.build69, model.build70, model.build71, model.build72, model.build73, model.build74, model.build75, model.build76, model.build77, model.build78, model.build79, model.build80, model.build81, model.build82, model.build83)
 paged_table(cbind(aic, BIC, DIC, AICc))
 ```
 
@@ -1898,7 +1890,6 @@ paged_table(cbind(aic, BIC, DIC, AICc))
 ## **CV & RSME Comparisons**
 
 ```{r rsme, echo=FALSE, rows.print=25}
-mse.jim<-sqrt(mean(residuals(model.jim)^2))
 mse.ry1<-sqrt(mean(residuals(model.ryan1)^2))
 mse.ry2<-sqrt(mean(residuals(model.ryan2)^2))
 mse.build1<-sqrt(mean(residuals(model.build1)^2))
@@ -1928,6 +1919,7 @@ mse.build24<-sqrt(mean(residuals(model.build24)^2))
 mse.build25<-sqrt(mean(residuals(model.build25)^2))
 mse.build26<-sqrt(mean(residuals(model.build26)^2))
 mse.build27<-sqrt(mean(residuals(model.build27)^2))
+mse.build28<-sqrt(mean(residuals(model.build28)^2))
 mse.build29<-sqrt(mean(residuals(model.build29)^2))
 mse.build30<-sqrt(mean(residuals(model.build30)^2))
 mse.build32<-sqrt(mean(residuals(model.build32)^2))
@@ -1962,7 +1954,7 @@ mse.build61<-sqrt(mean(residuals(model.build61)^2))
 mse.build62<-sqrt(mean(residuals(model.build62)^2))
 mse.build63<-sqrt(mean(residuals(model.build63)^2))
 mse.build64<-sqrt(mean(residuals(model.build64)^2))
-mse.build65<-sqrt(mean(residuals(model.build65)^2))
+mse.jim<-sqrt(mean(residuals(model.jim)^2))
 mse.build66<-sqrt(mean(residuals(model.build66)^2))
 mse.build67<-sqrt(mean(residuals(model.build67)^2))
 mse.build68<-sqrt(mean(residuals(model.build68)^2))
@@ -1981,7 +1973,6 @@ mse.build80<-sqrt(mean(residuals(model.build80)^2))
 mse.build81<-sqrt(mean(residuals(model.build81)^2))
 mse.build82<-sqrt(mean(residuals(model.build82)^2))
 mse.build83<-sqrt(mean(residuals(model.build83)^2))
-jim<-LSDer::CVer(model.jim)
 ry1<-LSDer::CVer(model.ryan1)
 ry2<-LSDer::CVer(model.ryan2)
 build1<-LSDer::CVer(model.build1)
@@ -2011,6 +2002,7 @@ build24<-LSDer::CVer(model.build24)
 build25<-LSDer::CVer(model.build25)
 build26<-LSDer::CVer(model.build26)
 build27<-LSDer::CVer(model.build27)
+build28<-LSDer::CVer(model.build28)
 build29<-LSDer::CVer(model.build29)
 build30<-LSDer::CVer(model.build30)
 build32<-LSDer::CVer(model.build32)
@@ -2045,7 +2037,7 @@ build61<-LSDer::CVer(model.build61)
 build62<-LSDer::CVer(model.build62)
 build63<-LSDer::CVer(model.build63)
 build64<-LSDer::CVer(model.build64)
-build65<-LSDer::CVer(model.build65)
+buildjim<-LSDer::CVer(model.jim)
 build66<-LSDer::CVer(model.build66)
 build67<-LSDer::CVer(model.build67)
 build68<-LSDer::CVer(model.build68)
@@ -2064,7 +2056,7 @@ build80<-LSDer::CVer(model.build80)
 build81<-LSDer::CVer(model.build81)
 build82<-LSDer::CVer(model.build82)
 build83<-LSDer::CVer(model.build83)
-model.cvs<-data.frame("Model"=c("Build1", "Build2", "Build3", "Build4", "Build5", "Build6", "Build7", "Build8", "Build9", "Build10", "Build11", "Build12", "Build13", "Build14", "Build15", "Build16", "Build17", "Build18", "Build19", "Build20", "Build21", "Build22", "Build23", "Build24", "Build25", "Build26", "Build27", "Jim", "Build30", "Ryan1", "Build31",  "Build32", "Build33", "Ryan2", "Build35", "Build36", "Build37", "Build38", "Build39", "Build40", "Build41", "Build42", "Build43", "Build44", "Build45", "Build46", "Build47", "Build48", "Build49", "Build50", "Build51", "Build52", "Build53", "Build54", "Build55", "Build56", "Build57", "Build58", "Build59", "Build60", "Build61", "Build62", "Build63", "Build64", "Build65", "Build66", "Build67", "Build68", "Build69", "Build70", "Build71", "Build72", "Build73", "Build74", "Build75", "Build76", "Build77", "Build78", "Build79", "Build80", "Build81", "Build82", "Build83"), "CV" = c(build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25, build26, build27, jim, build29, build30, ry1, build32, build33, ry2, build35, build36, build37, build38, build39, build40, build41, build42, build43, build44, build45, build46, build47, build48, build49, build50, build51, build52, build53, build54, build55, build56, build57, build58, build59, build60, build61, build62, build63, build64, build65, build66, build67, build68, build69, build70, build71, build72, build73, build74, build75, build76, build77, build78, build79, build80, build81, build82, build83), "RMSE" = c(mse.build1, mse.build2, mse.build3, mse.build4, mse.build5, mse.build6, mse.build7, mse.build8, mse.build9, mse.build10, mse.build11, mse.build12, mse.build13, mse.build14, mse.build15, mse.build16, mse.build17, mse.build18, mse.build19, mse.build20, mse.build21, mse.build22, mse.build23, mse.build24, mse.build25, mse.build26, mse.build27, mse.jim, mse.build29, mse.build30, mse.ry1, mse.build32, mse.build33, mse.ry2, mse.build35, mse.build36, mse.build37, mse.build38, mse.build39, mse.build40, mse.build41, mse.build42, mse.build43, mse.build44, mse.build45, mse.build46, mse.build47, mse.build48, mse.build49, mse.build50, mse.build51, mse.build52, mse.build53, mse.build54, mse.build55, mse.build56, mse.build57, mse.build58, mse.build59, mse.build60, mse.build61, mse.build62, mse.build63, mse.build64, mse.build65, mse.build66, mse.build67, mse.build68, mse.build69, mse.build70, mse.build71, mse.build72, mse.build73, mse.build74, mse.build75, mse.build76, mse.build77, mse.build78, mse.build79, mse.build80, mse.build81, mse.build82, mse.build83))
+model.cvs<-data.frame("Model"=c("Build1", "Build2", "Build3", "Build4", "Build5", "Build6", "Build7", "Build8", "Build9", "Build10", "Build11", "Build12", "Build13", "Build14", "Build15", "Build16", "Build17", "Build18", "Build19", "Build20", "Build21", "Build22", "Build23", "Build24", "Build25", "Build26", "Build27", "Build28", "Build29", "Build30", "Ryan1",  "Build32", "Build33", "Ryan2", "Build35", "Build36", "Build37", "Build38", "Build39", "Build40", "Build41", "Build42", "Build43", "Build44", "Build45", "Build46", "Build47", "Build48", "Build49", "Build50", "Build51", "Build52", "Build53", "Build54", "Build55", "Build56", "Build57", "Build58", "Build59", "Build60", "Build61", "Build62", "Build63", "Build64", "Jim", "Build66", "Build67", "Build68", "Build69", "Build70", "Build71", "Build72", "Build73", "Build74", "Build75", "Build76", "Build77", "Build78", "Build79", "Build80", "Build81", "Build82", "Build83"), "CV" = c(build1, build2, build3, build4, build5, build6, build7, build8, build9, build10, build11, build12, build13, build14, build15, build16, build17, build18, build19, build20, build21, build22, build23, build24, build25, build26, build27, build28, build29, build30, ry1, build32, build33, ry2, build35, build36, build37, build38, build39, build40, build41, build42, build43, build44, build45, build46, build47, build48, build49, build50, build51, build52, build53, build54, build55, build56, build57, build58, build59, build60, build61, build62, build63, build64, buildjim, build66, build67, build68, build69, build70, build71, build72, build73, build74, build75, build76, build77, build78, build79, build80, build81, build82, build83), "RMSE" = c(mse.build1, mse.build2, mse.build3, mse.build4, mse.build5, mse.build6, mse.build7, mse.build8, mse.build9, mse.build10, mse.build11, mse.build12, mse.build13, mse.build14, mse.build15, mse.build16, mse.build17, mse.build18, mse.build19, mse.build20, mse.build21, mse.build22, mse.build23, mse.build24, mse.build25, mse.build26, mse.build27, build28, mse.build29, mse.build30, mse.ry1, mse.build32, mse.build33, mse.ry2, mse.build35, mse.build36, mse.build37, mse.build38, mse.build39, mse.build40, mse.build41, mse.build42, mse.build43, mse.build44, mse.build45, mse.build46, mse.build47, mse.build48, mse.build49, mse.build50, mse.build51, mse.build52, mse.build53, mse.build54, mse.build55, mse.build56, mse.build57, mse.build58, mse.build59, mse.build60, mse.build61, mse.build62, mse.build63, mse.build64, mse.jim, mse.build66, mse.build67, mse.build68, mse.build69, mse.build70, mse.build71, mse.build72, mse.build73, mse.build74, mse.build75, mse.build76, mse.build77, mse.build78, mse.build79, mse.build80, mse.build81, mse.build82, mse.build83))
 paged_table(model.cvs)
 ```
 
