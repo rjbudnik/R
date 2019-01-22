@@ -1,0 +1,232 @@
+library(agricolae)
+library(dplyr)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(emmeans)
+library(MuMIn)
+library(ggplot2)
+# library(merTools)
+
+
+setwd("C:/Users/Ryan.Ryan-PC/Desktop/wd")
+df<-read.csv("18CC.csv", header=T, na.strings=c("", " ", "NA"))
+CCF<-8.067
+df <- df%>%mutate (yld = (wt*CCF*(100-moist)/84.5))
+data<-subset(df, exp=="C81A")
+
+test0<-lmer(yld~1 + (1|entry) + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+
+test1<-lmer(yld~entry + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+test2<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+test3<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+
+## Close to same variance as test3, but worth checking for more according to step function...
+# test4<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+# test5<-lmer(yld~entry + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+
+percent <- function(x, digits = 6, format = "f", ...) {paste0(formatC( x, format = format, digits = digits, ...), "%")}
+
+## Begin calculation to determine amount of variance explained by each fixed effect::
+## https://stats.stackexchange.com/questions/185936/variance-explained-by-each-fixed-variable-linear-mixed-model
+sum1<-summary(test1)
+rvar1<-as.numeric(VarCorr(test1))
+rvariance <- sum(rvar1)
+an1<-anova(test1)
+fvar1<-an1$`Sum Sq`
+n<-length(data$rec.id)
+fvariance<-n/fvar1
+wholevariance<-as.numeric(r.squaredLR(test1))
+Fixed1<-(wholevariance*fvariance)/(rvariance+fvariance)
+
+sum2<-summary(test2)
+rvar2<-as.numeric(VarCorr(test2))
+rvariance2<-sum(rvar2)
+an2<-anova(test2)
+fvar2<-an2$`Sum Sq`
+fvar2a<-fvar2[1]
+fvar2b<-fvar2[2]
+fvariance2a<-n/fvar2a
+fvariance2b<-n/fvar2b
+wholevariance2<-as.numeric(r.squaredLR(test2))
+Fixed2A<-(wholevariance2*fvariance2a)/(rvariance2+fvariance2a+fvariance2b)
+Fixed2B<-(wholevariance2*fvariance2b)/(rvariance2+fvariance2a+fvariance2b)
+
+sum3<-summary(test3)
+rvar3<-as.numeric(VarCorr(test3))
+rvariance3<-sum(rvar3)
+an3<-anova(test3)
+fvar3<-an3$`Sum Sq`
+fvar3a<-fvar3[1]
+fvar3b<-fvar3[2]
+fvar3c<-fvar3[3]
+fvariance3a<-n/fvar3a
+fvariance3b<-n/fvar3b
+fvariance3c<-n/fvar3c
+wholevariance3<-as.numeric(r.squaredLR(test3))
+Fixed3A<-(wholevariance3*fvariance3a)/(rvariance3+fvariance3a+fvariance3b+fvariance3c)
+Fixed3B<-(wholevariance3*fvariance3b)/(rvariance3+fvariance3a+fvariance3b+fvariance3c)
+Fixed3C<-(wholevariance3*fvariance3c)/(rvariance3+fvariance3a+fvariance3b+fvariance3c)
+
+
+## Residual Variance - "sc"=residual standard deviation, (sd^2=variance)
+## the physical variance of the error::
+ErrorVar1<-attr(VarCorr(test1),"sc")^2
+ErrorVar2<-attr(VarCorr(test2),"sc")^2
+ErrorVar3<-attr(VarCorr(test3),"sc")^2
+
+
+## Variance accounted for by random effects:
+RandVar1<-as.numeric(VarCorr(test1))
+RandVar1<-sum(RandVar1)
+RandVar2<-as.numeric(VarCorr(test2))
+RandVar2<-sum(RandVar2)
+RandVar3<-as.numeric(VarCorr(test3))
+RandVar3<-sum(RandVar3)
+
+
+## Total variance from dataset::
+less<-data %>% select("yld")
+VAR<-as.numeric(var(less, na.rm=TRUE))
+
+
+## Percentage of variance caused by error::
+PercentErr1<-percent(ErrorVar1/VAR)
+PercentErr2<-percent(ErrorVar2/VAR)
+PercentErr3<-percent(ErrorVar3/VAR)
+PercentErr1
+PercentErr2
+PercentErr3
+
+## Percentage of variance accounted for by random effects::
+PercentRand1<-percent(RandVar1/VAR)
+PercentRand2<-percent(RandVar2/VAR)
+PercentRand3<-percent(RandVar3/VAR)
+PercentRand1
+PercentRand2
+PercentRand3
+
+
+
+## Simulated/Bootstrapped Prediction Intervals::
+
+## Test 1
+## merTools::predictIntervals Method
+simm<-data %>% select("book.name", "rep", "entry", "pass", "rng", "yld")
+
+PI<-merTools::predictInterval(test1, simm, level=0.95, n.sims=100, stat=c("median"), type=c("linear.prediction"), include.resid.var=TRUE)
+# ggplot(aes(x=1:100, y=fit, ymin=lwr, ymax=upr), data=PI[1:100,]) + 
+#   geom_point() + geom_linerange() + labs(x="Index", y="Prediction w/95% PI") + theme_bw()
+
+##lme4::bootMer() Method
+mySumm <- function(.) {predict(., newdata=simm, re.form=NULL)}
+sumBoot <- function(merBoot) {return(data.frame(fit = apply(merBoot$t, 2, function(x) as.numeric(quantile(x, probs=.5, na.rm=TRUE))),
+  lwr = apply(merBoot$t, 2, function(x) as.numeric(quantile(x, probs=.025, na.rm=TRUE))),
+  upr = apply(merBoot$t, 2, function(x) as.numeric(quantile(x, probs=.975, na.rm=TRUE)))))}
+
+boot1 <- lme4::bootMer(test1, mySumm, nsim=250, use.u=FALSE, type="parametric")
+
+PI.boot1 <- sumBoot(boot1)
+
+# comp.data <- rbind(data.frame(Predict.Method="predictInterval()", x=(1:nrow(PI))-0.1, PI), data.frame(Predict.Method="lme4::bootMer() - Method 1", x=(1:nrow(PI.boot1))+0.1, PI.boot1))
+# 
+# ggplot(aes(x=x, y=fit, ymin=lwr, ymax=upr, color=Predict.Method), data=comp.data[c(1:30,181:210),]) +
+#   geom_point() +
+#   geom_linerange() +
+#   labs(x="Index", y="Prediction w/ 95% PI") +
+#   theme_bw() +  theme(legend.position="bottom") +
+#   scale_color_brewer(type = "qual", palette = 2)
+
+## Averages (boot v. predict)
+mean(PI.boot1$fit)
+mean(PI$fit)
+
+## Interval
+(mean(PI.boot1$upr)) 
+(mean(PI.boot1$lwr))
+## Interval Range:
+(mean(PI.boot1$upr))-(mean(PI.boot1$lwr))
+
+## Test2
+## merTools::predictIntervals Method
+PI2<-merTools::predictInterval(test2, simm, level=0.95, n.sims=250, stat=c("median"), type=c("linear.prediction"), include.resid.var=TRUE)
+# ggplot(aes(x=1:100, y=fit, ymin=lwr, ymax=upr), data=PI2[1:100,]) + 
+#   geom_point() + geom_linerange() + labs(x="Index", y="Prediction w/95% PI") + theme_bw()
+
+##lme4::bootMer() Method
+boot2 <- lme4::bootMer(test2, mySumm, nsim=250, use.u=FALSE, type="parametric")
+
+PI.boot2 <- sumBoot(boot2)
+
+# comp.data2 <- rbind(data.frame(Predict.Method="predictInterval()", x=(1:nrow(PI2))-0.1, PI), data.frame(Predict.Method="lme4::bootMer() - Method 1", x=(1:nrow(PI.boot2))+0.1, PI.boot2))
+
+# ggplot(aes(x=x, y=fit, ymin=lwr, ymax=upr, color=Predict.Method), data=comp.data2[c(1:250),]) +
+#   geom_point() +
+#   geom_linerange() +
+#   labs(x="Index", y="Prediction w/ 95% PI") +
+#   theme_bw() +  theme(legend.position="bottom") +
+#   scale_color_brewer(type = "qual", palette = 2)
+
+## Averages
+mean(PI.boot2$fit)
+mean(PI2$fit)
+
+## Interval
+(mean(PI.boot2$upr)) 
+(mean(PI.boot2$lwr))
+## Interval Range:
+(mean(PI.boot2$upr))-(mean(PI.boot2$lwr))
+
+
+## Test2
+## merTools::predictIntervals Method
+PI3<-merTools::predictInterval(test3, simm, level=0.95, n.sims=250, stat=c("median"), type=c("linear.prediction"), include.resid.var=TRUE)
+# ggplot(aes(x=1:100, y=fit, ymin=lwr, ymax=upr), data=PI2[1:100,]) + 
+#   geom_point() + geom_linerange() + labs(x="Index", y="Prediction w/95% PI") + theme_bw()
+
+##lme4::bootMer() Method
+boot3<-lme4::bootMer(test3, mySumm, nsim=250, use.u=FALSE, type="parametric")
+
+PI.boot3<-sumBoot(boot3)
+
+# comp.data3 <- rbind(data.frame(Predict.Method="predictInterval()", x=(1:nrow(PI2))-0.1, PI3), data.frame(Predict.Method="lme4::bootMer() - Method 1", x=(1:nrow(PI.boot2))+0.1, PI.boot2))
+
+# ggplot(aes(x=x, y=fit, ymin=lwr, ymax=upr, color=Predict.Method), data=comp.data3[c(1:250),]) +
+#   geom_point() +
+#   geom_linerange() +
+#   labs(x="Index", y="Prediction w/ 95% PI") +
+#   theme_bw() +  theme(legend.position="bottom") +
+#   scale_color_brewer(type = "qual", palette = 2)
+
+mean(PI.boot3$fit)
+mean(PI3$fit)
+
+## Interval
+(mean(PI.boot3$upr))
+## to---->
+(mean(PI.boot3$lwr))
+## Interval Range:
+(mean(PI.boot3$upr))-(mean(PI.boot3$lwr))
+
+
+## RMSEs::
+mse.test1<-sqrt(mean(residuals(model.build1)^2))
+mse.test2<-sqrt(mean(residuals(model.build1)^2))
+mse.test3<-sqrt(mean(residuals(model.build1)^2))
+
+
+#Repeatabilities (ICC):
+library(rptR)
+repeat1<-rpt(yld~book.name:entry + book.name + rep:book.name + pass:book.name:rep + rng:book.name:rep + (1|entry), grname=c("entry", "Fixed", "Residual"), data=simm, datatype = c("Gaussian"), CI = 0.95, nboot = 250, ratio = FALSE)
+plot(repeat1,cex.main=1)
+summary(repeat1)
+
+repeat2<-rpt(yld~book.name + rep:book.name + pass:book.name:rep + rng:book.name:rep + (1|entry), grname=c("entry", "Fixed", "Residual"), data=simm, datatype = c("Gaussian"), CI = 0.95, nboot = 250)
+plot(repeat2,cex.main=1)
+summary(repeat2)
+
+repeat3<-rpt(yld~book.name:entry + rep:book.name + pass:book.name:rep + rng:book.name:rep + (1|entry), grname=c("entry", "Fixed", "Residual"), data=simm, datatype = c("Gaussian"), CI = 0.95, nboot = 250)
+plot(repeat3,cex.main=1)
+summary(repeat3)
