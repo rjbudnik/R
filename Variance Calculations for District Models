@@ -50,7 +50,7 @@ newv0<-lmer(yld~1 + (1|entry) + (1|book.name) + (1|pass:REPid) + (1|rng:REPid) +
 newv1<-lmer(yld~entry + (1|book.name) + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name) + (1|REPid), data=data, REML=TRUE)
 newv2<-lmer(yld~entry + book.name + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name) + (1|REPid), data=data, REML=TRUE)
 newv3<-lmer(yld~entry + book.name + REPid + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name), data=data, REML=TRUE)
-
+# w/NO single REPid effect, only nested::
 newv4<-lmer(yld~entry + book.name + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name), data=data, REML=TRUE)
 
 # Should Random Effect : + (1|entry:book.name) really be + (1|entry/book.name)
@@ -222,6 +222,18 @@ adj.r2Linear10<-summary(Linear10)$adj.r.squared
 adj.r2Linear11<-summary(Linear11)$adj.r.squared
 adj.r2Linear12<-summary(Linear12)$adj.r.squared
 
+
+## Variance of environment lsmeans::
+## σ²e ::
+ls1<-ls_means(model3, which = "book.name")
+var(lss$Estimate)
+# or, variance of hybrid lsmeans::
+# σ²ȳ ::
+ls2<-ls_means(model3, which = "entry")
+var(lss$Estimate)
+
+
+## Comparison Tables
 RMSE.Table<-data.frame("Model"=c("Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Drop3", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2", "Repless3", "Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6", "Linear7", "Linear8", "Linear9", "Linear10", "Linear11", "Linear12"),"Residual RMSE" = c(rmse.basic1, rmse.basic2, rmse.basic3, rmse.model1, rmse.model2, rmse.model3, rmse.newv1, rmse.newv2, rmse.newv3, rmse.newv4, rmse.extended1, rmse.extended2, rmse.extended3, rmse.drop1, rmse.drop2, rmse.drop3, rmse.rep1, rmse.rep2, rmse.rep3, rmse.Repless1, rmse.Repless2, rmse.Repless3, rmse.linear1, rmse.linear2, rmse.linear3, rmse.linear4, rmse.linear5, rmse.linear6, rmse.linear7, rmse.linear8, rmse.linear9, rmse.linear10, rmse.linear11, rmse.linear12))
 rmse.order<-as.numeric(rank(RMSE.Table$Residual.RMSE))
 RMSE.Table$Rank<-as.factor(paste(rmse.order))
@@ -229,6 +241,15 @@ RMSE.Table$Rank<-as.factor(paste(rmse.order))
 R2.Table<-data.frame("Model"=c("Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Drop3", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2", "Repless3", "Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6", "Linear7", "Linear8", "Linear9", "Linear10", "Linear11", "Linear12"),"Residual R2" = c(LRbasic1, LRbasic2, LRbasic3, LRmodel1, LRmodel2, LRmodel3, LRnewv1, LRnewv2, LRnewv3, LRnewv4, LRextended1, LRextended2, LRextended3, LRdrop1, LRdrop2, LRdrop3, LRrep1, LRrep2, LRrep3, LRRepless1, LRRepless2, LRRepless3, r2linear1, r2linear2, r2linear3, r2linear4, r2linear5, r2linear6, r2linear7, r2linear8, r2linear9, r2linear10, r2linear11, r2linear12))
 r2.order<-as.numeric(rank(-R2.Table$Residual.R2))
 R2.Table$Rank<-as.factor(paste(r2.order))
+
+RMSE.R2.sigma_Table<-data.frame("Model"=c("Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Drop3", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2", "Repless3", "Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6", "Linear7", "Linear8", "Linear9", "Linear10", "Linear11", "Linear12"),"Residual RMSE" = c(rmse.basic1, rmse.basic2, rmse.basic3, rmse.model1, rmse.model2, rmse.model3, rmse.newv1, rmse.newv2, rmse.newv3, rmse.newv4, rmse.extended1, rmse.extended2, rmse.extended3, rmse.drop1, rmse.drop2, rmse.drop3, rmse.rep1, rmse.rep2, rmse.rep3, rmse.Repless1, rmse.Repless2, rmse.Repless3, rmse.linear1, rmse.linear2, rmse.linear3, rmse.linear4, rmse.linear5, rmse.linear6, rmse.linear7, rmse.linear8, rmse.linear9, rmse.linear10, rmse.linear11, rmse.linear12), "Residual R2" = c(LRbasic1, LRbasic2, LRbasic3, LRmodel1, LRmodel2, LRmodel3, LRnewv1, LRnewv2, LRnewv3, LRnewv4, LRextended1, LRextended2, LRextended3, LRdrop1, LRdrop2, LRdrop3, LRrep1, LRrep2, LRrep3, LRRepless1, LRRepless2, LRRepless3, r2linear1, r2linear2, r2linear3, r2linear4, r2linear5, r2linear6, r2linear7, r2linear8, r2linear9, r2linear10, r2linear11, r2linear12), "Residual Sigma" = c(sig.basic1, sig.basic2, sig.basic3, sig.model1, sig.model2, sig.model3, sig.newv1, sig.newv2, sig.newv3, sig.newv4, sig.extended1, sig.extended2, sig.extended3, sig.drop1, sig.drop2, sig.drop3, sig.rep1, sig.rep2, sig.rep3, sig.Repless1, sig.Repless2, sig.Repless3, sig.linear1, sig.linear2, sig.linear3, sig.linear4, sig.linear5, sig.linear6, sig.linear7, sig.linear8, sig.linear9, sig.linear10, sig.linear11, sig.linear12))
+rmsecomb.order<-as.numeric(rank(RMSE.R2.sigma_Table$Residual.RMSE))
+r2comb.order<-as.numeric(rank(-RMSE.R2.sigma_Table$Residual.R2))
+sigmacomb.order<-as.numeric(rank(RMSE.R2.sigma_Table$Residual.Sigma))
+RMSE.R2.sigma_Table$RMSE.Rank<-as.factor(paste(rmsecomb.order))
+RMSE.R2.sigma_Table$R2.Rank<-as.factor(paste(r2comb.order))
+RMSE.R2.sigma_Table$Sigma.Rank<-as.factor(paste(sigmacomb.order))
+RMSE.R2.sigma_Table
 
 ## Begin calculation to determine amount of variance explained by each fixed effect::
 ## https://stats.stackexchange.com/questions/185936/variance-explained-by-each-fixed-variable-linear-mixed-model
