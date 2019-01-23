@@ -135,7 +135,7 @@ r2rep3<-r.squaredGLMM(rep3)
 r2Repless1<-r.squaredGLMM(Repless1)
 r2Repless2<-r.squaredGLMM(Repless2)
 r2Repless3<-r.squaredGLMM(Repless3)
-#or
+#or, SAME as R^2
 LRbasic1<-r.squaredLR(basic1)
 LRbasic2<-r.squaredLR(basic2)
 LRbasic3<-r.squaredLR(basic3)
@@ -147,7 +147,7 @@ LRnewv2<-r.squaredLR(newv2)
 LRnewv3<-r.squaredLR(newv3)
 LRnewv4<-r.squaredLR(newv4)
 LRextended1<-r.squaredLR(extended1)
-Lrextended2<-r.squaredLR(extended2)
+LRextended2<-r.squaredLR(extended2)
 LRextended3<-r.squaredLR(extended3)
 LRdrop1<-r.squaredLR(drop1)
 LRdrop2<-r.squaredLR(drop2)
@@ -158,6 +158,7 @@ LRrep3<-r.squaredLR(rep3)
 LRRepless1<-r.squaredLR(Repless1)
 LRRepless2<-r.squaredLR(Repless2)
 LRRepless3<-r.squaredLR(Repless3)
+
 
 # Linear Approaches::
 Linear1<-lm(yld~entry, data=data)
@@ -181,31 +182,32 @@ Linear12<-lm(yld~entry + book.name + REPid + entry:book.name + pass:REPid + rng:
 ## Linear Comparisons
 anova(Linear1, Linear2, Linear3, Linear4, Linear5, Linear6, Linear7, Linear8, Linear9, Linear10, Linear11, Linear12)
 # RMSE::
-rmse.Linear1<-sqrt(mean(residuals(Linear1)^2))
-rmse.Linear2<-sqrt(mean(residuals(Linear2)^2))
-rmse.Linear3<-sqrt(mean(residuals(Linear3)^2))
-rmse.Linear4<-sqrt(mean(residuals(Linear4)^2))
-rmse.Linear5<-sqrt(mean(residuals(Linear5)^2))
-rmse.Linear6<-sqrt(mean(residuals(Linear6)^2))
-rmse.Linear7<-sqrt(mean(residuals(Linear7)^2))
-rmse.Linear8<-sqrt(mean(residuals(Linear8)^2))
-rmse.Linear9<-sqrt(mean(residuals(Linear9)^2))
-rmse.Linear10<-sqrt(mean(residuals(Linear10)^2))
-rmse.Linear11<-sqrt(mean(residuals(Linear11)^2))
-rmse.Linear12<-sqrt(mean(residuals(Linear12)^2))
+rmse.linear1<-sqrt(mean(residuals(Linear1)^2))
+rmse.linear2<-sqrt(mean(residuals(Linear2)^2))
+rmse.linear3<-sqrt(mean(residuals(Linear3)^2))
+rmse.linear4<-sqrt(mean(residuals(Linear4)^2))
+rmse.linear5<-sqrt(mean(residuals(Linear5)^2))
+rmse.linear6<-sqrt(mean(residuals(Linear6)^2))
+rmse.linear7<-sqrt(mean(residuals(Linear7)^2))
+rmse.linear8<-sqrt(mean(residuals(Linear8)^2))
+rmse.linear9<-sqrt(mean(residuals(Linear9)^2))
+rmse.linear10<-sqrt(mean(residuals(Linear10)^2))
+rmse.linear11<-sqrt(mean(residuals(Linear11)^2))
+rmse.linear12<-sqrt(mean(residuals(Linear12)^2))
 # R^2::
-r2Linear1<-summary(Linear1)$r.squared
-r2Linear2<-summary(Linear2)$r.squared
-r2Linear3<-summary(Linear3)$r.squared
-r2Linear4<-summary(Linear4)$r.squared
-r2Linear5<-summary(Linear5)$r.squared
-r2Linear6<-summary(Linear6)$r.squared
-r2Linear7<-summary(Linear7)$r.squared
-r2Linear8<-summary(Linear8)$r.squared
-r2Linear9<-summary(Linear9)$r.squared
-r2Linear10<-summary(Linear10)$r.squared
-r2Linear11<-summary(Linear11)$r.squared
-r2Linear12<-summary(Linear12)$r.squared
+# The percentage of variation explained by the regression model. 
+r2linear1<-summary(Linear1)$r.squared
+r2linear2<-summary(Linear2)$r.squared
+r2linear3<-summary(Linear3)$r.squared
+r2linear4<-summary(Linear4)$r.squared
+r2linear5<-summary(Linear5)$r.squared
+r2linear6<-summary(Linear6)$r.squared
+r2linear7<-summary(Linear7)$r.squared
+r2linear8<-summary(Linear8)$r.squared
+r2linear9<-summary(Linear9)$r.squared
+r2linear10<-summary(Linear10)$r.squared
+r2linear11<-summary(Linear11)$r.squared
+r2linear12<-summary(Linear12)$r.squared
 # Adj. R^2
 adj.r2Linear1<-summary(Linear1)$adj.r.squared
 adj.r2Linear2<-summary(Linear2)$adj.r.squared
@@ -220,7 +222,13 @@ adj.r2Linear10<-summary(Linear10)$adj.r.squared
 adj.r2Linear11<-summary(Linear11)$adj.r.squared
 adj.r2Linear12<-summary(Linear12)$adj.r.squared
 
+RMSE.Table<-data.frame("Model"=c("Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Drop3", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2", "Repless3", "Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6", "Linear7", "Linear8", "Linear9", "Linear10", "Linear11", "Linear12"),"Residual RMSE" = c(rmse.basic1, rmse.basic2, rmse.basic3, rmse.model1, rmse.model2, rmse.model3, rmse.newv1, rmse.newv2, rmse.newv3, rmse.newv4, rmse.extended1, rmse.extended2, rmse.extended3, rmse.drop1, rmse.drop2, rmse.drop3, rmse.rep1, rmse.rep2, rmse.rep3, rmse.Repless1, rmse.Repless2, rmse.Repless3, rmse.linear1, rmse.linear2, rmse.linear3, rmse.linear4, rmse.linear5, rmse.linear6, rmse.linear7, rmse.linear8, rmse.linear9, rmse.linear10, rmse.linear11, rmse.linear12))
+rmse.order<-as.numeric(rank(RMSE.Table$Residual.RMSE))
+RMSE.Table$Rank<-as.factor(paste(rmse.order))
 
+R2.Table<-data.frame("Model"=c("Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Drop3", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2", "Repless3", "Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6", "Linear7", "Linear8", "Linear9", "Linear10", "Linear11", "Linear12"),"Residual R2" = c(LRbasic1, LRbasic2, LRbasic3, LRmodel1, LRmodel2, LRmodel3, LRnewv1, LRnewv2, LRnewv3, LRnewv4, LRextended1, LRextended2, LRextended3, LRdrop1, LRdrop2, LRdrop3, LRrep1, LRrep2, LRrep3, LRRepless1, LRRepless2, LRRepless3, r2linear1, r2linear2, r2linear3, r2linear4, r2linear5, r2linear6, r2linear7, r2linear8, r2linear9, r2linear10, r2linear11, r2linear12))
+r2.order<-as.numeric(rank(-R2.Table$Residual.R2))
+R2.Table$Rank<-as.factor(paste(r2.order))
 
 ## Begin calculation to determine amount of variance explained by each fixed effect::
 ## https://stats.stackexchange.com/questions/185936/variance-explained-by-each-fixed-variable-linear-mixed-model
@@ -265,11 +273,51 @@ Fixed3C<-(wholevariance3*fvariance3c)/(rvariance3+fvariance3a+fvariance3b+fvaria
 
 
 ## Residual Variance - "sc"=residual standard deviation, (sd^2=variance)
-## the physical variance of the error::
+## the physical variance of the error, or the variability around the regression line. 
+## Minimize this value to limit residual variance from line of best fit. 
 ErrorVar1<-attr(VarCorr(model1),"sc")^2
 ErrorVar2<-attr(VarCorr(model2),"sc")^2
 ErrorVar3<-attr(VarCorr(model3),"sc")^2
+# or
+sig.basic1<-as.numeric(summary(basic1)$sigma^2)
+sig.basic2<-as.numeric(summary(basic2)$sigma^2)
+sig.basic3<-as.numeric(summary(basic3)$sigma^2)
+sig.model1<-as.numeric(summary(model1)$sigma^2)
+sig.model2<-as.numeric(summary(model2)$sigma^2)
+sig.model3<-as.numeric(summary(model3)$sigma^2)
+sig.newv1<-as.numeric(summary(newv1)$sigma^2)
+sig.newv2<-as.numeric(summary(newv2)$sigma^2)
+sig.newv3<-as.numeric(summary(newv3)$sigma^2)
+sig.newv4<-as.numeric(summary(newv4)$sigma^2)
+sig.extended1<-as.numeric(summary(extended1)$sigma^2)
+sig.extended2<-as.numeric(summary(extended2)$sigma^2)
+sig.extended3<-as.numeric(summary(extended3)$sigma^2)
+sig.drop1<-as.numeric(summary(drop1)$sigma^2)
+sig.drop2<-as.numeric(summary(drop2)$sigma^2)
+sig.drop3<-as.numeric(summary(drop3)$sigma^2)
+sig.rep1<-as.numeric(summary(rep1)$sigma^2)
+sig.rep2<-as.numeric(summary(rep2)$sigma^2)
+sig.rep3<-as.numeric(summary(rep3)$sigma^2)
+sig.Repless1<-as.numeric(summary(Repless1)$sigma^2)
+sig.Repless2<-as.numeric(summary(Repless2)$sigma^2)
+sig.Repless3<-as.numeric(summary(Repless3)$sigma^2)
 
+sig.linear1<-as.numeric(summary(Linear1)$sigma^2)
+sig.linear2<-as.numeric(summary(Linear2)$sigma^2)
+sig.linear3<-as.numeric(summary(Linear3)$sigma^2)
+sig.linear4<-as.numeric(summary(Linear4)$sigma^2)
+sig.linear5<-as.numeric(summary(Linear5)$sigma^2)
+sig.linear6<-as.numeric(summary(Linear6)$sigma^2)
+sig.linear7<-as.numeric(summary(Linear7)$sigma^2)
+sig.linear8<-as.numeric(summary(Linear8)$sigma^2)
+sig.linear9<-as.numeric(summary(Linear9)$sigma^2)
+sig.linear10<-as.numeric(summary(Linear10)$sigma^2)
+sig.linear11<-as.numeric(summary(Linear11)$sigma^2)
+sig.linear12<-as.numeric(summary(Linear12)$sigma^2)
+
+Sigma.Table<-data.frame("Model"=c("Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Drop3", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2", "Repless3", "Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6", "Linear7", "Linear8", "Linear9", "Linear10", "Linear11", "Linear12"),"Residual Sigma" = c(sig.basic1, sig.basic2, sig.basic3, sig.model1, sig.model2, sig.model3, sig.newv1, sig.newv2, sig.newv3, sig.newv4, sig.extended1, sig.extended2, sig.extended3, sig.drop1, sig.drop2, sig.drop3, sig.rep1, sig.rep2, sig.rep3, sig.Repless1, sig.Repless2, sig.Repless3, sig.linear1, sig.linear2, sig.linear3, sig.linear4, sig.linear5, sig.linear6, sig.linear7, sig.linear8, sig.linear9, sig.linear10, sig.linear11, sig.linear12))
+sigma.order<-as.numeric(rank(Sigma.Table$Residual.Sigma))
+Sigma.Table$Rank<-as.factor(paste(sigma.order))
 
 ## Variance accounted for by random effects:
 RandVar1<-as.numeric(VarCorr(model1))
