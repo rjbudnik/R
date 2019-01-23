@@ -627,7 +627,7 @@ sig.linear10<-as.numeric(summary(Linear10)$sigma^2)
 sig.linear11<-as.numeric(summary(Linear11)$sigma^2)
 sig.linear12<-as.numeric(summary(Linear12)$sigma^2)
 
-RMSE.R2.sigma_Table<-data.frame("Model"=c("Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2", "Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6", "Linear7", "Linear8", "Linear9", "Linear10", "Linear11", "Linear12"),"Residual RMSE" = c(rmse.basic1, rmse.basic2, rmse.basic3, rmse.model1, rmse.model2, rmse.model3, rmse.newv1, rmse.newv2, rmse.newv3, rmse.newv4, rmse.extended1, rmse.extended2, rmse.extended3, rmse.drop1, rmse.drop2, rmse.rep1, rmse.rep2, rmse.rep3, rmse.Repless1, rmse.Repless2, rmse.linear1, rmse.linear2, rmse.linear3, rmse.linear4, rmse.linear5, rmse.linear6, rmse.linear7, rmse.linear8, rmse.linear9, rmse.linear10, rmse.linear11, rmse.linear12), "Residual R2" = c(LRbasic1, LRbasic2, LRbasic3, LRmodel1, LRmodel2, LRmodel3, LRnewv1, LRnewv2, LRnewv3, LRnewv4, LRextended1, LRextended2, LRextended3, LRdrop1, LRdrop2, LRrep1, LRrep2, LRrep3, LRRepless1, LRRepless2, r2linear1, r2linear2, r2linear3, r2linear4, r2linear5, r2linear6, r2linear7, r2linear8, r2linear9, r2linear10, r2linear11, r2linear12), "Residual Sigma" = c(sig.basic1, sig.basic2, sig.basic3, sig.model1, sig.model2, sig.model3, sig.newv1, sig.newv2, sig.newv3, sig.newv4, sig.extended1, sig.extended2, sig.extended3, sig.drop1, sig.drop2, sig.rep1, sig.rep2, sig.rep3, sig.Repless1, sig.Repless2, sig.linear1, sig.linear2, sig.linear3, sig.linear4, sig.linear5, sig.linear6, sig.linear7, sig.linear8, sig.linear9, sig.linear10, sig.linear11, sig.linear12))
+RMSE.R2.sigma_Table<-data.frame("Model"=c( "Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6", "Linear7", "Linear8", "Linear9", "Linear10", "Linear11", "Linear12", "Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2"),"Residual RMSE" = c(rmse.linear1, rmse.linear2, rmse.linear3, rmse.linear4, rmse.linear5, rmse.linear6, rmse.linear7, rmse.linear8, rmse.linear9, rmse.linear10, rmse.linear11, rmse.linear12, rmse.basic1, rmse.basic2, rmse.basic3, rmse.model1, rmse.model2, rmse.model3, rmse.newv1, rmse.newv2, rmse.newv3, rmse.newv4, rmse.extended1, rmse.extended2, rmse.extended3, rmse.drop1, rmse.drop2, rmse.rep1, rmse.rep2, rmse.rep3, rmse.Repless1, rmse.Repless2), "Residual R2" = c(LRbasic1, LRbasic2, LRbasic3, LRmodel1, LRmodel2, LRmodel3, LRnewv1, LRnewv2, LRnewv3, LRnewv4, LRextended1, LRextended2, LRextended3, LRdrop1, LRdrop2, LRrep1, LRrep2, LRrep3, LRRepless1, LRRepless2, r2linear1, r2linear2, r2linear3, r2linear4, r2linear5, r2linear6, r2linear7, r2linear8, r2linear9, r2linear10, r2linear11, r2linear12), "Residual Sigma" = c(sig.linear1, sig.linear2, sig.linear3, sig.linear4, sig.linear5, sig.linear6, sig.linear7, sig.linear8, sig.linear9, sig.linear10, sig.linear11, sig.linear12, sig.basic1, sig.basic2, sig.basic3, sig.model1, sig.model2, sig.model3, sig.newv1, sig.newv2, sig.newv3, sig.newv4, sig.extended1, sig.extended2, sig.extended3, sig.drop1, sig.drop2, sig.rep1, sig.rep2, sig.rep3, sig.Repless1, sig.Repless2))
 rmsecomb.order<-as.numeric(rank(RMSE.R2.sigma_Table$Residual.RMSE))
 r2comb.order<-as.numeric(rank(-RMSE.R2.sigma_Table$Residual.R2))
 sigmacomb.order<-as.numeric(rank(RMSE.R2.sigma_Table$Residual.Sigma))
@@ -640,7 +640,7 @@ paged_table(RMSE.R2.sigma_Table)
 # **Variance of Treatment LS-Means** {.tabset .tabset-fade}
 
 ```{r LSmeanVariance.linear, comment=NA, echo=FALSE, rows.print=32, message=FALSE}
-## Variance of hybrid lsmeans, σ²ȳ
+## Variance of hybrid lsmeans, sigma²ȳ
 lsv.l1<-as.data.frame(lsmeans(Linear1, specs="entry"))
 lsv.l1<-var(lsv.l1$lsmean)
 lsv.l2<-as.data.frame(lsmeans(Linear2, specs="entry"))
@@ -668,7 +668,7 @@ lsv.l5<-var(lsv.l5$lsmean)
 ```
 
 ```{r LSmeanVariance, comment=NA, echo=FALSE, rows.print=25, message=FALSE}
-## Variance of hybrid lsmeans, σ²ȳ
+## Variance of hybrid lsmeans, sigma²ȳ
 lsv.basic1<-ls_means(basic1, which = "entry")
 lsv.basic1<-var(lsv.basic1$Estimate)
 lsv.basic2<-ls_means(basic2, which = "entry")
@@ -716,7 +716,7 @@ lsv.repless1<-var(lsv.repless1$Estimate)
 lsv.repless2<-ls_means(Repless2, which = "entry")
 lsv.repless2<-var(lsv.repless2$Estimate)
 
-LSmean_Variance_Table<-data.frame("Model"=c("Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2", "Linear1", "Linear2", "Linear3", "Linear4", "Linear5"),"LS Variance" = c(lsv.basic1, lsv.basic2, lsv.basic3, lsv.model1, lsv.model2, lsv.model3, lsv.newv1, lsv.newv2, lsv.newv3, lsv.newv4, lsv.extended1, lsv.extended2, lsv.extended3, lsv.drop1, lsv.drop2, lsv.rep1, lsv.rep2, lsv.rep3, lsv.repless1, lsv.repless2, lsv.l1, lsv.l2, lsv.l3, lsv.l4, lsv.l5))
+LSmean_Variance_Table<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2"),"LS Variance" = c(lsv.l1, lsv.l2, lsv.l3, lsv.l4, lsv.l5, lsv.basic1, lsv.basic2, lsv.basic3, lsv.model1, lsv.model2, lsv.model3, lsv.newv1, lsv.newv2, lsv.newv3, lsv.newv4, lsv.extended1, lsv.extended2, lsv.extended3, lsv.drop1, lsv.drop2, lsv.rep1, lsv.rep2, lsv.rep3, lsv.repless1, lsv.repless2))
 lsvcomb.order<-as.numeric(rank(LSmean_Variance_Table$LS.Variance))
 LSmean_Variance_Table$LSmean.Variance.Rank<-as.factor(paste(lsvcomb.order))
 paged_table(LSmean_Variance_Table)
