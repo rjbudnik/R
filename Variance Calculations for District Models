@@ -8,56 +8,175 @@ library(MuMIn)
 library(ggplot2)
 # library(merTools)
 
-
 setwd("C:/Users/Ryan.Ryan-PC/Desktop/wd")
 df<-read.csv("18CC.csv", header=T, na.strings=c("", " ", "NA"))
 CCF<-8.067
 df <- df%>%mutate (yld = (wt*CCF*(100-moist)/84.5))
 data<-subset(df, exp=="C81A")
-
-test0<-lmer(yld~1 + (1|entry) + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
-
-test1<-lmer(yld~entry + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
-test2<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
-test3<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+data$REPid<-as.factor(paste(data$book.name, data$rep, sep="."))
 
 
-## Close to same variance as test3, but worth checking for more according to step function...
-# test4<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
-# test5<-lmer(yld~entry + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+## Models::
+# w/o Pass or Rng in most basic mixed model::
+# Y = mean + Gene + Env + Gene(Env) + Env(Rep)
+basic0<-lmer(yld~1 + (1|entry) + (1|book.name) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+basic1<-lmer(yld~entry + (1|book.name) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+basic2<-lmer(yld~entry + book.name + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+basic3<-lmer(yld~entry + book.name + rep:book.name + (1|entry:book.name), data=data, REML=TRUE)
+
+# w/Pass & Rng included to suit alpha-Lattice design::
+# Y = mean + Gene + Env + Pass(Env*Rep) + Rng(Env*Rep) + Gene(Env) + Env(Rep)
+model0<-lmer(yld~1 + (1|entry) + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+model1<-lmer(yld~entry + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+model2<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+model3<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+# Using REPid = (book.name).(rep)::
+newv0<-lmer(yld~1 + (1|entry) + (1|book.name) + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name) + (1|REPid), data=data, REML=TRUE)
+newv1<-lmer(yld~entry + (1|book.name) + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name) + (1|REPid), data=data, REML=TRUE)
+newv2<-lmer(yld~entry + book.name + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name) + (1|REPid), data=data, REML=TRUE)
+newv3<-lmer(yld~entry + book.name + REPid + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name), data=data, REML=TRUE)
+
+newv4<-lmer(yld~entry + book.name + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name), data=data, REML=TRUE)
+
+# Should Random Effect : + (1|entry:book.name) really be + (1|entry/book.name)
+extended0<-lmer(yld~1 + (1|entry) + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry/book.name) + (1|rep:book.name), data=data, REML=TRUE)
+extended1<-lmer(yld~entry + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry/book.name) + (1|rep:book.name), data=data, REML=TRUE)
+extended2<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry/book.name) + (1|rep:book.name), data=data, REML=TRUE)
+extended3<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry/book.name), data=data, REML=TRUE)
+
+# Should rep:book.name be dropped::
+drop0<-lmer(yld~1 + (1|entry) + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep), data=data, REML=TRUE)
+drop1<-lmer(yld~entry + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+drop2<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+drop3<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
+
+# Remove Rep in Pass & Rng??::
+rep0<-lmer(yld~1 + (1|entry) + (1|book.name) + (1|pass:book.name) + (1|rng:book.name) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+rep1<-lmer(yld~entry + (1|book.name) + (1|pass:book.name) + (1|rng:book.name) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+rep2<-lmer(yld~entry + book.name + (1|pass:book.name) + (1|rng:book.name) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+rep3<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name) + (1|rng:book.name) + (1|entry:book.name), data=data, REML=TRUE)
+
+# Remove all Rep??::
+Repless0<-lmer(yld~1 + (1|entry) + (1|book.name) + (1|pass:book.name) + (1|rng:book.name) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+Repless1<-lmer(yld~entry + (1|book.name) + (1|pass:book.name) + (1|rng:book.name) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+Repless2<-lmer(yld~entry + book.name + (1|pass:book.name) + (1|rng:book.name) + (1|entry:book.name) + (1|rep:book.name), data=data, REML=TRUE)
+Repless3<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name) + (1|rng:book.name) + (1|entry:book.name), data=data, REML=TRUE)
 
 
+
+anova(basic1, basic2, basic3, refit=FALSE)
+anova(model1, model2, model3, refit=FALSE)
+anova(newv1, newv2, newv3, newv4, refit=FALSE)
+anova(extended1, extended2, extended3, refit=FALSE)
+anova(drop1, drop2, drop3, refit=FALSE)
+anova(rep1, rep2, rep3, refit=FALSE)
+anova(Repless1, Repless2, Repless3, refit=FALSE)
+
+## Root Mean Square Error, RMSE::
+rmse.basic1<-sqrt(mean(residuals(basic1)^2))
+rmse.basic2<-sqrt(mean(residuals(basic2)^2))
+rmse.basic3<-sqrt(mean(residuals(basic3)^2))
+rmse.model1<-sqrt(mean(residuals(model1)^2))
+rmse.model2<-sqrt(mean(residuals(model2)^2))
+rmse.model3<-sqrt(mean(residuals(model3)^2))
+rmse.newv1<-sqrt(mean(residuals(newv1)^2))
+rmse.newv2<-sqrt(mean(residuals(newv2)^2))
+rmse.newv3<-sqrt(mean(residuals(newv3)^2))
+rmse.newv4<-sqrt(mean(residuals(newv4)^2))
+rmse.extended1<-sqrt(mean(residuals(extended1)^2))
+rmse.extended2<-sqrt(mean(residuals(extended2)^2))
+rmse.extended3<-sqrt(mean(residuals(extended3)^2))
+rmse.drop1<-sqrt(mean(residuals(drop1)^2))
+rmse.drop2<-sqrt(mean(residuals(drop2)^2))
+rmse.drop3<-sqrt(mean(residuals(drop3)^2))
+rmse.rep1<-sqrt(mean(residuals(rep1)^2))
+rmse.rep2<-sqrt(mean(residuals(rep2)^2))
+rmse.rep3<-sqrt(mean(residuals(rep3)^2))
+rmse.Repless1<-sqrt(mean(residuals(Repless1)^2))
+rmse.Repless2<-sqrt(mean(residuals(Repless2)^2))
+rmse.Repless3<-sqrt(mean(residuals(Repless3)^2))
+
+
+## MumIn??
+r2basic1<-r.squaredGLMM(basic1)
+r2basic2<-r.squaredGLMM(basic2)
+r2basic3<-r.squaredGLMM(basic3)
+r2model1<-r.squaredGLMM(model1)
+r2model2<-r.squaredGLMM(model2)
+r2model3<-r.squaredGLMM(model3)
+r2newv1<-r.squaredGLMM(newv1)
+r2newv2<-r.squaredGLMM(newv2)
+r2newv3<-r.squaredGLMM(newv3)
+r2newv4<-r.squaredGLMM(newv4)
+r2extended1<-r.squaredGLMM(extended1)
+r2extended2<-r.squaredGLMM(extended2)
+r2extended3<-r.squaredGLMM(extended3)
+r2drop1<-r.squaredGLMM(drop1)
+r2drop2<-r.squaredGLMM(drop2)
+r2drop3<-r.squaredGLMM(drop3)
+r2rep1<-r.squaredGLMM(rep1)
+r2rep2<-r.squaredGLMM(rep2)
+r2rep3<-r.squaredGLMM(rep3)
+r2Repless1<-r.squaredGLMM(Repless1)
+r2Repless2<-r.squaredGLMM(Repless2)
+r2Repless3<-r.squaredGLMM(Repless3)
+#or
+LRbasic1<-r.squaredLR(basic1)
+LRbasic2<-r.squaredLR(basic2)
+LRbasic3<-r.squaredLR(basic3)
+LRmodel1<-r.squaredLR(model1)
+LRmodel2<-r.squaredLR(model2)
+LRmodel3<-r.squaredLR(model3)
+LRnewv1<-r.squaredLR(newv1)
+LRnewv2<-r.squaredLR(newv2)
+LRnewv3<-r.squaredLR(newv3)
+LRnewv4<-r.squaredLR(newv4)
+LRextended1<-r.squaredLR(extended1)
+Lrextended2<-r.squaredLR(extended2)
+LRextended3<-r.squaredLR(extended3)
+LRdrop1<-r.squaredLR(drop1)
+LRdrop2<-r.squaredLR(drop2)
+LRdrop3<-r.squaredLR(drop3)
+LRrep1<-r.squaredLR(rep1)
+LRrep2<-r.squaredLR(rep2)
+LRrep3<-r.squaredLR(rep3)
+LRRepless1<-r.squaredLR(Repless1)
+LRRepless2<-r.squaredLR(Repless2)
+LRRepless3<-r.squaredLR(Repless3)
+
+#Make things a percent function::
 percent <- function(x, digits = 6, format = "f", ...) {paste0(formatC( x, format = format, digits = digits, ...), "%")}
 
 ## Begin calculation to determine amount of variance explained by each fixed effect::
 ## https://stats.stackexchange.com/questions/185936/variance-explained-by-each-fixed-variable-linear-mixed-model
-sum1<-summary(test1)
-rvar1<-as.numeric(VarCorr(test1))
+sum1<-summary(model1)
+rvar1<-as.numeric(VarCorr(model1))
 rvariance <- sum(rvar1)
-an1<-anova(test1)
+an1<-anova(model1)
 fvar1<-an1$`Sum Sq`
 n<-length(data$rec.id)
 fvariance<-n/fvar1
-wholevariance<-as.numeric(r.squaredLR(test1))
+wholevariance<-as.numeric(r.squaredLR(model1))
 Fixed1<-(wholevariance*fvariance)/(rvariance+fvariance)
 
-sum2<-summary(test2)
-rvar2<-as.numeric(VarCorr(test2))
+sum2<-summary(model2)
+rvar2<-as.numeric(VarCorr(model2))
 rvariance2<-sum(rvar2)
-an2<-anova(test2)
+an2<-anova(model2)
 fvar2<-an2$`Sum Sq`
 fvar2a<-fvar2[1]
 fvar2b<-fvar2[2]
 fvariance2a<-n/fvar2a
 fvariance2b<-n/fvar2b
-wholevariance2<-as.numeric(r.squaredLR(test2))
+wholevariance2<-as.numeric(r.squaredLR(model2))
 Fixed2A<-(wholevariance2*fvariance2a)/(rvariance2+fvariance2a+fvariance2b)
 Fixed2B<-(wholevariance2*fvariance2b)/(rvariance2+fvariance2a+fvariance2b)
 
-sum3<-summary(test3)
-rvar3<-as.numeric(VarCorr(test3))
+sum3<-summary(model3)
+rvar3<-as.numeric(VarCorr(model3))
 rvariance3<-sum(rvar3)
-an3<-anova(test3)
+an3<-anova(model3)
 fvar3<-an3$`Sum Sq`
 fvar3a<-fvar3[1]
 fvar3b<-fvar3[2]
@@ -65,7 +184,7 @@ fvar3c<-fvar3[3]
 fvariance3a<-n/fvar3a
 fvariance3b<-n/fvar3b
 fvariance3c<-n/fvar3c
-wholevariance3<-as.numeric(r.squaredLR(test3))
+wholevariance3<-as.numeric(r.squaredLR(model3))
 Fixed3A<-(wholevariance3*fvariance3a)/(rvariance3+fvariance3a+fvariance3b+fvariance3c)
 Fixed3B<-(wholevariance3*fvariance3b)/(rvariance3+fvariance3a+fvariance3b+fvariance3c)
 Fixed3C<-(wholevariance3*fvariance3c)/(rvariance3+fvariance3a+fvariance3b+fvariance3c)
@@ -73,17 +192,17 @@ Fixed3C<-(wholevariance3*fvariance3c)/(rvariance3+fvariance3a+fvariance3b+fvaria
 
 ## Residual Variance - "sc"=residual standard deviation, (sd^2=variance)
 ## the physical variance of the error::
-ErrorVar1<-attr(VarCorr(test1),"sc")^2
-ErrorVar2<-attr(VarCorr(test2),"sc")^2
-ErrorVar3<-attr(VarCorr(test3),"sc")^2
+ErrorVar1<-attr(VarCorr(model1),"sc")^2
+ErrorVar2<-attr(VarCorr(model2),"sc")^2
+ErrorVar3<-attr(VarCorr(model3),"sc")^2
 
 
 ## Variance accounted for by random effects:
-RandVar1<-as.numeric(VarCorr(test1))
+RandVar1<-as.numeric(VarCorr(model1))
 RandVar1<-sum(RandVar1)
-RandVar2<-as.numeric(VarCorr(test2))
+RandVar2<-as.numeric(VarCorr(model2))
 RandVar2<-sum(RandVar2)
-RandVar3<-as.numeric(VarCorr(test3))
+RandVar3<-as.numeric(VarCorr(model3))
 RandVar3<-sum(RandVar3)
 
 
@@ -116,7 +235,7 @@ PercentRand3
 ## merTools::predictIntervals Method
 simm<-data %>% select("book.name", "rep", "entry", "pass", "rng", "yld")
 
-PI<-merTools::predictInterval(test1, simm, level=0.95, n.sims=100, stat=c("median"), type=c("linear.prediction"), include.resid.var=TRUE)
+PI<-merTools::predictInterval(model1, simm, level=0.95, n.sims=100, stat=c("median"), type=c("linear.prediction"), include.resid.var=TRUE)
 # ggplot(aes(x=1:100, y=fit, ymin=lwr, ymax=upr), data=PI[1:100,]) + 
 #   geom_point() + geom_linerange() + labs(x="Index", y="Prediction w/95% PI") + theme_bw()
 
@@ -126,7 +245,7 @@ sumBoot <- function(merBoot) {return(data.frame(fit = apply(merBoot$t, 2, functi
   lwr = apply(merBoot$t, 2, function(x) as.numeric(quantile(x, probs=.025, na.rm=TRUE))),
   upr = apply(merBoot$t, 2, function(x) as.numeric(quantile(x, probs=.975, na.rm=TRUE)))))}
 
-boot1 <- lme4::bootMer(test1, mySumm, nsim=250, use.u=FALSE, type="parametric")
+boot1 <- lme4::bootMer(model1, mySumm, nsim=250, use.u=FALSE, type="parametric")
 
 PI.boot1 <- sumBoot(boot1)
 
@@ -151,12 +270,12 @@ mean(PI$fit)
 
 ## Test2
 ## merTools::predictIntervals Method
-PI2<-merTools::predictInterval(test2, simm, level=0.95, n.sims=250, stat=c("median"), type=c("linear.prediction"), include.resid.var=TRUE)
+PI2<-merTools::predictInterval(model2, simm, level=0.95, n.sims=250, stat=c("median"), type=c("linear.prediction"), include.resid.var=TRUE)
 # ggplot(aes(x=1:100, y=fit, ymin=lwr, ymax=upr), data=PI2[1:100,]) + 
 #   geom_point() + geom_linerange() + labs(x="Index", y="Prediction w/95% PI") + theme_bw()
 
 ##lme4::bootMer() Method
-boot2 <- lme4::bootMer(test2, mySumm, nsim=250, use.u=FALSE, type="parametric")
+boot2 <- lme4::bootMer(model2, mySumm, nsim=250, use.u=FALSE, type="parametric")
 
 PI.boot2 <- sumBoot(boot2)
 
@@ -182,12 +301,12 @@ mean(PI2$fit)
 
 ## Test2
 ## merTools::predictIntervals Method
-PI3<-merTools::predictInterval(test3, simm, level=0.95, n.sims=250, stat=c("median"), type=c("linear.prediction"), include.resid.var=TRUE)
+PI3<-merTools::predictInterval(model3, simm, level=0.95, n.sims=250, stat=c("median"), type=c("linear.prediction"), include.resid.var=TRUE)
 # ggplot(aes(x=1:100, y=fit, ymin=lwr, ymax=upr), data=PI2[1:100,]) + 
 #   geom_point() + geom_linerange() + labs(x="Index", y="Prediction w/95% PI") + theme_bw()
 
 ##lme4::bootMer() Method
-boot3<-lme4::bootMer(test3, mySumm, nsim=250, use.u=FALSE, type="parametric")
+boot3<-lme4::bootMer(model3, mySumm, nsim=250, use.u=FALSE, type="parametric")
 
 PI.boot3<-sumBoot(boot3)
 
@@ -211,12 +330,6 @@ mean(PI3$fit)
 (mean(PI.boot3$upr))-(mean(PI.boot3$lwr))
 
 
-## RMSEs::
-mse.test1<-sqrt(mean(residuals(model.build1)^2))
-mse.test2<-sqrt(mean(residuals(model.build1)^2))
-mse.test3<-sqrt(mean(residuals(model.build1)^2))
-
-
 #Repeatabilities (ICC):
 library(rptR)
 repeat1<-rpt(yld~book.name:entry + book.name + rep:book.name + pass:book.name:rep + rng:book.name:rep + (1|entry), grname=c("entry", "Fixed", "Residual"), data=simm, datatype = c("Gaussian"), CI = 0.95, nboot = 250, ratio = FALSE)
@@ -230,3 +343,22 @@ summary(repeat2)
 repeat3<-rpt(yld~book.name:entry + rep:book.name + pass:book.name:rep + rng:book.name:rep + (1|entry), grname=c("entry", "Fixed", "Residual"), data=simm, datatype = c("Gaussian"), CI = 0.95, nboot = 250)
 plot(repeat3,cex.main=1)
 summary(repeat3)
+
+
+## Anything here??
+tempa3 <- glm(yld ~ entry + book.name + rep %in% (book.name) + entry:book.name, family = gaussian , data=data )
+  #Supposed MS error term??  
+  #model summary
+  summary1 <- summary.glm(tempa3)
+  #Error SS
+  error_ss<- as.data.frame(summary1$deviance)
+  error_ss1 <- error_ss %>%
+  #rename variable
+  select (Deviance = starts_with("summary"), everything())
+  #Error DF
+  error_df<- as.data.frame(summary1$df.residual)
+  error_df1 <- error_df %>%
+  #rename variable
+  select (Df = starts_with("summary"), everything())
+  #MS of error
+  mse1 <- as.data.frame(error_ss1/error_df1)
