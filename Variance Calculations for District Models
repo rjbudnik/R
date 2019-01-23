@@ -8,12 +8,26 @@ library(MuMIn)
 library(ggplot2)
 # library(merTools)
 
+# Percent function::
+percent <- function(x, digits = 6, format = "f", ...) {paste0(formatC( x, format = format, digits = digits, ...), "%")}
+
+
 setwd("C:/Users/Ryan.Ryan-PC/Desktop/wd")
 df<-read.csv("18CC.csv", header=T, na.strings=c("", " ", "NA"))
 CCF<-8.067
 df <- df%>%mutate (yld = (wt*CCF*(100-moist)/84.5))
 data<-subset(df, exp=="C81A")
 data$REPid<-as.factor(paste(data$book.name, data$rep, sep="."))
+
+data$book.name<-factor(data$book.name)
+data$exp<-factor(data$exp)
+data$entry<-factor(data$entry)
+data$ped.id<-factor(data$ped.id)
+data$code<-factor(data$code)
+data$rng<-factor(data$rng)
+data$pass<-factor(data$pass)
+data$rep<-factor(data$rep)
+data$plot<-factor(data$plot)
 
 
 ## Models::
@@ -64,7 +78,7 @@ Repless2<-lmer(yld~entry + book.name + (1|pass:book.name) + (1|rng:book.name) + 
 Repless3<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name) + (1|rng:book.name) + (1|entry:book.name), data=data, REML=TRUE)
 
 
-
+# Mixed Comparisons::
 anova(basic1, basic2, basic3, refit=FALSE)
 anova(model1, model2, model3, refit=FALSE)
 anova(newv1, newv2, newv3, newv4, refit=FALSE)
@@ -145,8 +159,68 @@ LRRepless1<-r.squaredLR(Repless1)
 LRRepless2<-r.squaredLR(Repless2)
 LRRepless3<-r.squaredLR(Repless3)
 
-#Make things a percent function::
-percent <- function(x, digits = 6, format = "f", ...) {paste0(formatC( x, format = format, digits = digits, ...), "%")}
+# Linear Approaches::
+Linear1<-lm(yld~entry, data=data)
+Linear2<-lm(yld~entry + book.name, data=data)
+Linear3<-lm(yld~entry + book.name + entry:book.name, data=data)
+Linear4<-lm(yld~entry + book.name + rep:book.name, data=data)
+Linear5<-lm(yld~entry + book.name + rep:book.name + entry:book.name, data=data)
+
+#Same RSS::
+Linear6<-lm(yld~entry + book.name + pass:book.name + rng:book.name, data=data)
+Linear8<-lm(yld~entry + book.name + rep:book.name + pass:book.name + rng:book.name, data=data)
+#Same RSS::
+Linear7<-lm(yld~entry + book.name + entry:book.name + pass:book.name + rng:book.name, data=data)
+Linear9<-lm(yld~entry + book.name + rep:book.name + entry:book.name + pass:book.name + rng:book.name, data=data)
+
+Linear10<-lm(yld~entry + book.name + rep:book.name + pass:book.name:rep + rng:book.name:rep, data=data)
+Linear11<-lm(yld~entry + book.name + rep:book.name + entry:book.name + pass:book.name:rep + rng:book.name:rep, data=data)
+#w/ REPid = rep*book.name::
+Linear12<-lm(yld~entry + book.name + REPid + entry:book.name + pass:REPid + rng:REPid, data=data)
+
+## Linear Comparisons
+anova(Linear1, Linear2, Linear3, Linear4, Linear5, Linear6, Linear7, Linear8, Linear9, Linear10, Linear11, Linear12)
+# RMSE::
+rmse.Linear1<-sqrt(mean(residuals(Linear1)^2))
+rmse.Linear2<-sqrt(mean(residuals(Linear2)^2))
+rmse.Linear3<-sqrt(mean(residuals(Linear3)^2))
+rmse.Linear4<-sqrt(mean(residuals(Linear4)^2))
+rmse.Linear5<-sqrt(mean(residuals(Linear5)^2))
+rmse.Linear6<-sqrt(mean(residuals(Linear6)^2))
+rmse.Linear7<-sqrt(mean(residuals(Linear7)^2))
+rmse.Linear8<-sqrt(mean(residuals(Linear8)^2))
+rmse.Linear9<-sqrt(mean(residuals(Linear9)^2))
+rmse.Linear10<-sqrt(mean(residuals(Linear10)^2))
+rmse.Linear11<-sqrt(mean(residuals(Linear11)^2))
+rmse.Linear12<-sqrt(mean(residuals(Linear12)^2))
+# R^2::
+r2Linear1<-summary(Linear1)$r.squared
+r2Linear2<-summary(Linear2)$r.squared
+r2Linear3<-summary(Linear3)$r.squared
+r2Linear4<-summary(Linear4)$r.squared
+r2Linear5<-summary(Linear5)$r.squared
+r2Linear6<-summary(Linear6)$r.squared
+r2Linear7<-summary(Linear7)$r.squared
+r2Linear8<-summary(Linear8)$r.squared
+r2Linear9<-summary(Linear9)$r.squared
+r2Linear10<-summary(Linear10)$r.squared
+r2Linear11<-summary(Linear11)$r.squared
+r2Linear12<-summary(Linear12)$r.squared
+# Adj. R^2
+adj.r2Linear1<-summary(Linear1)$adj.r.squared
+adj.r2Linear2<-summary(Linear2)$adj.r.squared
+adj.r2Linear3<-summary(Linear3)$adj.r.squared
+adj.r2Linear4<-summary(Linear4)$adj.r.squared
+adj.r2Linear5<-summary(Linear5)$adj.r.squared
+adj.r2Linear6<-summary(Linear6)$adj.r.squared
+adj.r2Linear7<-summary(Linear7)$adj.r.squared
+adj.r2Linear8<-summary(Linear8)$adj.r.squared
+adj.r2Linear9<-summary(Linear9)$adj.r.squared
+adj.r2Linear10<-summary(Linear10)$adj.r.squared
+adj.r2Linear11<-summary(Linear11)$adj.r.squared
+adj.r2Linear12<-summary(Linear12)$adj.r.squared
+
+
 
 ## Begin calculation to determine amount of variance explained by each fixed effect::
 ## https://stats.stackexchange.com/questions/185936/variance-explained-by-each-fixed-variable-linear-mixed-model
