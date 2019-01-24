@@ -181,13 +181,13 @@ Yld = G + E + G(E) + Rep(E) + Pass(Rep(E)) + Rng(Rep(E))
 Linear11<-lm(yld~entry + book.name + rep:book.name + entry:book.name + pass:book.name:rep + rng:book.name:rep, data=data)
 ```
 
-## Linear 12
+<!-- ## Linear 12 -->
+<!-- ## Same results as Linear 11 -->
+<!-- Yld = G + E + G(E) + REPid + Pass(REPid) + Rng(REPid) -->
 
-Yld = G + E + G(E) + REPid + Pass(REPid) + Rng(REPid)
-
-```{r lmodel12, echo=FALSE}
-Linear12<-lm(yld~entry + book.name + REPid + entry:book.name + pass:REPid + rng:REPid, data=data)
-```
+<!-- ```{r lmodel12, echo=FALSE} -->
+<!-- Linear12<-lm(yld~entry + book.name + REPid + entry:book.name + pass:REPid + rng:REPid, data=data) -->
+<!-- ``` -->
 
 
 # Mixed Model Analyses: {.tabset .tabset-fade}
@@ -284,119 +284,120 @@ model3<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1
 ```
 
 
-## New REPid Variable:
+<!-- ## New REPid Variable: -->
+<!-- ## New variable yielded the same results as the following: -->
+<!-- ## NewV1=Model1, NewV2=Model2, NewV3=Rank Deficient, NewV4=Drop2 -->
+<!-- Using the newly added unique idnetifier column, REPid = (book.name).(rep) -->
 
-Using the newly added unique idnetifier column, REPid = (book.name).(rep)
+<!-- Y = mean + Gene + Env + Pass(REPid) + Rng(REPid) + Gene(Env) + REPid -->
 
-Y = mean + Gene + Env + Pass(REPid) + Rng(REPid) + Gene(Env) + REPid
+<!-- ### New Variable 1 -->
+<!-- ### Same as Model 1 -->
+<!-- **YIELD = G** -->
 
-### New Variable 1
+<!-- * RANDOM =  -->
+<!--     + E -->
+<!--     + Pass(REPid) -->
+<!--     + Rng(REPid) -->
+<!--     + G(E) -->
+<!--     + REPid -->
 
-**YIELD = G**
+<!-- ```{r newv1, echo=FALSE} -->
+<!-- newv1<-lmer(yld~entry + (1|book.name) + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name) + (1|REPid), data=data, REML=TRUE) -->
+<!-- ``` -->
 
-* RANDOM = 
-    + E
-    + Pass(REPid)
-    + Rng(REPid)
-    + G(E)
-    + REPid
+<!-- ### New Variable 2 -->
+<!-- ### Same as Model 2 -->
+<!-- **YIELD = G + E** -->
 
-```{r newv1, echo=FALSE}
-newv1<-lmer(yld~entry + (1|book.name) + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name) + (1|REPid), data=data, REML=TRUE)
-```
+<!-- * RANDOM =  -->
+<!--     + Pass(REPid) -->
+<!--     + Rng(REPid) -->
+<!--     + G(E) -->
+<!--     + REPid -->
 
-### New Variable 2
+<!-- ```{r newv2, echo=FALSE} -->
+<!-- newv2<-lmer(yld~entry + book.name + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name) + (1|REPid), data=data, REML=TRUE) -->
+<!-- ``` -->
 
-**YIELD = G + E**
+<!-- ### New Variable 3 -->
+<!-- ### Returns rank deficient model fit, and shoul not be used: -->
+<!-- **YIELD = G + E + REPid** -->
 
-* RANDOM = 
-    + Pass(REPid)
-    + Rng(REPid)
-    + G(E)
-    + REPid
+<!-- * RANDOM =  -->
+<!--     + Pass(REPid) -->
+<!--     + Rng(REPid)) -->
+<!--     + G(E) -->
 
-```{r newv2, echo=FALSE}
-newv2<-lmer(yld~entry + book.name + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name) + (1|REPid), data=data, REML=TRUE)
-```
+<!-- ```{r newv3, echo=FALSE} -->
+<!-- newv3<-lmer(yld~entry + book.name + REPid + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name), data=data, REML=TRUE) -->
+<!-- ``` -->
 
-### New Variable 3
+<!-- ### New Variable 4 -->
+<!-- ### Same as Drop 2 -->
+<!-- **YIELD = G + E** -->
 
-**YIELD = G + E + REPid**
+<!-- * RANDOM =  -->
+<!--     + Pass(REPid) -->
+<!--     + Rng(REPid)) -->
+<!--     + G(E) -->
 
-* RANDOM = 
-    + Pass(REPid)
-    + Rng(REPid))
-    + G(E)
-
-```{r newv3, echo=FALSE}
-newv3<-lmer(yld~entry + book.name + REPid + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name), data=data, REML=TRUE)
-```
-
-### New Variable 4
-
-**YIELD = G + E**
-
-* RANDOM = 
-    + Pass(REPid)
-    + Rng(REPid))
-    + G(E)
-
-```{r newv4, echo=FALSE}
-newv4<-lmer(yld~entry + book.name + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name), data=data, REML=TRUE)
-```
+<!-- ```{r newv4, echo=FALSE} -->
+<!-- newv4<-lmer(yld~entry + book.name + (1|pass:REPid) + (1|rng:REPid) + (1|entry:book.name), data=data, REML=TRUE) -->
+<!-- ``` -->
 
 
-## Define Random Effect Better:
+<!-- ## Define Random Effect Better: -->
+<!-- ## ALL EXTENDED come back needing rescaled? -->
+<!-- Should Random Effect **"(1|entry:book.name)"** really be, -->
+<!--   **"(1|entry/book.name)"** = **"(1|entry) + (1|entry:book.name)"** -->
 
-Should Random Effect **"(1|entry:book.name)"** really be,
-  **"(1|entry/book.name)"** = **"(1|entry) + (1|entry:book.name)"**
+<!-- Y = mean + Gene + Env + Pass(Env(Rep)) + Rng(Env(Rep)) + Gene(Env) + Env(Rep) -->
 
-Y = mean + Gene + Env + Pass(Env(Rep)) + Rng(Env(Rep)) + Gene(Env) + Env(Rep)
+<!-- ### Extended 1 -->
 
-### Extended 1
+<!-- **YIELD = G** -->
 
-**YIELD = G**
+<!-- * RANDOM =  -->
+<!--     + E -->
+<!--     + Pass(Rep(E)) -->
+<!--     + Rng(Rep(E)) -->
+<!--     + G -->
+<!--     + G(E) -->
+<!--     + Rep(E) -->
 
-* RANDOM = 
-    + E
-    + Pass(Rep(E))
-    + Rng(Rep(E))
-    + G
-    + G(E)
-    + Rep(E)
+<!-- ```{r extended1, echo=FALSE} -->
+<!-- extended1<-lmer(yld~entry + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry/book.name) + (1|rep:book.name), data=data, REML=TRUE) -->
+<!-- ``` -->
 
-```{r extended1, echo=FALSE}
-extended1<-lmer(yld~entry + (1|book.name) + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry/book.name) + (1|rep:book.name), data=data, REML=TRUE)
-```
+<!-- ### Extended 2 -->
 
-### Extended 2
+<!-- **YIELD = G + E** -->
 
-**YIELD = G + E**
+<!-- * RANDOM =  -->
+<!--     + Pass(Rep(E)) -->
+<!--     + Rng(Rep(E)) -->
+<!--     + G -->
+<!--     + G(E) -->
+<!--     + Rep(E) -->
 
-* RANDOM = 
-    + Pass(Rep(E))
-    + Rng(Rep(E))
-    + G
-    + G(E)
-    + Rep(E)
+<!-- ```{r extended2, echo=FALSE} -->
+<!-- extended2<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry/book.name) + (1|rep:book.name), data=data, REML=TRUE) -->
+<!-- ``` -->
 
-```{r extended2, echo=FALSE}
-extended2<-lmer(yld~entry + book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry/book.name) + (1|rep:book.name), data=data, REML=TRUE)
-```
+<!-- ### Extended 3 -->
 
-### Extended 3
+<!-- **YIELD = G + E + Rep(E)** -->
 
-**YIELD = G + E + Rep(E)**
+<!-- * RANDOM =  -->
+<!--     + Pass(Rep(E)) -->
+<!--     + Rng(Rep(E)) -->
+<!--     + G -->
+<!--     + G(E) -->
 
-* RANDOM = 
-    + Pass(Rep(E))
-    + Rng(Rep(E))
-    + G
-    + G(E)
-
-```{r extended3, echo=FALSE}
-extended3<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry/book.name), data=data, REML=TRUE)
-```
+<!-- ```{r extended3, echo=FALSE} -->
+<!-- extended3<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry/book.name), data=data, REML=TRUE) -->
+<!-- ``` -->
 
 
 ## Drop **"Rep(E)"**:
@@ -535,17 +536,17 @@ rmse.linear8<-sqrt(mean(residuals(Linear8)^2))
 rmse.linear9<-sqrt(mean(residuals(Linear9)^2))
 rmse.linear10<-sqrt(mean(residuals(Linear10)^2))
 rmse.linear11<-sqrt(mean(residuals(Linear11)^2))
-rmse.linear12<-sqrt(mean(residuals(Linear12)^2))
+# rmse.linear12<-sqrt(mean(residuals(Linear12)^2))
 rmse.basic1<-sqrt(mean(residuals(basic1)^2))
 rmse.basic2<-sqrt(mean(residuals(basic2)^2))
 rmse.basic3<-sqrt(mean(residuals(basic3)^2))
 rmse.model1<-sqrt(mean(residuals(model1)^2))
 rmse.model2<-sqrt(mean(residuals(model2)^2))
 rmse.model3<-sqrt(mean(residuals(model3)^2))
-rmse.newv1<-sqrt(mean(residuals(newv1)^2))
-rmse.newv2<-sqrt(mean(residuals(newv2)^2))
-rmse.newv3<-sqrt(mean(residuals(newv3)^2))
-rmse.newv4<-sqrt(mean(residuals(newv4)^2))
+# rmse.newv1<-sqrt(mean(residuals(newv1)^2))
+# rmse.newv2<-sqrt(mean(residuals(newv2)^2))
+# rmse.newv3<-sqrt(mean(residuals(newv3)^2))
+# rmse.newv4<-sqrt(mean(residuals(newv4)^2))
 rmse.extended1<-sqrt(mean(residuals(extended1)^2))
 rmse.extended2<-sqrt(mean(residuals(extended2)^2))
 rmse.extended3<-sqrt(mean(residuals(extended3)^2))
@@ -564,10 +565,10 @@ LRbasic3<-r.squaredLR(basic3)
 LRmodel1<-r.squaredLR(model1)
 LRmodel2<-r.squaredLR(model2)
 LRmodel3<-r.squaredLR(model3)
-LRnewv1<-r.squaredLR(newv1)
-LRnewv2<-r.squaredLR(newv2)
-LRnewv3<-r.squaredLR(newv3)
-LRnewv4<-r.squaredLR(newv4)
+# LRnewv1<-r.squaredLR(newv1)
+# LRnewv2<-r.squaredLR(newv2)
+# LRnewv3<-r.squaredLR(newv3)
+# LRnewv4<-r.squaredLR(newv4)
 LRextended1<-r.squaredLR(extended1)
 LRextended2<-r.squaredLR(extended2)
 LRextended3<-r.squaredLR(extended3)
@@ -589,7 +590,7 @@ r2linear8<-r.squaredLR(Linear8)
 r2linear9<-r.squaredLR(Linear9)
 r2linear10<-r.squaredLR(Linear10)
 r2linear11<-r.squaredLR(Linear11)
-r2linear12<-r.squaredLR(Linear12)
+# r2linear12<-r.squaredLR(Linear12)
 
 ## Residual Variance - "sc" = residual standard deviation, (sd^2=variance)
 ## the physical variance of the error, or the variability around the regression line. 
@@ -600,10 +601,10 @@ sig.basic3<-as.numeric(summary(basic3)$sigma^2)
 sig.model1<-as.numeric(summary(model1)$sigma^2)
 sig.model2<-as.numeric(summary(model2)$sigma^2)
 sig.model3<-as.numeric(summary(model3)$sigma^2)
-sig.newv1<-as.numeric(summary(newv1)$sigma^2)
-sig.newv2<-as.numeric(summary(newv2)$sigma^2)
-sig.newv3<-as.numeric(summary(newv3)$sigma^2)
-sig.newv4<-as.numeric(summary(newv4)$sigma^2)
+# sig.newv1<-as.numeric(summary(newv1)$sigma^2)
+# sig.newv2<-as.numeric(summary(newv2)$sigma^2)
+# sig.newv3<-as.numeric(summary(newv3)$sigma^2)
+# sig.newv4<-as.numeric(summary(newv4)$sigma^2)
 sig.extended1<-as.numeric(summary(extended1)$sigma^2)
 sig.extended2<-as.numeric(summary(extended2)$sigma^2)
 sig.extended3<-as.numeric(summary(extended3)$sigma^2)
@@ -625,9 +626,9 @@ sig.linear8<-as.numeric(summary(Linear8)$sigma^2)
 sig.linear9<-as.numeric(summary(Linear9)$sigma^2)
 sig.linear10<-as.numeric(summary(Linear10)$sigma^2)
 sig.linear11<-as.numeric(summary(Linear11)$sigma^2)
-sig.linear12<-as.numeric(summary(Linear12)$sigma^2)
+# sig.linear12<-as.numeric(summary(Linear12)$sigma^2)
 
-RMSE.R2.sigma_Table<-data.frame("Model"=c( "Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6", "Linear7", "Linear8", "Linear9", "Linear10", "Linear11", "Linear12", "Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2"),"Residual RMSE" = c(rmse.linear1, rmse.linear2, rmse.linear3, rmse.linear4, rmse.linear5, rmse.linear6, rmse.linear7, rmse.linear8, rmse.linear9, rmse.linear10, rmse.linear11, rmse.linear12, rmse.basic1, rmse.basic2, rmse.basic3, rmse.model1, rmse.model2, rmse.model3, rmse.newv1, rmse.newv2, rmse.newv3, rmse.newv4, rmse.extended1, rmse.extended2, rmse.extended3, rmse.drop1, rmse.drop2, rmse.rep1, rmse.rep2, rmse.rep3, rmse.Repless1, rmse.Repless2), "Residual R2" = c(LRbasic1, LRbasic2, LRbasic3, LRmodel1, LRmodel2, LRmodel3, LRnewv1, LRnewv2, LRnewv3, LRnewv4, LRextended1, LRextended2, LRextended3, LRdrop1, LRdrop2, LRrep1, LRrep2, LRrep3, LRRepless1, LRRepless2, r2linear1, r2linear2, r2linear3, r2linear4, r2linear5, r2linear6, r2linear7, r2linear8, r2linear9, r2linear10, r2linear11, r2linear12), "Residual Sigma" = c(sig.linear1, sig.linear2, sig.linear3, sig.linear4, sig.linear5, sig.linear6, sig.linear7, sig.linear8, sig.linear9, sig.linear10, sig.linear11, sig.linear12, sig.basic1, sig.basic2, sig.basic3, sig.model1, sig.model2, sig.model3, sig.newv1, sig.newv2, sig.newv3, sig.newv4, sig.extended1, sig.extended2, sig.extended3, sig.drop1, sig.drop2, sig.rep1, sig.rep2, sig.rep3, sig.Repless1, sig.Repless2))
+RMSE.R2.sigma_Table<-data.frame("Model"=c( "Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Linear6", "Linear7", "Linear8", "Linear9", "Linear10", "Linear11", "Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2"),"Residual RMSE" = c(rmse.linear1, rmse.linear2, rmse.linear3, rmse.linear4, rmse.linear5, rmse.linear6, rmse.linear7, rmse.linear8, rmse.linear9, rmse.linear10, rmse.linear11, rmse.basic1, rmse.basic2, rmse.basic3, rmse.model1, rmse.model2, rmse.model3, rmse.extended1, rmse.extended2, rmse.extended3, rmse.drop1, rmse.drop2, rmse.rep1, rmse.rep2, rmse.rep3, rmse.Repless1, rmse.Repless2), "Residual R2" = c(r2linear1, r2linear2, r2linear3, r2linear4, r2linear5, r2linear6, r2linear7, r2linear8, r2linear9, r2linear10, r2linear11, LRbasic1, LRbasic2, LRbasic3, LRmodel1, LRmodel2, LRmodel3, LRextended1, LRextended2, LRextended3, LRdrop1, LRdrop2, LRrep1, LRrep2, LRrep3, LRRepless1, LRRepless2), "Residual Sigma" = c(sig.linear1, sig.linear2, sig.linear3, sig.linear4, sig.linear5, sig.linear6, sig.linear7, sig.linear8, sig.linear9, sig.linear10, sig.linear11, sig.basic1, sig.basic2, sig.basic3, sig.model1, sig.model2, sig.model3, sig.extended1, sig.extended2, sig.extended3, sig.drop1, sig.drop2, sig.rep1, sig.rep2, sig.rep3, sig.Repless1, sig.Repless2))
 rmsecomb.order<-as.numeric(rank(RMSE.R2.sigma_Table$Residual.RMSE))
 r2comb.order<-as.numeric(rank(-RMSE.R2.sigma_Table$Residual.R2))
 sigmacomb.order<-as.numeric(rank(RMSE.R2.sigma_Table$Residual.Sigma))
@@ -683,14 +684,14 @@ lsv.model2<-var(lsv.model2$Estimate)
 lsv.model3<-ls_means(model3, which = "entry")
 lsv.model3<-var(lsv.model3$Estimate)
 
-lsv.newv1<-ls_means(newv1, which = "entry")
-lsv.newv1<-var(lsv.newv1$Estimate)
-lsv.newv2<-ls_means(newv2, which = "entry")
-lsv.newv2<-var(lsv.newv2$Estimate)
-lsv.newv3<-ls_means(newv3, which = "entry")
-lsv.newv3<-var(lsv.newv3$Estimate)
-lsv.newv4<-ls_means(newv4, which = "entry")
-lsv.newv4<-var(lsv.newv4$Estimate)
+# lsv.newv1<-ls_means(newv1, which = "entry")
+# lsv.newv1<-var(lsv.newv1$Estimate)
+# lsv.newv2<-ls_means(newv2, which = "entry")
+# lsv.newv2<-var(lsv.newv2$Estimate)
+# lsv.newv3<-ls_means(newv3, which = "entry")
+# lsv.newv3<-var(lsv.newv3$Estimate)
+# lsv.newv4<-ls_means(newv4, which = "entry")
+# lsv.newv4<-var(lsv.newv4$Estimate)
 
 lsv.extended1<-ls_means(extended1, which = "entry")
 lsv.extended1<-var(lsv.extended1$Estimate)
@@ -716,7 +717,7 @@ lsv.repless1<-var(lsv.repless1$Estimate)
 lsv.repless2<-ls_means(Repless2, which = "entry")
 lsv.repless2<-var(lsv.repless2$Estimate)
 
-LSmean_Variance_Table<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Newv1", "Newv2", "Newv3", "Newv4", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2"),"LS Variance" = c(lsv.l1, lsv.l2, lsv.l3, lsv.l4, lsv.l5, lsv.basic1, lsv.basic2, lsv.basic3, lsv.model1, lsv.model2, lsv.model3, lsv.newv1, lsv.newv2, lsv.newv3, lsv.newv4, lsv.extended1, lsv.extended2, lsv.extended3, lsv.drop1, lsv.drop2, lsv.rep1, lsv.rep2, lsv.rep3, lsv.repless1, lsv.repless2))
+LSmean_Variance_Table<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear4", "Linear5", "Basic1", "Basic2", "Basic3", "Model1", "Model2", "Model3", "Extended1", "Extended2", "Extended3", "Drop1", "Drop2", "Rep1", "Rep2", "Rep3", "Repless1", "Repless2"),"LS Variance" = c(lsv.l1, lsv.l2, lsv.l3, lsv.l4, lsv.l5, lsv.basic1, lsv.basic2, lsv.basic3, lsv.model1, lsv.model2, lsv.model3, lsv.extended1, lsv.extended2, lsv.extended3, lsv.drop1, lsv.drop2, lsv.rep1, lsv.rep2, lsv.rep3, lsv.repless1, lsv.repless2))
 lsvcomb.order<-as.numeric(rank(LSmean_Variance_Table$LS.Variance))
 LSmean_Variance_Table$LSmean.Variance.Rank<-as.factor(paste(lsvcomb.order))
 paged_table(LSmean_Variance_Table)
