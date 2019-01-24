@@ -27,11 +27,8 @@ params:
   year:
     label: "Year"
     value: 2018
-    input: slider
-    min: 2010
-    max: 2030
-    step: 1
-    sep: ""
+    input: select
+    choices: [2018, 2017, 2016]
 ---
 
 ```{r logo, cache=TRUE, echo=FALSE}
@@ -73,7 +70,7 @@ df<-read.csv("yt18.csv", header=T, na.strings=c("", " ", "NA"))
 
 ###CCF
 CCF<-8.067
-df <- df%>%mutate (yld = (wt*CCF))
+df <- df%>%mutate (yld = (wt*CCF*(100-moist)/84.5))
 ###BCF
 # BCF<-7.779
 # df <- df%>%mutate (yld = (wt*BCF))
@@ -108,7 +105,7 @@ avg.yld <- mean(data$yld, na.rm = TRUE)
 
 ## Summary
 
-```{r summary, echo = FALSE, cols.print=8, rows.print=20, warning=FALSE}
+```{r summary, echo = FALSE, cols.print=15, rows.print=10, warning=FALSE}
 sum.less<-data %>% select("exp", "book.name", "rep", "entry", "plot", "pass", "range", "wt", "moist", "yld")
 des<-describe(sum.less, IQR=TRUE)
 paged_table(des, options(scipen=999, digits=3))
@@ -161,7 +158,7 @@ abline(h = min.yld, col="red")
 ## Boxplot
 
 ``` {r boxplot, echo = FALSE, fig.width=9}
-Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld")
+Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld", las=2)
 abline(h = max.yld, col="red")
 abline(h = avg.yld, col="red", lwd=c(3))
 abline(h = min.yld, col="red")
@@ -169,31 +166,36 @@ abline(h = min.yld, col="red")
 
 # Mixed Model Analysis: {.tabset .tabset-fade}
 
-## Summary
+**YIELD = ENTRY**
 
-**Model: YIELD = ENTRY**
-
-* Random Effects: 
-  - REP
-  - PASS(REP)
-  - RANGE(REP)
+* Random: + REP + PASS(REP) + RANGE(REP)
 
 ```{r model, comment=NA, echo=FALSE, message=FALSE}
 model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=data, REML=TRUE)
-summary(model1)
-model1
+# summary(model1)
 ```
 
-## Random-Effects Table
+## Least Squares (LS) Means {.tabset .tabset-fade}
 
-```{r modelsum, echo=FALSE, message=FALSE}
-kable(ranova(model1))
++ Observed Means: Regular arithmetic means that can be computed by hand directly on your data without reference to any statistical model.
+
++ **Least Squares Means (LS Means):** Means that are computed based on a linear model such as ANOVA.
+
+### By Entry
+
+```{r lsm.by.entry, comment=NA, echo=FALSE, cols.print=8, rows.print=25, message=FALSE}
+options(scipen=6)
+LSM.Entry<-ls_means(model1, which="entry")
+paged_table(LSM.Entry)
 ```
 
-## Predicted Means
+### Average & Variance
 
-```{r modelpredictmeans, comment=NA, echo=FALSE, message=FALSE}
-predictmeans(model1, "entry", pairwise=FALSE, level=.25, newwd=FALSE)
+```{r lsm.avg.var, comment=NA, echo=FALSE, message=FALSE}
+lsm.entry<-mean(LSM.Entry$Estimate)
+lsv.entry<-var(LSM.Entry$Estimate)
+Avg.Var.Table<-data.frame("Source"=c("Entry"), "Average" = c(lsm.entry), "Variance" = c(lsv.entry))
+paged_table(Avg.Var.Table)
 ```
 
 ## ANOVA Tables
@@ -202,9 +204,9 @@ Generally speaking, the smaller the *p-value*, and the larger the *F-statistic* 
 
 ANOVA uses the *F-statistic* to determine whether the variability between group means is larger than the variability of the observations within the groups. If that ratio is sufficiently large, you can conclude that not all the means are equal. A low *p-value* suggests that your sample provides enough evidence that you can reject the null hypothesis for the entire population.
 
-  + The **null hypothesis** states that the model with no independent variables fits       the data as well as your model.
+  + The **null hypothesis** states that the model with no independent variables fits the data as well as your model.
 
-  + The **alternative hypothesis** says that your model fits the data better than the      intercept-only model.
+  + The **alternative hypothesis** says that your model fits the data better than the intercept-only model.
 
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
@@ -216,54 +218,51 @@ paged_table(anovalmer(model1))
 **Type III** Analysis of Variance Table with Satterthwaite's method:
 
 ```{r modelanova2, echo = FALSE}
+options(scipen=3)
 paged_table(anova(model1))
 ```
 
-## CV & LSD
+## Random-Effects Table
+
+An ANOVA-like table with tests of random-effect terms in the model. **Each random-effect term is reduced or removed** and likelihood ratio tests of model reductions are presented.
+
+```{r modelsum, echo=FALSE, message=FALSE}
+options(scipen=3)
+paged_table(ranova(model1))
+```
+
+## CV, LSD & RMSE
 
 **Coefficient of Vairance (CV):**
 
-The CV for a model aims to describe the model fit in terms of the relative sizes of the squared residuals and outcome values.  The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. The CV is the physical ratio of the standard deviation to the mean. Thus the higher the coefficient of variation, the greater the level of dispersion around the mean.
+The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. 
 
-The advantage of the CV is that it is unitless.  This allows CVs to be compared to each other in ways that other measures, like standard deviations or root mean squared residuals, cannot be.
-
-  **SMALLER IS BETTER!!!!**
-
-**The model with the smaller CV has predicted values that are closer to the actual values.**
-
-```{r modelcv, comment=NA, echo = FALSE}
-LSDer::CVer(model1)
-```
+* **SMALLER IS BETTER!!!!** (i.e. The model with the smaller CV has predicted values that are closer to the actual values.)
 
 **Fisher's Least Significant Differnce (LSD):**
 
-Least significant difference is used to compare means of different treatments that have an equal number of replications. The yields must be greater than the LSD value between any two hybrids, varieties, or treatments to be considered significant. This ensures the differences are real and not because of chance or due to soil variability.
+Least significant difference is used to compare means of different treatments that have an equal number of replications.
+* **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-LSD values in the university tests are generally reported at (0.1) or 10% level. It means that there is a 90% chance that any one of the hybrids or varieties within the LSD value for the test could be on the top. Some test plot data are now being reported with LSD at (0.25) or 75% level, perhaps to be more inclusive.
-
-
-*At 90% Confidence:*
-
-```{r modellsd.1, comment=NA, echo = FALSE}
-LSDer::LSDer(model1, "entry", level=0.90)
+```{r modellsd.cv.rmse.2, comment=NA, echo = FALSE, message=FALSE}
+mod1.cv<-LSDer::CVer(model1)
+mod1.lsd.90<-LSDer::LSDer(model1, "entry", level=0.90)
+mod1.lsd.75<-LSDer::LSDer(model1, "entry", level=0.75)
+mod1.rmse<-sqrt(mean(residuals(model1)^2))
+CV.LSD.RMSE.Table1<-data.frame("CV" = c(mod1.cv), "LSD 90%" = c(mod1.lsd.90), "LSD 75%" = c(mod1.lsd.75), "RMSE" = c(mod1.rmse))
+paged_table(CV.LSD.RMSE.Table1)
 ```
 
-*At 75% Confidence:*
+<!-- OR -->
 
-```{r modellsd.25, comment=NA, echo = FALSE}
-LSDer::LSDer(model1, "entry", level=0.75)
-```
-
-OR
-
-```{r modellsdeq.25, comment=NA, echo = FALSE}
-vcor<-as.data.frame(VarCorr(model1))
-t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1))
-V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
-n_rep<-n_distinct(data[,"rep"])
-n_rep<-as.numeric(n_rep)
-t_alpha*sqrt(2*(V_R/n_rep))
-```
+<!-- ```{r modellsdeq.25, comment=NA, echo = FALSE} -->
+<!-- vcor<-as.data.frame(VarCorr(model1)) -->
+<!-- t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1)) -->
+<!-- V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE) -->
+<!-- n_rep<-n_distinct(data[,"rep"]) -->
+<!-- n_rep<-as.numeric(n_rep) -->
+<!-- t_alpha*sqrt(2*(V_R/n_rep)) -->
+<!-- ``` -->
 
 # Outlier Detection: {.tabset .tabset-fade}
 
@@ -298,11 +297,12 @@ Cook's distance is useful for identifying outliers in the X values (observations
       *k* = number of independent variables
 
 ```{r cook, echo = FALSE, message=FALSE}
-sample_size<-nrow(data)
+sample_size<-as.numeric(nrow(data))
+entryL<-as.numeric(nlevels(data$entry))
 Cooksd<-CookD(model1, newwd=FALSE)
-abline(h = (10/(sample_size-params$entry.end-1)), col="red")
-abline(h = (8/(sample_size-params$entry.end-1)), col="red", lwd=c(2))
-abline(h = (4/(sample_size-params$entry.end-1)), col="red", lwd=c(3))
+abline(h = (10/(sample_size-entryL-1)), col="red")
+abline(h = (8/(sample_size-entryL-1)), col="red", lwd=c(2))
+abline(h = (4/(sample_size-entryL-1)), col="red", lwd=c(3))
 ```
 
 
@@ -325,7 +325,7 @@ Replaced all low values outside the minimum IQR value, as visualized in the barp
 
 Low yielding rows in which yield values were replaced with NA.
 
-```{r modelc1, comment=NA, echo = FALSE}
+```{r modelc1, echo = FALSE}
 ##Replace All Low Values Identified in  Histogram (e.g.< IQR Minimum bu/ac) with NA:
 IQRNoLow<-subset(data, data$yld < min.yld)
 NoLowRows<-as.numeric(rownames(IQRNoLow))
@@ -336,20 +336,33 @@ IQRClean1$yld<-replace(IQRClean1$yld, NoLowRows, NA)
 model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRClean1, REML=TRUE)
 ```
 
-**Summary**
+<!-- **Summary** -->
 
-```{r modelc1.sum2, comment=NA, echo=FALSE, message=FALSE}
-summary(model2)
+<!-- ```{r modelc1.sum2, comment=NA, echo=FALSE, message=FALSE} -->
+<!-- summary(model2) -->
+<!-- ``` -->
+
+### Least Squares (LS) Means {.tabset .tabset-fade}
+
++ Observed Means: Regular arithmetic means that can be computed by hand directly on your data without reference to any statistical model.
+
++ **Least Squares Means (LS Means):** Means that are computed based on a linear model such as ANOVA.
+
+#### By Entry
+
+```{r lsm.by.entry2, comment=NA, echo=FALSE, cols.print=8, rows.print=25, message=FALSE}
+options(scipen=6)
+LSM.Entry2<-ls_means(model2, which="entry")
+paged_table(LSM.Entry2)
 ```
 
-### Random-Effect Table
+#### Average & Variance
 
-ANOVA-like table for random-effects: Single term deletions;
-
-Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
-
-```{r modelc1.reml, echo=FALSE, message=FALSE}
-kable(ranova(model2))
+```{r lsm.avg.var2, comment=NA, echo=FALSE, message=FALSE}
+lsm.entry2<-mean(LSM.Entry2$Estimate)
+lsv.entry2<-var(LSM.Entry2$Estimate)
+Avg.Var.Table2<-data.frame("Source"=c("Entry"), "Average" = c(lsm.entry2), "Variance" = c(lsv.entry2))
+paged_table(Avg.Var.Table2)
 ```
 
 ### ANOVA Tables
@@ -366,37 +379,36 @@ paged_table(anovalmer(model2))
 paged_table(anova(model2))
 ```
 
-### CV & LSD
+### Random-Effect Table
+
+ANOVA-like table for random-effects: Single term deletions;
+
+Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
+
+```{r modelc1.reml, echo=FALSE, message=FALSE}
+paged_table(ranova(model2))
+```
+
+### CV, LSD & RMSE
 
 **Coefficient of Vairance (CV):**
 
-```{r, modelc1.cv, comment=NA, echo=FALSE}
-LSDer::CVer(model2)
-```
+The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. 
+
+* **SMALLER IS BETTER!!!!** (i.e. The model with the smaller CV has predicted values that are closer to the actual values.)
 
 **Fisher's Least Significant Differnce (LSD):**
 
-*At 90% Confidence:*
+Least significant difference is used to compare means of different treatments that have an equal number of replications.
+* **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r, modelc1.lsd.1, comment=NA, echo=FALSE}
-LSDer::LSDer(model2, "entry", level=0.95)
-```
-
-*At 75% Confidence:*
-
-```{r, modelc1.lsd.25, comment=NA, echo=FALSE}
-LSDer::LSDer(model2, "entry", level=0.75)
-```
-
-OR
-
-```{r modelc1.lsdeq.25, comment=NA, echo = FALSE}
-vcor<-as.data.frame(VarCorr(model2))
-t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1))
-V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
-n_rep<-n_distinct(data[,"rep"])
-n_rep<-as.numeric(n_rep)
-t_alpha*sqrt(2*(V_R/n_rep))
+```{r modellsd.cv.rmse.3, comment=NA, echo = FALSE, message=FALSE}
+mod2.cv<-LSDer::CVer(model2)
+mod2.lsd.90<-LSDer::LSDer(model2, "entry", level=0.90)
+mod2.lsd.75<-LSDer::LSDer(model2, "entry", level=0.75)
+mod2.rmse<-sqrt(mean(residuals(model2)^2))
+CV.LSD.RMSE.Table2<-data.frame("CV" = c(mod2.cv), "LSD 90%" = c(mod2.lsd.90), "LSD 75%" = c(mod2.lsd.75), "RMSE" = c(mod2.rmse))
+paged_table(CV.LSD.RMSE.Table2)
 ```
 
 ## Outside Min/Max IQRs: {.tabset .tabset-fade}
@@ -405,7 +417,7 @@ Replaced all values outside the minimum and maximum IQRs with NA, as visualized 
 
 ### Summary
 
-```{r modelc2, comment=NA, echo = FALSE}
+```{r modelc2, echo = FALSE}
 ##Replace values outside the minimum and maximum IQR values with NA:
 IQRNoHigh<-subset(data, data$yld > max.yld)
 NoHighRows<-as.numeric(rownames(IQRNoHigh))
@@ -428,20 +440,33 @@ paged_table(data[NoLowRows, ])
 paged_table(data[NoHighRows, ])
 ```
 
-**Summary**
+<!-- **Summary** -->
 
-```{r modelc2.sum, comment=NA, echo=FALSE, message=FALSE}
-summary(model3)
+<!-- ```{r modelc2.sum, comment=NA, echo=FALSE, message=FALSE} -->
+<!-- summary(model3) -->
+<!-- ``` -->
+
+### Least Squares (LS) Means {.tabset .tabset-fade}
+
++ Observed Means: Regular arithmetic means that can be computed by hand directly on your data without reference to any statistical model.
+
++ **Least Squares Means (LS Means):** Means that are computed based on a linear model such as ANOVA.
+
+#### By Entry
+
+```{r lsm.by.entry3, comment=NA, echo=FALSE, cols.print=8, rows.print=25, message=FALSE}
+options(scipen=6)
+LSM.Entry3<-ls_means(model3, which="entry")
+paged_table(LSM.Entry3)
 ```
 
-### Random-Effects Table
+#### Average & Variance
 
-ANOVA-like table for random-effects: Single term deletions;
-
-Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
-
-```{r modelc2.reml, echo=FALSE, meesage=FALSE}
-kable(ranova(model3))
+```{r lsm.avg.var3, comment=NA, echo=FALSE, message=FALSE}
+lsm.entry3<-mean(LSM.Entry3$Estimate)
+lsv.entry3<-var(LSM.Entry3$Estimate)
+Avg.Var.Table3<-data.frame("Source"=c("Entry"), "Average" = c(lsm.entry3), "Variance" = c(lsv.entry3))
+paged_table(Avg.Var.Table3)
 ```
 
 ### ANOVA Tables
@@ -458,37 +483,36 @@ paged_table(anovalmer(model3))
 paged_table(anova(model3))
 ```
 
-### CV & LSD
+### Random-Effects Table
+
+ANOVA-like table for random-effects: Single term deletions;
+
+Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
+
+```{r modelc2.reml, echo=FALSE, meesage=FALSE}
+paged_table(ranova(model3))
+```
+
+### CV, LSD & RMSE
 
 **Coefficient of Vairance (CV):**
 
-```{r modelc2.cv, comment=NA, echo=FALSE}
-LSDer::CVer(model3)
-```
+The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. 
+
+* **SMALLER IS BETTER!!!!** (i.e. The model with the smaller CV has predicted values that are closer to the actual values.)
 
 **Fisher's Least Significant Differnce (LSD):**
 
-*At 90% Confidence:*
+Least significant difference is used to compare means of different treatments that have an equal number of replications.
+* **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modelc2.lsd.1, comment=NA, echo=FALSE}
-LSDer::LSDer(model3, "entry", level=0.90)
-```
-
-*At 75% Confidence:*
-
-```{r modelc2.lsd.25, comment=NA, echo=FALSE}
-LSDer::LSDer(model3, "entry", level=0.75)
-```
-
-OR
-
-```{r modelc2.lsdeq.25, comment=NA, echo = FALSE}
-vcor<-as.data.frame(VarCorr(model3))
-t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1))
-V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
-n_rep<-n_distinct(data[,"rep"])
-n_rep<-as.numeric(n_rep)
-t_alpha*sqrt(2*(V_R/n_rep))
+```{r modellsd.cv.rmse.4, comment=NA, echo = FALSE, message=FALSE}
+mod3.cv<-LSDer::CVer(model3)
+mod3.lsd.90<-LSDer::LSDer(model3, "entry", level=0.90)
+mod3.lsd.75<-LSDer::LSDer(model3, "entry", level=0.75)
+mod3.rmse<-sqrt(mean(residuals(model3)^2))
+CV.LSD.RMSE.Table3<-data.frame("CV" = c(mod3.cv), "LSD 90%" = c(mod3.lsd.90), "LSD 75%" = c(mod3.lsd.75), "RMSE" = c(mod3.rmse))
+paged_table(CV.LSD.RMSE.Table3)
 ```
 
 ## Residual Deviations: {.tabset .tabset-fade}
@@ -499,7 +523,7 @@ Replace residual outliers identified in  Q-Q Plot with NA for all resdiual value
 
 Influential residual deviating rows in which yield values were replaced with NA.
 
-```{r modelc3, comment=NA, echo = FALSE}
+```{r modelc3, echo = FALSE}
 # ##Replace All Residual Outliers 2.5 times the standard deviation above/below the 
 # ##residual mean in  Q-Q Plot with NA:
 influentialQQ<-resid(model1)[abs(resid(model1)-mean(resid(model1)))>2.5*sd(resid(model1))]
@@ -517,16 +541,33 @@ model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=QQClea
 # model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=ResidualClean, REML=TRUE)
 ```
 
-**Summary**
+<!-- **Summary** -->
 
-```{r modelc3.sum, comment=NA, echo=FALSE, message=FALSE}
-summary(model4)
+<!-- ```{r modelc3.sum, comment=NA, echo=FALSE, message=FALSE} -->
+<!-- summary(model4) -->
+<!-- ``` -->
+
+### Least Squares (LS) Means {.tabset .tabset-fade}
+
++ Observed Means: Regular arithmetic means that can be computed by hand directly on your data without reference to any statistical model.
+
++ **Least Squares Means (LS Means):** Means that are computed based on a linear model such as ANOVA.
+
+#### By Entry
+
+```{r lsm.by.entry4, comment=NA, echo=FALSE, cols.print=8, rows.print=25, message=FALSE}
+options(scipen=6)
+LSM.Entry4<-ls_means(model4, which="entry")
+paged_table(LSM.Entry4)
 ```
 
-### Random-Effects Table
+#### Average & Variance
 
-```{r modelc3.reml, echo=FALSE, message=FALSE}
-kable(ranova(model4))
+```{r lsm.avg.var4, comment=NA, echo=FALSE, message=FALSE}
+lsm.entry4<-mean(LSM.Entry4$Estimate)
+lsv.entry4<-var(LSM.Entry4$Estimate)
+Avg.Var.Table4<-data.frame("Source"=c("Entry"), "Average" = c(lsm.entry4), "Variance" = c(lsv.entry4))
+paged_table(Avg.Var.Table4)
 ```
 
 ### ANOVA Tables
@@ -543,37 +584,32 @@ paged_table(anovalmer(model4))
 paged_table(anova(model4))
 ```
 
-### CV & LSD
+### Random-Effects Table
+
+```{r modelc3.reml, echo=FALSE, message=FALSE}
+paged_table(ranova(model4))
+```
+
+### CV, LSD & RMSE
 
 **Coefficient of Vairance (CV):**
 
-```{r modelc3.cv, comment=NA, echo=FALSE}
-LSDer::CVer(model4)
-```
+The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. 
+
+* **SMALLER IS BETTER!!!!** (i.e. The model with the smaller CV has predicted values that are closer to the actual values.)
 
 **Fisher's Least Significant Differnce (LSD):**
 
-*At 90% Confidence:*
+Least significant difference is used to compare means of different treatments that have an equal number of replications.
+* **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modelc3.lsd.1, comment=NA, echo=FALSE}
-LSDer::LSDer(model4, "entry", level=0.90)
-```
-
-*At 75% Confidence:*
-
-```{r modelc3.lsd.25, comment=NA, echo=FALSE}
-LSDer::LSDer(model4, "entry", level=0.75)
-```
-
-OR
-
-```{r modelc3.lsdeq.25, comment=NA, echo = FALSE}
-vcor<-as.data.frame(VarCorr(model4))
-t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1))
-V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
-n_rep<-n_distinct(data[,"rep"])
-n_rep<-as.numeric(n_rep)
-t_alpha*sqrt(2*(V_R/n_rep))
+```{r modellsd.cv.rmse.1, comment=NA, echo = FALSE, message=FALSE}
+mod4.cv<-LSDer::CVer(model4)
+mod4.lsd.90<-LSDer::LSDer(model4, "entry", level=0.90)
+mod4.lsd.75<-LSDer::LSDer(model4, "entry", level=0.75)
+mod4.rmse<-sqrt(mean(residuals(model4)^2))
+CV.LSD.RMSE.Table4<-data.frame("CV" = c(mod4.cv), "LSD 90%" = c(mod4.lsd.90), "LSD 75%" = c(mod4.lsd.75), "RMSE" = c(mod4.rmse))
+paged_table(CV.LSD.RMSE.Table4)
 ```
 
 ## Cook's Distance: {.tabset .tabset-fade}
@@ -588,26 +624,43 @@ Replace influential Values determined Via Cook's Distance with NA.
 
 Influential Cook's Distance rows in which yield values were replaced with NA.
 
-```{r modelc4, comment=NA, echo = FALSE}
+```{r modelc4, echo = FALSE}
 ##Replace "Influential" Values Determined Via Cook's Distance, with NA:
-influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=(10/(sample_size-params$entry.end-1))))])
+influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=(10/(sample_size-entryL-1))))])
 paged_table(data[influentialcooks, ])
 CooksClean<-data
 CooksClean$yld<-replace(CooksClean$yld, influentialcooks, NA)
 ##Cooks Clean Model:
-model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=CooksClean, REML=TRUE)
+model5<-lmer(yld~entry + (1|rep) + (1|rep:pass) + (1|rep:range), data=CooksClean, REML=TRUE)
 ```
 
-**Summary**
+<!-- **Summary** -->
 
-```{r modelc4.sum, comment=NA, echo=FALSE, message=FALSE}
-summary(model5)
+<!-- ```{r modelc4.sum, comment=NA, echo=FALSE, message=FALSE} -->
+<!-- summary(model5) -->
+<!-- ``` -->
+
+### Least Squares (LS) Means {.tabset .tabset-fade}
+
++ Observed Means: Regular arithmetic means that can be computed by hand directly on your data without reference to any statistical model.
+
++ **Least Squares Means (LS Means):** Means that are computed based on a linear model such as ANOVA.
+
+#### By Entry
+
+```{r lsm.by.entry5, comment=NA, echo=FALSE, cols.print=8, rows.print=25, message=FALSE}
+options(scipen=6)
+LSM.Entry5<-ls_means(model5, which="entry")
+paged_table(LSM.Entry5)
 ```
 
-### Random-Effects Table
+#### Average & Variance
 
-```{r modelc4.reml, echo=FALSE, message=FALSE}
-kable(ranova(model5))
+```{r lsm.avg.var5, comment=NA, echo=FALSE, message=FALSE}
+lsm.entry5<-mean(LSM.Entry5$Estimate)
+lsv.entry5<-var(LSM.Entry5$Estimate)
+Avg.Var.Table5<-data.frame("Source"=c("Entry"), "Average" = c(lsm.entry5), "Variance" = c(lsv.entry5))
+paged_table(Avg.Var.Table5)
 ```
 
 ### ANOVA Tables
@@ -624,43 +677,39 @@ paged_table(anovalmer(model5))
 paged_table(anova(model5))
 ```
 
-### CV & LSD
+### Random-Effects Table
+
+```{r modelc4.reml, echo=FALSE, message=FALSE}
+paged_table(ranova(model5))
+```
+
+### CV, LSD & RMSE
 
 **Coefficient of Vairance (CV):**
 
-```{r modelc4.cv, comment=NA, echo=FALSE}
-LSDer::CVer(model5)
-```
+The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. 
+
+* **SMALLER IS BETTER!!!!** (i.e. The model with the smaller CV has predicted values that are closer to the actual values.)
 
 **Fisher's Least Significant Differnce (LSD):**
 
-*At 90% Confidence:*
+Least significant difference is used to compare means of different treatments that have an equal number of replications.
+* **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modelc4.lsd.1, comment=NA, echo=FALSE}
-LSDer::LSDer(model5, "entry", level=0.90)
-```
-
-*At 75% Confidence:*
-
-```{r modelc4.lsd.25, comment=NA, echo=FALSE}
-LSDer::LSDer(model5, "entry", level=0.75)
-```
-
-OR
-
-```{r modelc4.lsdeq.25, comment=NA, echo = FALSE}
-vcor<-as.data.frame(VarCorr(model5))
-t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1))
-V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
-n_rep<-n_distinct(data[,"rep"])
-n_rep<-as.numeric(n_rep)
-t_alpha*sqrt(2*(V_R/n_rep))
+```{r modellsd.cv.rmse.5, comment=NA, echo = FALSE, message=FALSE}
+mod5.cv<-LSDer::CVer(model5)
+mod5.lsd.90<-LSDer::LSDer(model5, "entry", level=0.90)
+mod5.lsd.75<-LSDer::LSDer(model5, "entry", level=0.75)
+mod5.rmse<-sqrt(mean(residuals(model5)^2))
+CV.LSD.RMSE.Table5<-data.frame("CV" = c(mod5.cv), "LSD 90%" = c(mod5.lsd.90), "LSD 75%" = c(mod5.lsd.75), "RMSE" = c(mod5.rmse))
+paged_table(CV.LSD.RMSE.Table5)
 ```
 
 # Export Clean Dataset: {.tabset .tabset-fade}
 
-**-Uncomment specfic cleaned dataset you wish to export.**
-**-MUST specify & manually change output filename within code!**
+* **Uncomment specfic cleaned dataset you wish to export.**
+
+* **MUST specify & manually change output filename within code!**
 
 
 <!-- Cleaned w/NO Low IQR Yields: -->
