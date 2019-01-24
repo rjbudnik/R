@@ -244,7 +244,7 @@ The lower the CV, the smaller the residuals relative to the predicted value.  Th
 Least significant difference is used to compare means of different treatments that have an equal number of replications.
 * **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modellsd.cv.rmse.2, comment=NA, echo = FALSE, message=FALSE}
+```{r modellsd.cv.rmse.1, comment=NA, echo = FALSE, message=FALSE}
 mod1.cv<-LSDer::CVer(model1)
 mod1.lsd.90<-LSDer::LSDer(model1, "entry", level=0.90)
 mod1.lsd.75<-LSDer::LSDer(model1, "entry", level=0.75)
@@ -402,7 +402,7 @@ The lower the CV, the smaller the residuals relative to the predicted value.  Th
 Least significant difference is used to compare means of different treatments that have an equal number of replications.
 * **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modellsd.cv.rmse.3, comment=NA, echo = FALSE, message=FALSE}
+```{r modellsd.cv.rmse.2, comment=NA, echo = FALSE, message=FALSE}
 mod2.cv<-LSDer::CVer(model2)
 mod2.lsd.90<-LSDer::LSDer(model2, "entry", level=0.90)
 mod2.lsd.75<-LSDer::LSDer(model2, "entry", level=0.75)
@@ -506,7 +506,7 @@ The lower the CV, the smaller the residuals relative to the predicted value.  Th
 Least significant difference is used to compare means of different treatments that have an equal number of replications.
 * **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modellsd.cv.rmse.4, comment=NA, echo = FALSE, message=FALSE}
+```{r modellsd.cv.rmse.3, comment=NA, echo = FALSE, message=FALSE}
 mod3.cv<-LSDer::CVer(model3)
 mod3.lsd.90<-LSDer::LSDer(model3, "entry", level=0.90)
 mod3.lsd.75<-LSDer::LSDer(model3, "entry", level=0.75)
@@ -603,7 +603,7 @@ The lower the CV, the smaller the residuals relative to the predicted value.  Th
 Least significant difference is used to compare means of different treatments that have an equal number of replications.
 * **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modellsd.cv.rmse.1, comment=NA, echo = FALSE, message=FALSE}
+```{r modellsd.cv.rmse.4, comment=NA, echo = FALSE, message=FALSE}
 mod4.cv<-LSDer::CVer(model4)
 mod4.lsd.90<-LSDer::LSDer(model4, "entry", level=0.90)
 mod4.lsd.75<-LSDer::LSDer(model4, "entry", level=0.75)
