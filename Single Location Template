@@ -13,7 +13,7 @@ params:
     label: "Dataset:"
     value: yt18.csv
     input: select
-    choices: yt18.csv
+    choices: [yt18.csv, 18CC.csv]
   book.name:
     label: "Book Name:"
     value: CF811
@@ -32,7 +32,7 @@ params:
 ---
 
 ```{r logo, cache=TRUE, echo=FALSE}
-htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "YieldTrialSingleLoc","inst","rmarkdown","templates","report","skeleton","ICIA_logo.png")), 
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","Ryan.Ryan-PC","Documents", "YieldTrialSingleLoc","inst","rmarkdown","templates","report","skeleton","ICIA_logo.png")), 
                alt = 'logo',
                style = 'position:absolute; top:0; right:0; padding:10px;')
 ```
@@ -58,7 +58,6 @@ library(shiny)
 library(shinythemes)
 library(psych)
 library(MuMIn)
-library(magrittr)
 ```
 
 -Corn Coversion Factor = **8.067**
@@ -400,7 +399,7 @@ paged_table(ranova(model2))
 ```
 
 
-## CV, LSD, RMSE & R^2
+### CV, LSD, RMSE & R^2
 
 **Coefficient of Vairance (CV):**
 
@@ -509,7 +508,7 @@ Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
 paged_table(ranova(model3))
 ```
 
-## CV, LSD, RMSE & R^2
+### CV, LSD, RMSE & R^2
 
 **Coefficient of Vairance (CV):**
 
@@ -611,7 +610,7 @@ paged_table(anova(model4))
 paged_table(ranova(model4))
 ```
 
-## CV, LSD, RMSE & R^2
+### CV, LSD, RMSE & R^2
 
 **Coefficient of Vairance (CV):**
 
@@ -709,7 +708,7 @@ paged_table(anova(model5))
 paged_table(ranova(model5))
 ```
 
-## CV, LSD, RMSE & R^2
+### CV, LSD, RMSE & R^2
 
 **Coefficient of Vairance (CV):**
 
