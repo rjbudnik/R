@@ -36,11 +36,11 @@ params:
     choices: [Early, Full]
 ---
 
-```{r logo, cache=TRUE, echo=FALSE}
-htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "DistrictAnalysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), 
-               alt = 'logo',
-               style = 'position:absolute; top:0; right:0; padding:10px;')
-```
+<!-- # ```{r logo, cache=TRUE, echo=FALSE} -->
+<!-- # htmltools::img(src = knitr::image_uri(file.path("C:","Users","Ryan-Ryan.PC","Documents", "District.Analysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), -->
+<!-- #                alt = 'logo', -->
+<!-- #                style = 'position:absolute; top:0; right:0; padding:10px;') -->
+<!-- # ``` -->
 
 ---
 
@@ -149,11 +149,11 @@ abline(h = min.yld, col="red")
 model1<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data, REML=TRUE)
 ```
 
-## Least Square Means (LS-Means)  {.tabset .tabset-fade}
+## Least Square (LS) Means  {.tabset .tabset-fade}
 
 + Observed Means: Regular arithmetic means that can be computed by hand directly on your data without reference to any statistical model.
 
-+ Least Squares Means (LS Means): Means that are computed based on a linear model such as ANOVA.
++ **Least Squares Means (LS Means):** Means that are computed based on a linear model such as ANOVA.
 
 ### By Entry
 
@@ -185,13 +185,13 @@ paged_table(Avg.Var.Table)
 
 ## ANOVA Tables
 
-Generally speaking, the smaller the *p-value*, and the larger the *F-statistic* the better the model fit and grounds for rejection of the null hypothesis.
+A small *P-value*, and a large *F-statistic* constitute grounds for null hypothesis rejection.
 
 ANOVA uses the *F-statistic* to determine whether the variability between group means is larger than the variability of the observations within the groups. If that ratio is sufficiently large, you can conclude that not all the means are equal. A low *p-value* suggests that your sample provides enough evidence that you can reject the null hypothesis for the entire population.
 
-  + The **null hypothesis** states that the model with no independent variables fits the data as well as your model.
+* The **null hypothesis** states that the model with no independent variables fits the data as well as your model.
 
-  + The **alternative hypothesis** says that your model fits the data better than the intercept-only model.
+* The **alternative hypothesis** says that your model fits the data better than the intercept-only model.
 
 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
@@ -212,57 +212,53 @@ paged_table(anova(model1))
 
 ## Random-Effects Table
 
-```{r modelsum, echo=FALSE, message=FALSE}
+```{r model.step.random, echo=FALSE, message=FALSE}
 options(scipen=6)
 paged_table(ranova(model1))
 ```
 
 
-## CV & LSD
+## CV, LSD, RMSE & R^2
 
 **Coefficient of Vairance (CV):**
 
-The CV for a model aims to describe the model fit in terms of the relative sizes of the squared residuals and outcome values.  The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. The CV is the physical ratio of the standard deviation to the mean. Thus the higher the coefficient of variation, the greater the level of dispersion around the mean.
+The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. 
 
-The advantage of the CV is that it is unitless.  This allows CVs to be compared to each other in ways that other measures, like standard deviations or root mean squared residuals, cannot be.
-
-  **SMALLER IS BETTER!!!!**
-
-**The model with the smaller CV has predicted values that are closer to the actual values.**
-
-```{r modelcv, comment=NA, echo = FALSE}
-LSDer::CVer(model1)
-```
+* **SMALLER IS BETTER!!!!** (i.e. The model with the smaller CV has predicted values that are closer to the actual values.)
 
 **Fisher's Least Significant Differnce (LSD):**
 
-Least significant difference is used to compare means of different treatments that have an equal number of replications. The yields must be greater than the LSD value between any two hybrids, varieties, or treatments to be considered significant. This ensures the differences are real and not because of chance or due to soil variability.
+Least significant difference is used to compare means of different treatments that have an equal number of replications.
 
-LSD values in the university tests are generally reported at (0.1) or 10% level. It means that there is a 90% chance that any one of the hybrids or varieties within the LSD value for the test could be on the top. Some test plot data are now being reported with LSD at (0.25) or 75% level, perhaps to be more inclusive.
+* **The yields must be greater than the LSD value between any two treatments to be considered significant.**
 
-
-*At 90% Confidence:*
-
-```{r modellsd.1, comment=NA, echo = FALSE}
-LSDer::LSDer(model1, "entry", level=0.90)
+```{r modellsd.predict.25, comment=NA, echo = FALSE}
+pre<-predictmeans(model1, "entry", pairwise=TRUE, level=0.25, newwd=FALSE)
+LSDpre<-pre[["LSD"]][["Aveg.LSD"]]
 ```
 
-*At 75% Confidence:*
+```{r model.lsd.cv.rmse, comment=NA, echo = FALSE, message=FALSE}
+##CV from "LSDer" package:
+mod1.cv<-LSDer::CVer(model1)
 
-```{r modellsd.25, comment=NA, echo = FALSE}
-LSDer::LSDer(model1, "entry", level=0.75)
+####NOT THE SAME AS SAS::::
+# ##LSD from "LSDer" package:
+# mod1.lsd.90<-LSDer::LSDer(model1, "entry", level=0.90)
+# mod1.lsd.75<-LSDer::LSDer(model1, "entry", level=0.75)
+# 
+# ##"Plantbreeding" package LSD approach:
+# vcor<-as.data.frame(VarCorr(model1))
+# entryL<-as.numeric(nlevels(data$entry))
+# t_alpha<-qt(p=1-(0.25/2), df=(entryL-1))
+# V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
+# n_rep<-as.numeric(n_distinct(data[,"rep"]))
+# LSD.v2<-t_alpha*sqrt(2*(V_R/n_rep))
+
+mod1.rmse<-sqrt(mean(residuals(model1)^2))
+mod1.R2<-r.squaredLR(model1)
+CV.LSD.RMSE.R2.Table1<-data.frame("CV" = c(mod1.cv), "LSD.25_Average" = c(LSDpre), "RMSE" = c(mod1.rmse), "R^2" = c(mod1.R2))
+paged_table(CV.LSD.RMSE.R2.Table1)
 ```
-
-<!-- OR -->
-
-<!-- ```{r modellsdeq.25, comment=NA, echo = FALSE} -->
-<!-- vcor<-as.data.frame(VarCorr(model1)) -->
-<!-- t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1)) -->
-<!-- V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE) -->
-<!-- n_rep<-n_distinct(data[,"rep"]) -->
-<!-- n_rep<-as.numeric(n_rep) -->
-<!-- t_alpha*sqrt(2*(V_R/n_rep)) -->
-<!-- ``` -->
 
 
 # Outlier Detection: {.tabset .tabset-fade}
@@ -309,8 +305,28 @@ text(qq, label=(data$entry), cex=0.8, col= "red4", pos=4, offset = 1.6)
 
 # Export Clean Dataset: {.tabset .tabset-fade}
 
-**-Uncomment specfic cleaned dataset you wish to export.**
-**-MUST specify & manually change output filename within code!**
+* **Uncomment specfic cleaned dataset you wish to export.**
+
+* **MUST specify & manually change output filename within code!**
+
+```{r, echo=FALSE}
+server <- shinyServer(function(input, output, session) {
+
+  output$downloadData <- downloadHandler(
+    filename = function() { 
+      paste("dataset-", Sys.Date(), ".csv", sep="")
+    },
+    content = function(file) {
+      write.csv(data, row.names=FALSE)
+    })
+})
+
+ui <- shinyUI(fluidPage(
+    downloadButton('downloadData', 'Download data')
+))
+
+shinyApp(ui=ui,server=server)
+```
 
 
 <!-- Cleaned w/NO Low IQR Yields: -->
