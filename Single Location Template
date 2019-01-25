@@ -742,9 +742,9 @@ paged_table(CV.LSD.RMSE.R2.Table5)
 
 ```{r download.QQ, echo=FALSE}
 IQRC1<-paste(c(params$book.name), "IQRCleaned_mins", "csv", sep=".")
-IQRC2<-paste(c(params$book.name), "IQRCleaned_minmax", sep=".")
-QQC<-paste(c(params$book.name), "QQCleaned", sep=".")
-CooksC<-paste(c(params$book.name), "CooksCleaned", sep=".")
+IQRC2<-paste(c(params$book.name), "IQRCleaned_minmax", "csv", sep=".")
+QQC<-paste(c(params$book.name), "QQCleaned", "csv", sep=".")
+CooksC<-paste(c(params$book.name), "CooksCleaned", "csv", sep=".")
 
 embed_data= function(x= mtcars, filename= "file.csv", label= "Get data"){
   encode_data= function(x){
@@ -757,13 +757,13 @@ embed_data= function(x= mtcars, filename= "file.csv", label= "Get data"){
 }
 ```
 
-* `r embed_data(IQRClean1, filename="IQRC1", label= "Export IQR Cleaned - ONLY Min. Removed Data")`
+* `r embed_data(IQRClean1, filename=c(IQRC1), label= "Export IQR Cleaned - ONLY Min. Removed Data")`
 
-* `r embed_data(IQRClean2, filename="IQRClean2.csv", label= "Export IQR Cleaned - BOTH Min. & Max Data")`
+* `r embed_data(IQRClean2, filename=c(IQRC2), label= "Export IQR Cleaned - BOTH Min. & Max Data")`
 
-* `r embed_data(QQClean, filename="QQClean.csv", label= "Export Q-Q Cleaned Data")`
+* `r embed_data(QQClean, filename=c(QQC), label= "Export Q-Q Cleaned Data")`
 
-* `r embed_data(CooksClean, filename="CooksClean.csv", label= "Export Cooks Distance Cleaned Data")`
+* `r embed_data(CooksClean, filename=c(CooksC), label= "Export Cooks Distance Cleaned Data")`
 
 
 
