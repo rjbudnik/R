@@ -39,7 +39,6 @@ htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documen
 
 ---
 
-
 # Overview:
 The following report renders a single location mixed model analysis with corresponding figures for the `r params$year`-- **`r params$exp`** Trial, at the **`r params$book.name`** location.
 
@@ -58,6 +57,8 @@ library(predictmeans)
 library(shiny)
 library(shinythemes)
 library(psych)
+library(MuMIn)
+library(magrittr)
 ```
 
 -Corn Coversion Factor = **8.067**
@@ -90,7 +91,6 @@ data$code<-factor(data$code)
 data$range<-factor(data$range)
 data$pass<-factor(data$pass)
 data$rep<-factor(data$rep)
-attach(data)
 
 ###Mean & IQRS:
 max.yld <- quantile(data$yld,0.75, na.rm=TRUE) + (IQR(data$yld, na.rm=TRUE) * 1.5 )
@@ -231,7 +231,7 @@ options(scipen=3)
 paged_table(ranova(model1))
 ```
 
-## CV, LSD & RMSE
+## CV, LSD, RMSE & R^2
 
 **Coefficient of Vairance (CV):**
 
@@ -242,27 +242,37 @@ The lower the CV, the smaller the residuals relative to the predicted value.  Th
 **Fisher's Least Significant Differnce (LSD):**
 
 Least significant difference is used to compare means of different treatments that have an equal number of replications.
-* **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modellsd.cv.rmse.1, comment=NA, echo = FALSE, message=FALSE}
-mod1.cv<-LSDer::CVer(model1)
-mod1.lsd.90<-LSDer::LSDer(model1, "entry", level=0.90)
-mod1.lsd.75<-LSDer::LSDer(model1, "entry", level=0.75)
-mod1.rmse<-sqrt(mean(residuals(model1)^2))
-CV.LSD.RMSE.Table1<-data.frame("CV" = c(mod1.cv), "LSD 90%" = c(mod1.lsd.90), "LSD 75%" = c(mod1.lsd.75), "RMSE" = c(mod1.rmse))
-paged_table(CV.LSD.RMSE.Table1)
+* **The yields must be greater than the LSD value between any two treatments to be considered significant.**
+
+```{r modellsd.predict.25, comment=NA, echo = FALSE}
+pre<-predictmeans(model1, "entry", pairwise=TRUE, level=0.25, newwd=FALSE)
+LSDpre<-pre[["LSD"]][["Aveg.LSD"]]
 ```
 
-<!-- OR -->
+```{r model.lsd.cv.rmse, comment=NA, echo = FALSE, message=FALSE}
+##CV from "LSDer" package:
+mod1.cv<-LSDer::CVer(model1)
 
-<!-- ```{r modellsdeq.25, comment=NA, echo = FALSE} -->
-<!-- vcor<-as.data.frame(VarCorr(model1)) -->
-<!-- t_alpha<-qt(p=1-(0.25/2), df=(params$entry.end-1)) -->
-<!-- V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE) -->
-<!-- n_rep<-n_distinct(data[,"rep"]) -->
-<!-- n_rep<-as.numeric(n_rep) -->
-<!-- t_alpha*sqrt(2*(V_R/n_rep)) -->
-<!-- ``` -->
+####NOT THE SAME AS SAS::::
+# ##LSD from "LSDer" package:
+# mod1.lsd.90<-LSDer::LSDer(model1, "entry", level=0.90)
+# mod1.lsd.75<-LSDer::LSDer(model1, "entry", level=0.75)
+# 
+# ##"Plantbreeding" package LSD approach:
+# vcor<-as.data.frame(VarCorr(model1))
+# entryL<-as.numeric(nlevels(data$entry))
+# t_alpha<-qt(p=1-(0.25/2), df=(entryL-1))
+# V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
+# n_rep<-as.numeric(n_distinct(data[,"rep"]))
+# LSD.v2<-t_alpha*sqrt(2*(V_R/n_rep))
+
+mod1.rmse<-sqrt(mean(residuals(model1)^2))
+mod1.R2<-r.squaredLR(model1)
+CV.LSD.RMSE.R2.Table1<-data.frame("CV" = c(mod1.cv), "LSD.25_Average" = c(LSDpre), "RMSE" = c(mod1.rmse), "R^2" = c(mod1.R2))
+paged_table(CV.LSD.RMSE.R2.Table1)
+```
+
 
 # Outlier Detection: {.tabset .tabset-fade}
 
@@ -296,7 +306,7 @@ Cook's distance is useful for identifying outliers in the X values (observations
       
       *k* = number of independent variables
 
-```{r cook, echo = FALSE, message=FALSE}
+```{r cook, echo = FALSE, cache=TRUE, message=FALSE}
 sample_size<-as.numeric(nrow(data))
 entryL<-as.numeric(nlevels(data$entry))
 Cooksd<-CookD(model1, newwd=FALSE)
@@ -389,7 +399,8 @@ Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
 paged_table(ranova(model2))
 ```
 
-### CV, LSD & RMSE
+
+## CV, LSD, RMSE & R^2
 
 **Coefficient of Vairance (CV):**
 
@@ -400,15 +411,20 @@ The lower the CV, the smaller the residuals relative to the predicted value.  Th
 **Fisher's Least Significant Differnce (LSD):**
 
 Least significant difference is used to compare means of different treatments that have an equal number of replications.
-* **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modellsd.cv.rmse.2, comment=NA, echo = FALSE, message=FALSE}
+* **The yields must be greater than the LSD value between any two treatments to be considered significant.**
+
+```{r model2lsd.predict.25, comment=NA, echo = FALSE}
+pre2<-predictmeans(model2, "entry", pairwise=TRUE, level=0.25, newwd=FALSE)
+LSDpre2<-pre2[["LSD"]][["Aveg.LSD"]]
+```
+
+```{r model2.lsd.cv.rmse, comment=NA, echo = FALSE, message=FALSE}
 mod2.cv<-LSDer::CVer(model2)
-mod2.lsd.90<-LSDer::LSDer(model2, "entry", level=0.90)
-mod2.lsd.75<-LSDer::LSDer(model2, "entry", level=0.75)
 mod2.rmse<-sqrt(mean(residuals(model2)^2))
-CV.LSD.RMSE.Table2<-data.frame("CV" = c(mod2.cv), "LSD 90%" = c(mod2.lsd.90), "LSD 75%" = c(mod2.lsd.75), "RMSE" = c(mod2.rmse))
-paged_table(CV.LSD.RMSE.Table2)
+mod2.R2<-r.squaredLR(model2)
+CV.LSD.RMSE.R2.Table2<-data.frame("CV" = c(mod2.cv), "LSD.25_Average" = c(LSDpre2), "RMSE" = c(mod2.rmse), "R^2" = c(mod2.R2))
+paged_table(CV.LSD.RMSE.R2.Table2)
 ```
 
 ## Outside Min/Max IQRs: {.tabset .tabset-fade}
@@ -493,7 +509,7 @@ Model: yld ~ entry + (1 | rep) + (1 | rep:pass) + (1 | rep:range)
 paged_table(ranova(model3))
 ```
 
-### CV, LSD & RMSE
+## CV, LSD, RMSE & R^2
 
 **Coefficient of Vairance (CV):**
 
@@ -504,15 +520,20 @@ The lower the CV, the smaller the residuals relative to the predicted value.  Th
 **Fisher's Least Significant Differnce (LSD):**
 
 Least significant difference is used to compare means of different treatments that have an equal number of replications.
-* **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modellsd.cv.rmse.3, comment=NA, echo = FALSE, message=FALSE}
+* **The yields must be greater than the LSD value between any two treatments to be considered significant.**
+
+```{r model3lsd.predict.25, comment=NA, echo = FALSE}
+pre3<-predictmeans(model3, "entry", pairwise=TRUE, level=0.25, newwd=FALSE)
+LSDpre3<-pre3[["LSD"]][["Aveg.LSD"]]
+```
+
+```{r model3.lsd.cv.rmse, comment=NA, echo = FALSE, message=FALSE}
 mod3.cv<-LSDer::CVer(model3)
-mod3.lsd.90<-LSDer::LSDer(model3, "entry", level=0.90)
-mod3.lsd.75<-LSDer::LSDer(model3, "entry", level=0.75)
 mod3.rmse<-sqrt(mean(residuals(model3)^2))
-CV.LSD.RMSE.Table3<-data.frame("CV" = c(mod3.cv), "LSD 90%" = c(mod3.lsd.90), "LSD 75%" = c(mod3.lsd.75), "RMSE" = c(mod3.rmse))
-paged_table(CV.LSD.RMSE.Table3)
+mod3.R2<-r.squaredLR(model3)
+CV.LSD.RMSE.R2.Table3<-data.frame("CV" = c(mod3.cv), "LSD.25_Average" = c(LSDpre3), "RMSE" = c(mod3.rmse), "R^2" = c(mod3.R2))
+paged_table(CV.LSD.RMSE.R2.Table3)
 ```
 
 ## Residual Deviations: {.tabset .tabset-fade}
@@ -590,7 +611,7 @@ paged_table(anova(model4))
 paged_table(ranova(model4))
 ```
 
-### CV, LSD & RMSE
+## CV, LSD, RMSE & R^2
 
 **Coefficient of Vairance (CV):**
 
@@ -601,15 +622,20 @@ The lower the CV, the smaller the residuals relative to the predicted value.  Th
 **Fisher's Least Significant Differnce (LSD):**
 
 Least significant difference is used to compare means of different treatments that have an equal number of replications.
-* **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modellsd.cv.rmse.4, comment=NA, echo = FALSE, message=FALSE}
+* **The yields must be greater than the LSD value between any two treatments to be considered significant.**
+
+```{r model4lsd.predict.25, comment=NA, echo = FALSE}
+pre4<-predictmeans(model4, "entry", pairwise=TRUE, level=0.25, newwd=FALSE)
+LSDpre4<-pre4[["LSD"]][["Aveg.LSD"]]
+```
+
+```{r model4.lsd.cv.rmse, comment=NA, echo = FALSE, message=FALSE}
 mod4.cv<-LSDer::CVer(model4)
-mod4.lsd.90<-LSDer::LSDer(model4, "entry", level=0.90)
-mod4.lsd.75<-LSDer::LSDer(model4, "entry", level=0.75)
 mod4.rmse<-sqrt(mean(residuals(model4)^2))
-CV.LSD.RMSE.Table4<-data.frame("CV" = c(mod4.cv), "LSD 90%" = c(mod4.lsd.90), "LSD 75%" = c(mod4.lsd.75), "RMSE" = c(mod4.rmse))
-paged_table(CV.LSD.RMSE.Table4)
+mod4.R2<-r.squaredLR(model4)
+CV.LSD.RMSE.R2.Table4<-data.frame("CV" = c(mod4.cv), "LSD.25_Average" = c(LSDpre4), "RMSE" = c(mod4.rmse), "R^2" = c(mod4.R2))
+paged_table(CV.LSD.RMSE.R2.Table4)
 ```
 
 ## Cook's Distance: {.tabset .tabset-fade}
@@ -683,7 +709,7 @@ paged_table(anova(model5))
 paged_table(ranova(model5))
 ```
 
-### CV, LSD & RMSE
+## CV, LSD, RMSE & R^2
 
 **Coefficient of Vairance (CV):**
 
@@ -694,25 +720,58 @@ The lower the CV, the smaller the residuals relative to the predicted value.  Th
 **Fisher's Least Significant Differnce (LSD):**
 
 Least significant difference is used to compare means of different treatments that have an equal number of replications.
-* **The yields must be greater than the LSD value between any two            treatments to be considered significant.**
 
-```{r modellsd.cv.rmse.5, comment=NA, echo = FALSE, message=FALSE}
+* **The yields must be greater than the LSD value between any two treatments to be considered significant.**
+
+```{r model5lsd.predict.25, comment=NA, echo = FALSE}
+pre5<-predictmeans(model5, "entry", pairwise=TRUE, level=0.25, newwd=FALSE)
+LSDpre5<-pre5[["LSD"]][["Aveg.LSD"]]
+```
+
+```{r model5.lsd.cv.rmse, comment=NA, echo = FALSE, message=FALSE}
 mod5.cv<-LSDer::CVer(model5)
-mod5.lsd.90<-LSDer::LSDer(model5, "entry", level=0.90)
-mod5.lsd.75<-LSDer::LSDer(model5, "entry", level=0.75)
 mod5.rmse<-sqrt(mean(residuals(model5)^2))
-CV.LSD.RMSE.Table5<-data.frame("CV" = c(mod5.cv), "LSD 90%" = c(mod5.lsd.90), "LSD 75%" = c(mod5.lsd.75), "RMSE" = c(mod5.rmse))
-paged_table(CV.LSD.RMSE.Table5)
+mod5.R2<-r.squaredLR(model5)
+CV.LSD.RMSE.R2.Table5<-data.frame("CV" = c(mod5.cv), "LSD.25_Average" = c(LSDpre5), "RMSE" = c(mod5.rmse), "R^2" = c(mod5.R2))
+paged_table(CV.LSD.RMSE.R2.Table5)
 ```
 
 # Export Clean Dataset: {.tabset .tabset-fade}
 
-* **Uncomment specfic cleaned dataset you wish to export.**
+**Select which "cleaned" dataset you would like to utilize, and export from analysis as CSV:**
 
-* **MUST specify & manually change output filename within code!**
+```{r download.QQ, echo=FALSE}
+IQRC1<-paste(c(params$book.name), "IQRCleaned_mins", "csv", sep=".")
+IQRC2<-paste(c(params$book.name), "IQRCleaned_minmax", sep=".")
+QQC<-paste(c(params$book.name), "QQCleaned", sep=".")
+CooksC<-paste(c(params$book.name), "CooksCleaned", sep=".")
+
+embed_data= function(x= mtcars, filename= "file.csv", label= "Get data"){
+  encode_data= function(x){
+    write.csv(x, "file", row.names=FALSE)
+    enc= sprintf('data:text/csv;base64,%s', openssl::base64_encode(paste0(readLines("file"), collapse="\n")) )
+    unlink("file")
+    return(enc)
+  }
+  paste0("<a download='", filename, "' href=", encode_data(x), ">", label, "</a>")
+}
+```
+
+* `r embed_data(IQRClean1, filename="IQRC1", label= "Export IQR Cleaned - ONLY Min. Removed Data")`
+
+* `r embed_data(IQRClean2, filename="IQRClean2.csv", label= "Export IQR Cleaned - BOTH Min. & Max Data")`
+
+* `r embed_data(QQClean, filename="QQClean.csv", label= "Export Q-Q Cleaned Data")`
+
+* `r embed_data(CooksClean, filename="CooksClean.csv", label= "Export Cooks Distance Cleaned Data")`
+
 
 
 <!-- Cleaned w/NO Low IQR Yields: -->
+
+<!-- * **Uncomment specfic cleaned dataset you wish to export.** -->
+
+<!-- * **MUST specify & manually change output filename within code!** -->
 
 <!-- ```{r export, echo = FALSE} -->
 <!-- write.csv(IQRClean1, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_xbook.name_x.exp.csv", row.names=FALSE) -->
