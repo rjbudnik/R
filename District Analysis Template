@@ -36,11 +36,9 @@ params:
     choices: [Early, Full]
 ---
 
-<!-- # ```{r logo, cache=TRUE, echo=FALSE} -->
-<!-- # htmltools::img(src = knitr::image_uri(file.path("C:","Users","Ryan-Ryan.PC","Documents", "District.Analysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), -->
-<!-- #                alt = 'logo', -->
-<!-- #                style = 'position:absolute; top:0; right:0; padding:10px;') -->
-<!-- # ``` -->
+```{r logo, cache=TRUE, echo=FALSE}
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "DistrictAnalysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), alt = 'logo', style = 'position:absolute; top:0; right:0; padding:10px;')
+```
 
 ---
 
@@ -89,7 +87,6 @@ data$rep<-factor(data$rep)
 data$entry<-factor(data$entry)
 data$pass<-factor(data$pass)
 data$rng<-factor(data$rng)
-attach(data)
 
 ###Variance, Mean & IQRS:
 Entry.Variance<-var(as.numeric(data$entry))
@@ -308,25 +305,6 @@ text(qq, label=(data$entry), cex=0.8, col= "red4", pos=4, offset = 1.6)
 * **Uncomment specfic cleaned dataset you wish to export.**
 
 * **MUST specify & manually change output filename within code!**
-
-```{r, echo=FALSE}
-server <- shinyServer(function(input, output, session) {
-
-  output$downloadData <- downloadHandler(
-    filename = function() { 
-      paste("dataset-", Sys.Date(), ".csv", sep="")
-    },
-    content = function(file) {
-      write.csv(data, row.names=FALSE)
-    })
-})
-
-ui <- shinyUI(fluidPage(
-    downloadButton('downloadData', 'Download data')
-))
-
-shinyApp(ui=ui,server=server)
-```
 
 
 <!-- Cleaned w/NO Low IQR Yields: -->
