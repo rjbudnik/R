@@ -11,14 +11,14 @@ output:
 params:
   data:
     label: "Dataset:"
-    value: yt18.csv
+    value: 18CC.csv
     input: select
     choices: [yt18.csv, 18CC.csv]
   book.name:
     label: "Book Name:"
     value: CF811
     input: select
-    choices: [CF811, CF812, CF813, CF814, CF815, CF821, CF822,	CF823, CF824, CF825, CF831, CF832, CF833, CF834, CF835]
+    choices: [CF811, CF812, CF813, CF814, CF815, CF821, CF822, CF823, CF824, CF825, CF831, CF832, CF833, CF834, CF835]
   exp:
     label: "Experiment:"
     value: C81A
@@ -32,7 +32,7 @@ params:
 ---
 
 ```{r logo, cache=TRUE, echo=FALSE}
-htmltools::img(src = knitr::image_uri(file.path("C:","Users","Ryan.Ryan-PC","Documents", "YieldTrialSingleLoc","inst","rmarkdown","templates","report","skeleton","ICIA_logo.png")), 
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "YieldTrialSingleLoc","inst","rmarkdown","templates","report","skeleton","ICIA_logo.png")), 
                alt = 'logo',
                style = 'position:absolute; top:0; right:0; padding:10px;')
 ```
@@ -60,9 +60,8 @@ library(psych)
 library(MuMIn)
 ```
 
--Corn Coversion Factor = **8.067**
-
--Bean Conversion Factor = **7.779**
+- Corn Coversion Factor = **8.067**
+- Bean Conversion Factor = **7.779**
 
 ```{r setup, echo = FALSE}
 ###Set wd & Import CSV Dataset:
@@ -253,18 +252,21 @@ LSDpre<-pre[["LSD"]][["Aveg.LSD"]]
 ##CV from "LSDer" package:
 mod1.cv<-LSDer::CVer(model1)
 
-####NOT THE SAME AS SAS::::
+# ####NOT THE SAME AS SAS::::
 # ##LSD from "LSDer" package:
 # mod1.lsd.90<-LSDer::LSDer(model1, "entry", level=0.90)
 # mod1.lsd.75<-LSDer::LSDer(model1, "entry", level=0.75)
+# mod1.lsd.90
+# mod1.lsd.75
 # 
-# ##"Plantbreeding" package LSD approach:
+# # ##"Plantbreeding" package LSD approach:
 # vcor<-as.data.frame(VarCorr(model1))
 # entryL<-as.numeric(nlevels(data$entry))
 # t_alpha<-qt(p=1-(0.25/2), df=(entryL-1))
 # V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
 # n_rep<-as.numeric(n_distinct(data[,"rep"]))
 # LSD.v2<-t_alpha*sqrt(2*(V_R/n_rep))
+# LSD.v2
 
 mod1.rmse<-sqrt(mean(residuals(model1)^2))
 mod1.R2<-r.squaredLR(model1)
@@ -305,7 +307,7 @@ Cook's distance is useful for identifying outliers in the X values (observations
       
       *k* = number of independent variables
 
-```{r cook, echo = FALSE, cache=TRUE, message=FALSE}
+```{r cook, echo = FALSE, message=FALSE}
 sample_size<-as.numeric(nrow(data))
 entryL<-as.numeric(nlevels(data$entry))
 Cooksd<-CookD(model1, newwd=FALSE)
