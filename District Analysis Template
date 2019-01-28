@@ -1,6 +1,6 @@
 ---
 title: "**District Wide Model Analysis**"
-author: "Ryan Budnik"
+author: '`r params$author`'
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: 
   html_document:
@@ -9,6 +9,11 @@ output:
     toc_float:
       collapsed: true
 params:
+  author:
+    label: "Analysis Conducted By:"
+    value: Ryan Budnik
+    input: select
+    choices: [Ryan Budnik, Graydon Marzen, Jim Rouse, Ryan Frasch, Shawn Bryant]
   data:
     label: "Input dataset:"
     value: 18CC.csv
@@ -154,7 +159,7 @@ model1<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1
 
 ### By Entry
 
-```{r lsm.by.entry, comment=NA, echo=FALSE, cols.print=8, rows.print=25, message=FALSE}
+```{r lsm.by.entry, comment=NA, echo=FALSE, cols.print=8, rows.print=15, message=FALSE}
 options(scipen=6)
 LSM.Entry<-ls_means(model1, which="entry")
 paged_table(LSM.Entry)
@@ -215,13 +220,59 @@ paged_table(ranova(model1))
 ```
 
 
-## CV, LSD, RMSE & R^2
+## CV, RMSE & R²
 
 **Coefficient of Vairance (CV):**
 
 The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. 
 
-* **SMALLER IS BETTER!!!!** (i.e. The model with the smaller CV has predicted values that are closer to the actual values.)
+* **SMALLER IS BETTER!** (i.e. The model with the smaller CV has predicted values that are closer to the actual values.)
+
+
+**Root Mean Square Error(RMSE):**
+
+*RMSE is an absolute measure of fit.*
+
+The standard deviation of the residuals. RMSE physically measures how spread out these residuals are from the line of best fit. The RMSE is a measure of the average deviation of the estimates from the observed values.
+
+* **SMALLER IS BETTER!** (i.e. lower values of RMSE indicate better fit.)
+
+
+**R-squared (R²):**
+
+*R² is a relative measure of fit.*
+
+R² is the proportional improvement in prediction from the regression model, compared to the mean model. R² indicates the goodness of fit of the model. The fraction of the total sum of squares that is explained by the regression. Scaled from 0 to 1.
+
+* **LARGER IS BETTER!** (i.e. values closer to 1 indicate better fit.)
+
+```{r model1.cv.rmse, comment=NA, echo = FALSE, message=FALSE}
+##CV from "LSDer" package:
+mod1.cv<-LSDer::CVer(model1)
+
+# ####NOT THE SAME AS SAS::::
+# ##LSD from "LSDer" package:
+# mod1.lsd.90<-LSDer::LSDer(model1, "entry", level=0.90)
+# mod1.lsd.75<-LSDer::LSDer(model1, "entry", level=0.75)
+# mod1.lsd.90
+# mod1.lsd.75
+# 
+# # ##"Plantbreeding" package LSD approach:
+# vcor<-as.data.frame(VarCorr(model1))
+# entryL<-as.numeric(nlevels(data$entry))
+# t_alpha<-qt(p=1-(0.25/2), df=(entryL-1))
+# V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
+# n_rep<-as.numeric(n_distinct(data[,"rep"]))
+# LSD.v2<-t_alpha*sqrt(2*(V_R/n_rep))
+# LSD.v2
+
+mod1.rmse<-sqrt(mean(residuals(model1)^2))
+mod1.R2<-r.squaredLR(model1)
+CV.RMSE.R2.Table1<-data.frame("CV" = c(mod1.cv), "RMSE" = c(mod1.rmse), "R²" = c(mod1.R2))
+paged_table(CV.RMSE.R2.Table1)
+```
+
+## Fisher's LSD
 
 **Fisher's Least Significant Differnce (LSD):**
 
@@ -229,32 +280,16 @@ Least significant difference is used to compare means of different treatments th
 
 * **The yields must be greater than the LSD value between any two treatments to be considered significant.**
 
-```{r modellsd.predict.25, comment=NA, echo = FALSE}
-pre<-predictmeans(model1, "entry", pairwise=TRUE, level=0.25, newwd=FALSE)
-LSDpre<-pre[["LSD"]][["Aveg.LSD"]]
+``` {r model1.predict.25, comment=NA, echo = FALSE, fig.width=10, fig.height=6.5}
+pre1<-predictmeans(model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+LSDpre1<-pre1[["LSD"]][["Aveg.LSD"]]
+LSD.Table1<-data.frame("."="Average LSD at 75% Confidence Level =", "VALUE" = as.factor(c(LSDpre1)))
+paged_table(LSD.Table1)
+pre1.1<-predictmeans(model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=TRUE, newwd=FALSE)
 ```
 
-```{r model.lsd.cv.rmse, comment=NA, echo = FALSE, message=FALSE}
-##CV from "LSDer" package:
-mod1.cv<-LSDer::CVer(model1)
-
-####NOT THE SAME AS SAS::::
-# ##LSD from "LSDer" package:
-# mod1.lsd.90<-LSDer::LSDer(model1, "entry", level=0.90)
-# mod1.lsd.75<-LSDer::LSDer(model1, "entry", level=0.75)
-# 
-# ##"Plantbreeding" package LSD approach:
-# vcor<-as.data.frame(VarCorr(model1))
-# entryL<-as.numeric(nlevels(data$entry))
-# t_alpha<-qt(p=1-(0.25/2), df=(entryL-1))
-# V_R<-subset(vcor, grp == "Residual", vcov, drop = TRUE)
-# n_rep<-as.numeric(n_distinct(data[,"rep"]))
-# LSD.v2<-t_alpha*sqrt(2*(V_R/n_rep))
-
-mod1.rmse<-sqrt(mean(residuals(model1)^2))
-mod1.R2<-r.squaredLR(model1)
-CV.LSD.RMSE.R2.Table1<-data.frame("CV" = c(mod1.cv), "LSD.25_Average" = c(LSDpre), "RMSE" = c(mod1.rmse), "R^2" = c(mod1.R2))
-paged_table(CV.LSD.RMSE.R2.Table1)
+```{r model1.lsdplot, echo=FALSE, fig.width=10, fig.height=6.5}
+pre1.2<-predictmeans(model1, "entry", pairwise=TRUE, level=0.25, pplot=TRUE, mplot=FALSE, newwd=FALSE)
 ```
 
 
@@ -265,15 +300,15 @@ paged_table(CV.LSD.RMSE.R2.Table1)
 QQ plot (or quantile-quantile plot) draws the correlation between a given sample and the normal distribution. A 45-degree reference line is also plotted. QQ plots are used to visually check the normality of the data.
 
 ```{r qq, echo = FALSE, fig.width=9, warning = FALSE}
-qq<-qqnorm(resid(model1), pch=23, bg="gray40")
+qq<-qqnorm(resid(model1), pch=23, bg="black")
 qqline(resid(model1), col="red", lwd=c(2))
-text(qq, rownames(data), cex=0.8, pos=4, offset = 0.5)
+text(qq, rownames(data), cex=0.8, col= "blue4", pos=4, offset = 0.5)
 text(qq, label=(data$entry), cex=0.8, col= "red4", pos=4, offset = 1.6)
 ```
 
 1. Data Points = Residuals for linear mixed model.
-2. Black Labels = **Row** number.
-3. Red Labels = **Entry** number.
+2. <span style="color:blue">Blue</span> Labels = **Row** number.
+3. <span style="color:red">Red</span> Labels = **Entry** number.
 
 <!-- ## Cook's Distance -->
 
@@ -299,37 +334,5 @@ text(qq, label=(data$entry), cex=0.8, col= "red4", pos=4, offset = 1.6)
 <!-- abline(h = (4/(sample_size-entryL-1)), col="red", lwd=c(3)) -->
 <!-- ``` -->
 
-
-# Export Clean Dataset: {.tabset .tabset-fade}
-
-* **Uncomment specfic cleaned dataset you wish to export.**
-
-* **MUST specify & manually change output filename within code!**
-
-
-<!-- Cleaned w/NO Low IQR Yields: -->
-
-<!-- ```{r export, echo = FALSE} -->
-<!-- write.csv(IQRClean1, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_xbook.name_x.exp.csv", row.names=FALSE) -->
-<!-- ``` -->
-
-<!-- Cleaned w/NO Low/High IQR Yields: -->
-
-<!-- ```{r export, echo = FALSE} -->
-<!-- write.csv(IQRClean2, "C:/Users/rjbudnik/Desktop/R_Cleaned/HistoClean_xbook.name_x.exp.csv", row.names=FALSE) -->
-<!-- ``` -->
-
-<!-- Residual Anomalies Cleaned: -->
-
-<!-- ```{r export, echo = FALSE} -->
-<!-- write.csv(QQClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/QQClean_CF815_C81A.csv", row.names=FALSE) -->
-<!-- ``` -->
-
-<!-- Cook's Distance Cleaned: -->
-
-<!-- ```{r export, echo = FALSE} -->
-<!-- write.csv(CooksClean, "C:/Users/rjbudnik/Desktop/R_Cleaned/CooksClean_xbook.name_x.exp.csv", row.names=FALSE) -->
-<!-- ``` -->
-
-# References:
-1. **Hair, J., Anderson, R., Tatham, R. and Black W.** (1998). Multivariate Data Analysis (fifth edition). Englewood Cliffs, NJ: Prentice-Hall.
+<!-- # References: -->
+<!-- 1. **Hair, J., Anderson, R., Tatham, R. and Black W.** (1998). Multivariate Data Analysis (fifth edition). Englewood Cliffs, NJ: Prentice-Hall. -->
