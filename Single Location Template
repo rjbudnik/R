@@ -62,7 +62,6 @@ library(shiny)
 library(shinythemes)
 library(psych)
 library(MuMIn)
-library(DT)
 ```
 
 - Corn Coversion Factor = **8.067**
