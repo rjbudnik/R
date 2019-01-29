@@ -37,7 +37,7 @@ params:
 ---
 
 ```{r logo, cache=TRUE, echo=FALSE}
-htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "YieldTrialSingleLoc","inst","rmarkdown","templates","report","skeleton","ICIA_logo.png")), 
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","Ryan.Ryan-PC","Documents", "YieldTrialSingleLoc","inst","rmarkdown","templates","report","skeleton","ICIA_logo.png")), 
                alt = 'logo',
                style = 'position:absolute; top:0; right:0; padding:10px;')
 ```
@@ -62,6 +62,7 @@ library(shiny)
 library(shinythemes)
 library(psych)
 library(MuMIn)
+library(DT)
 ```
 
 - Corn Coversion Factor = **8.067**
@@ -106,8 +107,8 @@ avg.yld <- mean(data$yld, na.rm = TRUE)
 
 ```{r summary, echo = FALSE, cols.print=15, rows.print=11, warning=FALSE}
 sum.less<-data %>% select("exp", "book.name", "rep", "entry", "plot", "plot.discarded", "pass", "range", "wt", "moist", "yld")
-des<-describe(sum.less, IQR=TRUE)
-paged_table(des, options(scipen=999, digits=3))
+des<-describe(sum.less, skew=FALSE, ranges=TRUE)
+paged_table(des, options(scipen=999, digits=4))
 ```
 
 ## Aggregation
@@ -174,6 +175,7 @@ ANOVA uses the *F-statistic* to determine whether the variability between group 
 Analysis of Variance Table of **Type I** with Kenward-Roger approximation for degrees of freedom:
 
 ```{r modelanova1, cols.print=9, echo = FALSE}
+options(scipen=3)
 paged_table(anovalmer(model1))
 ```
 
@@ -304,7 +306,7 @@ text(qq, label=(data$entry), cex=0.8, col= "red4", pos=4, offset = 1.6)
 ```
 
 1. Data Points = Residuals for linear mixed model.
-2. <span style="color:blue">Blue</span> Labels = **Row** number.
+2. <span style="color:blue">Blue</span> Labels = **Row** number within dataframe.
 3. <span style="color:red">Red</span> Labels = **Entry** number.
 
 ## Cook's Distance
@@ -323,7 +325,7 @@ Cook's distance is useful for identifying outliers in the X values (observations
 ```{r cook, echo = FALSE, fig.width=9, message=FALSE}
 sample_size<-as.numeric(nrow(data))
 entryL<-as.numeric(nlevels(data$entry))
-Cooksd<-CookD(model1, newwd=FALSE)
+Cooksd<-CookD(model1, idn=5, newwd=FALSE)
 abline(h = (10/(sample_size-entryL-1)), col="red")
 abline(h = (8/(sample_size-entryL-1)), col="red", lwd=c(2))
 abline(h = (4/(sample_size-entryL-1)), col="red", lwd=c(3))
@@ -334,8 +336,9 @@ abline(h = (4/(sample_size-entryL-1)), col="red", lwd=c(3))
 
 **Plot Discards Identified Pre-Analysis:**
 
-```{r discards, echo = FALSE}
+```{r discards, echo = FALSE, cols.print=13}
 Discards<-subset(data.withdiscards, plot.discarded=="Yes")
+Discards<-Discards %>% select("exp", "book.name", "company", "hybrid", "entry", "plot.discarded", "rep",  "pass", "range", "wt", "moist", "yld")
 paged_table(Discards)
 ```
 
@@ -349,11 +352,13 @@ Replaced all low values outside the minimum IQR value, as visualized in the barp
 
 Low yielding rows in which yield values were replaced with NA.
 
-```{r modelc1, echo = FALSE}
+```{r modelc1, echo = FALSE, cols.print=13}
 ##Replace All Low Values Identified in  Histogram (e.g.< IQR Minimum bu/ac) with NA:
 IQRNoLow<-subset(data, data$yld < min.yld)
 NoLowRows<-as.numeric(rownames(IQRNoLow))
-paged_table(data[NoLowRows, ])
+nolow<-data[NoLowRows, ]
+nolow<-nolow %>% select("exp", "book.name", "company", "hybrid", "entry", "plot", "rep",  "pass", "range", "wt", "moist", "yld")
+paged_table(nolow)
 IQRClean1<-data
 IQRClean1$yld<-replace(IQRClean1$yld, NoLowRows, NA)
 ##Model Without Histogram Identified Low Yields:
@@ -471,10 +476,12 @@ Replaced all values outside the minimum and maximum IQRs with NA, as visualized 
 
 ### Summary
 
-```{r modelc2, echo = FALSE}
+```{r modelc2, echo = FALSE, cols.print=13}
 ##Replace values outside the minimum and maximum IQR values with NA:
 IQRNoHigh<-subset(data, data$yld > max.yld)
 NoHighRows<-as.numeric(rownames(IQRNoHigh))
+nohigh<-data[NoHighRows, ]
+nohigh<-nohigh %>% select("exp", "book.name", "company", "hybrid", "entry", "plot", "rep",  "pass", "range", "wt", "moist", "yld")
 IQRClean2<-data
 IQRClean2$yld<-replace(IQRClean2$yld, NoLowRows, NA)
 IQRClean2$yld<-replace(IQRClean2$yld, NoHighRows, NA)
@@ -485,13 +492,13 @@ model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=IQRCle
 **Low** yielding rows in which yield values were replaced with NA.
 
 ```{r modelc2.datarl, comment=NA, echo = FALSE}
-paged_table(data[NoLowRows, ])
+paged_table(nolow)
 ```
 
 **High** yielding rows in which yield values were replaced with NA.
 
 ```{r modelc2.datarhl, comment=NA, echo = FALSE}
-paged_table(data[NoHighRows, ])
+paged_table(nohigh)
 ```
 
 
@@ -606,12 +613,14 @@ Replace residual outliers identified in  Q-Q Plot with NA for all resdiual value
 
 Influential residual deviating rows in which yield values were replaced with NA.
 
-```{r modelc3, echo = FALSE}
+```{r modelc3, echo = FALSE, cols.print=13}
 # ##Replace All Residual Outliers 2.5 times the standard deviation above/below the 
 # ##residual mean in  Q-Q Plot with NA:
 influentialQQ<-resid(model1)[abs(resid(model1)-mean(resid(model1)))>2.5*sd(resid(model1))]
 influentialQQ<-as.numeric(names(influentialQQ))
-paged_table(data[influentialQQ, ])
+influentailqq<-data[influentialQQ, ]
+influentailqq<-influentailqq %>% select("exp", "book.name", "company", "hybrid", "entry", "plot", "rep",  "pass", "range", "wt", "moist", "yld")
+paged_table(influentailqq)
 QQClean<-data
 QQClean$yld<-replace(QQClean$yld, influentialQQ, NA)
 model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=QQClean, REML=TRUE)
@@ -736,10 +745,12 @@ Replace influential Values determined Via Cook's Distance with NA.
 
 Influential Cook's Distance rows in which yield values were replaced with NA.
 
-```{r modelc4, echo = FALSE}
+```{r modelc4, echo = FALSE, cols.print=13}
 ##Replace "Influential" Values Determined Via Cook's Distance, with NA:
 influentialcooks <- as.numeric(names(Cooksd)[(Cooksd > (h=(10/(sample_size-entryL-1))))])
-paged_table(data[influentialcooks, ])
+influentialCooks<-data[influentialcooks, ]
+influentialCooks<-influentialCooks %>% select("exp", "book.name", "company", "hybrid", "entry", "plot", "rep",  "pass", "range", "wt", "moist", "yld")
+paged_table(influentialCooks)
 CooksClean<-data
 CooksClean$yld<-replace(CooksClean$yld, influentialcooks, NA)
 ##Cooks Clean Model:
