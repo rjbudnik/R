@@ -42,7 +42,7 @@ params:
 ---
 
 ```{r logo, cache=TRUE, echo=FALSE}
-htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "DistrictAnalysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), alt = 'logo', style = 'position:absolute; top:0; right:0; padding:10px;')
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","Ryan.Ryan-PC","Documents", "District.Analysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), alt = 'logo', style = 'position:absolute; top:0; right:0; padding:10px;')
 ```
 
 ---
@@ -108,13 +108,13 @@ percent<-function(x, digits = 6, format = "f", ...) {paste0(formatC( x, format =
 ## Summary
 
 ```{r summary, echo = FALSE, cols.print=15, warning=FALSE}
-described<-describe(data, IQR=TRUE)
+described<-describe(data, skew=FALSE, ranges=TRUE)
 paged_table(described, options(scipen=999, digits=4))
 ```
 
 ## Histograms
 
-```{r histo.yld, echo = FALSE, fig.width=9}
+```{r histo.yld, echo = FALSE, fig.width=10, fig.height=6.5}
 histo<-hist(data$yld, breaks=seq(0,350, l=150), col="purple", main="Distribution of Yield", xlab="Yield")
 abline(v = max.yld, col="red")
 abline(v = avg.yld, col="red", lwd=c(3))
@@ -132,13 +132,12 @@ abline(h = min.yld, col="red")
 
 ## Boxplot
 
-``` {r boxplot, echo = FALSE, fig.width=9}
+``` {r boxplot, comments=NA, echo = FALSE, fig.width=10, fig.height=7, message=FALSE}
 Boxplot(data$yld~data$entry,id=TRUE, main="2018 Yield Across Entries", xlab="entry", ylab="Yld", las=2)
 abline(h = max.yld, col="red")
 abline(h = avg.yld, col="red", lwd=c(3))
 abline(h = min.yld, col="red")
 ```
-
 
 
 # Mixed Model Analyses: {.tabset .tabset-fade}
