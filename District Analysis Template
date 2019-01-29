@@ -42,7 +42,7 @@ params:
 ---
 
 ```{r logo, cache=TRUE, echo=FALSE}
-htmltools::img(src = knitr::image_uri(file.path("C:","Users","Ryan.Ryan-PC","Documents", "District.Analysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), alt = 'logo', style = 'position:absolute; top:0; right:0; padding:10px;')
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "DistrictAnalysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), alt = 'logo', style = 'position:absolute; top:0; right:0; padding:10px;')
 ```
 
 ---
