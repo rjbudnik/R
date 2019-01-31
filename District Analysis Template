@@ -124,7 +124,7 @@ abline(v = min.yld, col="red")
 ## Barplots
 
 ``` {r bar.yld, echo = FALSE, fig.width=10, fig.height=7}
-barplot(data$yld, names.arg=data$entry, ylim=c(0,300), main="Distribution of Yield", ylab="Yield", xlab="Entry")
+barplot(data$yld, names.arg=data$entry, ylim=c(0,300), main="Distribution of Yield", ylab="Yield", xlab="Entry", cex.names=.4)
 abline(h = max.yld, col="red")
 abline(h = avg.yld, col="red", lwd=c(3))
 abline(h = min.yld, col="red")
