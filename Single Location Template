@@ -114,9 +114,10 @@ paged_table(des, options(scipen=999, digits=4))
 
 ```{r aggregation, echo = FALSE, rows.print=15, warning=FALSE}
 options(digits=5)
-aggdf <- data.frame(aggregate(yld~entry, data=data, function(x) c(length(x))),aggregate(yld~entry, data=data, function(x) c(min(x))),aggregate(yld~entry, data=data, function(x) c(mean(x))),aggregate(yld~entry, data=data, function(x) c(max(x))))
+aggdf <- data.frame(aggregate(yld~entry, data=data, function(x) c(length(x))),aggregate(yld~entry, data=data, function(x) c(min(x))),aggregate(yld~entry, data=data, function(x) c(max(x))),aggregate(yld~entry, data=data, function(x) c(mean(x))))
 aggdf <- aggdf[,c(1,2,4,6,8)]
-colnames(aggdf)<-c("Entry", "Count", "Min", "Mean", "Max")
+colnames(aggdf)<-c("Entry", "Count", "Min", "Max", "Mean")
+
 paged_table(aggdf)
 ```
 
@@ -193,10 +194,18 @@ paged_table(anova(model1))
 
 ### By Entry
 
-```{r lsm.by.entry, comment=NA, echo=FALSE, cols.print=8, rows.print=15, message=FALSE}
+```{r lsm.by.entry, comment=NA, echo=FALSE, cols.print=12, rows.print=15, message=FALSE}
 options(scipen=6)
 LSM.Entry<-ls_means(model1, which="entry")
-paged_table(LSM.Entry)
+data.small<-data%>%filter(rep==1)%>%select("exp", "book.name", "company", "hybrid")
+ls.all<-cbind(data.small, aggdf, LSM.Entry$Estimate)
+names(ls.all)[10]<-"LS Mean"
+names(ls.all)[1:4]<-c("Exp","Loc","Company","Hybrid")
+ls.all$Company<-factor(ls.all$Company)
+ls.all$Hybrid<-factor(ls.all$Hybrid)
+ls.all$Entry<-as.numeric(ls.all$Entry)
+ls.all$Count<-as.numeric(ls.all$Count)
+paged_table(ls.all)
 ```
 
 ### Average & Variance
@@ -337,7 +346,7 @@ abline(h = (4/(sample_size-entryL-1)), col="red", lwd=c(3))
 
 ```{r discards, echo = FALSE, cols.print=13}
 Discards<-subset(data.withdiscards, plot.discarded=="Yes")
-Discards<-Discards %>% select("exp", "book.name", "company", "hybrid", "entry", "plot.discarded", "rep",  "pass", "range", "wt", "moist", "yld")
+Discards<-Discards %>% select("exp", "book.name", "company", "hybrid", "entry", "rep",  "pass", "range", "wt", "moist", "yld")
 paged_table(Discards)
 ```
 
@@ -860,10 +869,11 @@ pre5.2<-predictmeans(model5, "entry", pairwise=TRUE, level=0.25, pplot=TRUE, mpl
 **Select which "cleaned" dataset you would like to utilize, and export from analysis as CSV:**
 
 ```{r download.QQ, echo=FALSE}
-IQRC1<-paste(c(params$book.name), "IQRCleaned_mins", "csv", sep=".")
-IQRC2<-paste(c(params$book.name), "IQRCleaned_minmax", "csv", sep=".")
-QQC<-paste(c(params$book.name), "QQCleaned", "csv", sep=".")
-CooksC<-paste(c(params$book.name), "CooksCleaned", "csv", sep=".")
+date<-format(Sys.time(), "%m-%d-%Y")
+IQRC1<-paste(c(params$book.name), "IQRCleaned_mins", c(date), "csv", sep=".")
+IQRC2<-paste(c(params$book.name), "IQRCleaned_minmax", c(date), "csv", sep=".")
+QQC<-paste(c(params$book.name), "QQCleaned", c(date), "csv", sep=".")
+CooksC<-paste(c(params$book.name), "CooksCleaned", c(date), "csv", sep=".")
 
 embed_data= function(x= mtcars, filename= "file.csv", label= "Get data"){
   encode_data= function(x){
