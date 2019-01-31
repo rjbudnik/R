@@ -1,5 +1,5 @@
 ---
-title: "**Yield Trial Single Loc**"
+title: "**Single Location Statistical Analysis**"
 author: '`r params$author`'
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: 
