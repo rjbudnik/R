@@ -869,6 +869,10 @@ pre5.2<-predictmeans(model5, "entry", pairwise=TRUE, level=0.25, pplot=TRUE, mpl
 **Select which "cleaned" dataset you would like to utilize, and export from analysis as CSV:**
 
 ```{r download.QQ, echo=FALSE}
+IQRClean1$color<-NULL
+IQRClean2$color<-NULL
+QQClean$color<-NULL
+CooksClean$color<-NULL
 date<-format(Sys.time(), "%m-%d-%Y")
 IQRC1<-paste(c(params$book.name), "IQRCleaned_mins", c(date), "csv", sep=".")
 IQRC2<-paste(c(params$book.name), "IQRCleaned_minmax", c(date), "csv", sep=".")
