@@ -1,0 +1,60 @@
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(car)
+library(emmeans)
+
+setwd("C:/Users/rjbudnik/Desktop/wd")
+df<-read.csv("mcomp_all.csv",header=T,na.strings=c("", " ", "NA"))
+
+df$exp<-factor(df$exp)
+df$year<-factor(df$year)
+df$model<-factor(df$model)
+df$stat<-factor(df$stat)
+df$value<-as.numeric(df$value)
+df$rank<-as.numeric(df$rank)
+
+df.RMSE<-filter(df, stat=="RMSE")
+df.R2<-filter(df, stat=="R2")
+df.Sigma_E<-filter(df, stat=="Sigma_E")
+df.SED<-filter(df, stat=="SED")
+
+#Boxplots of Statistical Comparison Scores::
+Boxplot(df$rank~df$model, main="ALL District Modeling Rank Compare ALL", xlab="Model", ylab="ALL Ranks", las=2)
+
+Boxplot(df.RMSE$rank~df.RMSE$model, main="ALL District Modeling - RMSE Compare", xlab="Model", ylab="RMSE", las=2)
+Boxplot(df.R2$value~df.R2$model, main="ALL District Modeling - R^2 Compare", xlab="Model", ylab="R^2", las=2)
+Boxplot(df.Sigma_E$value~df.Sigma_E$model, main="ALL District Modeling - Residual Variance Compare", xlab="Model", ylab="Error Variance", las=2)
+Boxplot(df.SED$value~df.SED$model, main="ALL District Modeling - SED Compare", xlab="Model", ylab="SED", las=2)
+
+##Entire Data Model
+model1<-lm(rank~model, data=df)
+model2<-lm(rank~model+stat, data=df)
+model3<-lm(rank~model+stat+model:stat, data=df)
+## OR,
+# model1<-lm(rank~model, data=df)
+anova(model1)
+anova(model2)
+anova(model3)
+
+## Clean?
+qqnorm(resid(model1), pch=23, bg="gray45")
+qqline(resid(model1), col="darkred", lwd=c(2))
+
+qqnorm(resid(model2), pch=23, bg="gray45")
+qqline(resid(model2), col="darkred", lwd=c(2))
+
+qqnorm(resid(model3), pch=23, bg="gray45")
+qqline(resid(model3), col="darkred", lwd=c(2))
+
+influentialQQ<-resid(model1)[abs(resid(model1)-mean(resid(model1)))>2.5*sd(resid(model1))]
+influentialQQ<-as.numeric(names(influentialQQ))
+influentialQQ
+
+QQClean<-df
+QQClean$score<-replace(QQClean$score, influentialQQ, NA)
+model2<-lm(score~model, data=QQClean)
+anova(model2)
+
