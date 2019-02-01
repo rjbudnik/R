@@ -23,7 +23,7 @@ params:
     label: "Book Name:"
     value: CF811
     input: select
-    choices: [CF811, CF812, CF813, CF814, CF815, CF821, CF822,	CF823, CF824, CF825, CF831, CF832, CF833, CF834, CF835, CF711, CF712, CF713, CF714, CF715, CF721, CF722,	CF723, CF724, CF725, CF731, CF732, CF733, CF734, CF735, CF611, CF612, CF613, CF614, CF615, CF621, CF622,	CF623, CF624, CF625, CF631, CF632, CF633, CF634, CF635]
+    choices: [CF611, CF612, CF613, CF614, CF615, CF621, CF622,	CF623, CF624, CF625, CF631, CF632, CF633, CF634, CF635, CF711, CF712, CF713, CF714, CF715, CF721, CF722,	CF723, CF724, CF725, CF731, CF732, CF733, CF734, CF735, CF811, CF812, CF813, CF814, CF815, CF821, CF822,	CF823, CF824, CF825, CF831, CF832, CF833, CF834, CF835]
   year:
     label: "Year"
     value: 2018
@@ -64,6 +64,7 @@ library(LMERConvenienceFunctions)
 library(lmerTest)
 library(predictmeans)
 library(emmeans)
+library(MuMIn)
 ```
 
 ```{r setup, echo = FALSE}
@@ -96,7 +97,7 @@ attach(data)
 ## Linear 1
 
 ```{r lmodel1, comment=NA, echo=FALSE, message=FALSE}
-lmodel1<-lm(yld~entry, data=data)
+Linear1<-lm(yld~entry, data=data)
 ```
 
 ### ANOVA L1
@@ -104,14 +105,14 @@ lmodel1<-lm(yld~entry, data=data)
 **YIELD = ENTRY**
 
 ```{r lmodel1.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-paged_table(anova(lmodel1))
+paged_table(anova(Linear1))
 ```
 
 
 ## Linear 2
 
 ```{r lmodel2, comment=NA, echo=FALSE, message=FALSE}
-lmodel2<-lm(yld~entry + rep, data=data)
+Linear2<-lm(yld~entry + rep, data=data)
 ```
 
 ### ANOVA L2
@@ -119,14 +120,14 @@ lmodel2<-lm(yld~entry + rep, data=data)
 **YIELD = ENTRY + REP**
 
 ```{r lmodel2.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-paged_table(anova(lmodel2))
+paged_table(anova(Linear2))
 ```
 
 
 ## Linear 3
 
 ```{r lmodel3, comment=NA, echo=FALSE, message=FALSE}
-lmodel3<-lm(yld~entry + pass, data=data)
+Linear3<-lm(yld~entry + pass, data=data)
 ```
 
 ### ANOVA L3
@@ -134,7 +135,7 @@ lmodel3<-lm(yld~entry + pass, data=data)
 **YIELD = ENTRY + PASS**
 
 ```{r lmodel3.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-paged_table(anova(lmodel3))
+paged_table(anova(Linear3))
 ```
 
 
@@ -156,7 +157,7 @@ paged_table(anova(lmodel3))
 ## Linear 5
 
 ```{r lmodel5, comment=NA, echo=FALSE, message=FALSE}
-lmodel5<-lm(yld~entry + rep + pass, data=data)
+Linear5<-lm(yld~entry + rep + pass, data=data)
 ```
 
 ### ANOVA L5
@@ -164,7 +165,7 @@ lmodel5<-lm(yld~entry + rep + pass, data=data)
 **YIELD = ENTRY + REP + PASS**
 
 ```{r lmodel5.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-paged_table(anova(lmodel5))
+paged_table(anova(Linear5))
 ```
 
 
@@ -186,7 +187,7 @@ paged_table(anova(lmodel5))
 ## Linear 7
 
 ```{r lmodel7, comment=NA, echo=FALSE, message=FALSE}
-lmodel7<-lm(yld~entry + rng + pass, data=data)
+Linear7<-lm(yld~entry + rng + pass, data=data)
 ```
 
 ### ANOVA L7
@@ -194,7 +195,7 @@ lmodel7<-lm(yld~entry + rng + pass, data=data)
 **YIELD = ENTRY + RANGE + PASS**
 
 ```{r lmodel7.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-paged_table(anova(lmodel7))
+paged_table(anova(Linear7))
 ```
 
 
@@ -216,7 +217,7 @@ paged_table(anova(lmodel7))
 ## Linear 9
 
 ```{r lmodel9, comment=NA, echo=FALSE, message=FALSE}
-lmodel9<-lm(yld~entry + rep:pass, data=data)
+Linear9<-lm(yld~entry + rep:pass, data=data)
 ```
 
 ### ANOVA L9
@@ -224,14 +225,14 @@ lmodel9<-lm(yld~entry + rep:pass, data=data)
 **YIELD = ENTRY + REP:PASS**
 
 ```{r lmodel9.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-paged_table(anova(lmodel9))
+paged_table(anova(Linear9))
 ```
 
 
 ## Linear 10
 
 ```{r lmodel10, comment=NA, echo=FALSE, message=FALSE}
-lmodel10<-lm(yld~entry + rep:rng, data=data)
+Linear10<-lm(yld~entry + rep:rng, data=data)
 ```
 
 ### ANOVA L10
@@ -239,7 +240,7 @@ lmodel10<-lm(yld~entry + rep:rng, data=data)
 **YIELD = ENTRY + REP:RANGE**
 
 ```{r lmodel10.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-paged_table(anova(lmodel10))
+paged_table(anova(Linear10))
 ```
 
 
@@ -261,7 +262,7 @@ paged_table(anova(lmodel10))
 ## Linear 12
 
 ```{r lmodel12, comment=NA, echo=FALSE, message=FALSE}
-lmodel12<-lm(yld~entry + rep:rng + rep:pass, data=data)
+Linear12<-lm(yld~entry + rep:rng + rep:pass, data=data)
 ```
 
 ### ANOVA L12
@@ -269,7 +270,7 @@ lmodel12<-lm(yld~entry + rep:rng + rep:pass, data=data)
 **YIELD = ENTRY + REP:RANGE + REP:PASS**
 
 ```{r lmodel12.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
-paged_table(anova(lmodel12))
+paged_table(anova(Linear12))
 ```
 
 
@@ -286,82 +287,6 @@ paged_table(anova(lmodel12))
 <!-- ```{r lmodel13.anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE} -->
 <!-- paged_table(anova(lmodel13)) -->
 <!-- ``` -->
-
-
-
-## **Linear Model Comparison**
-
-```{r model.lbiccalc, comment=NA, echo=FALSE, rows.print=15, message=FALSE}
-options(digits=7)
-bicl1<-BIC(lmodel1)
-bicl2<-BIC(lmodel2)
-bicl3<-BIC(lmodel3)
-
-bicl5<-BIC(lmodel5)
-
-bicl7<-BIC(lmodel7)
-
-bicl9<-BIC(lmodel9)
-bicl10<-BIC(lmodel10)
-
-bicl12<-BIC(lmodel12)
-
-aicl1<-AIC(lmodel1)
-aicl2<-AIC(lmodel2)
-aicl3<-AIC(lmodel3)
-
-aicl5<-AIC(lmodel5)
-
-aicl7<-AIC(lmodel7)
-
-aicl9<-AIC(lmodel9)
-aicl10<-AIC(lmodel10)
-
-aicl12<-AIC(lmodel12)
-
-model.lcomp<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear5", "Linear7", "Linear9", "Linear10", "Linear12"), "AIC" = as.numeric(c(aicl1, aicl2, aicl3, aicl5, aicl7, aicl9, aicl10, aicl12)), "BIC" = as.numeric(c(bicl1, bicl2, bicl3, bicl5, bicl7, bicl9, bicl10, bicl12)))
-paged_table(model.lcomp)
-```
-
-
-
-## **Linear CV & RMSE Comparisons**
-
-```{r lrmse, echo=FALSE, rows.print=15}
-mse.linear1<-sqrt(mean(residuals(lmodel1)^2))
-mse.linear2<-sqrt(mean(residuals(lmodel2)^2))
-mse.linear3<-sqrt(mean(residuals(lmodel3)^2))
-
-mse.linear5<-sqrt(mean(residuals(lmodel5)^2))
-
-mse.linear7<-sqrt(mean(residuals(lmodel7)^2))
-
-mse.linear9<-sqrt(mean(residuals(lmodel9)^2))
-mse.linear10<-sqrt(mean(residuals(lmodel10)^2))
-
-mse.linear12<-sqrt(mean(residuals(lmodel12)^2))
-
-
-l1<-cv.model(lmodel1)
-l2<-cv.model(lmodel2)
-l3<-cv.model(lmodel3)
-
-l5<-cv.model(lmodel5)
-
-l7<-cv.model(lmodel7)
-
-l9<-cv.model(lmodel9)
-l10<-cv.model(lmodel10)
-
-l12<-cv.model(lmodel12)
-
-percent <- function(x, digits = 2, format = "f", ...) {paste0(formatC( x, format = format, digits = digits, ...), "%")}
-l.cvs<-c(l1, l2, l3, l5, l7, l9, l10, l12)
-pl.cvs<-percent(l.cvs)
-model.lcvs<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear5", "Linear7", "Linear9", "Linear10", "Linear12"), "CV" = c(pl.cvs), "RMSE" = c(mse.linear1, mse.linear2, mse.linear3, mse.linear5, mse.linear7, mse.linear9, mse.linear10, mse.linear12))
-paged_table(model.lcvs)
-```
-
 
 
 # Mixed Model Analyses: {.tabset .tabset-fade}
@@ -620,13 +545,13 @@ paged_table(anova(model13))
 ```
 
 
-## Jim
+## 14
 
 ```{r model14, echo=FALSE}
-model.jim<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=data, REML=TRUE)
+model14<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=data, REML=TRUE)
 ```
 
-### ANOVA Jim
+### ANOVA 14
 
 **YIELD = ENTRY**
 
@@ -637,7 +562,7 @@ model.jim<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=data,
 
 ```{r 14anova, comment=NA, echo=FALSE, cols.print=7, message=FALSE}
 options(scipen=7)
-paged_table(anova(model.jim))
+paged_table(anova(model14))
 ```
 
 
@@ -893,63 +818,148 @@ paged_table(anova(model20))
 <!-- ``` -->
 
 
-## **Mixed Model Comparisons**
+## **Model Comparisons**
 
-```{r model.comp, comment=NA, echo=FALSE, rows.print=25, message=FALSE}
+```{r Comp.Stats, comment=NA, echo=FALSE, cols.print=11, rows.print=20, message=FALSE}
+# Root Mean Square Error, (RMSE):
 options(digits=6)
-bic<-BIC(model1, model2, model4, model6, model7, model8, model9, model11, model12, model13, model.jim, model15, model17, model18, model20)
-BIC<-bic$BIC
-aic<-AIC(model1, model2, model4, model6, model7, model8, model9, model11, model12, model13, model.jim, model15, model17, model18, model20)
-paged_table(cbind(aic, BIC))
-```
+rmse.linear1<-sqrt(mean(residuals(Linear1)^2))
+rmse.linear2<-sqrt(mean(residuals(Linear2)^2))
+rmse.linear3<-sqrt(mean(residuals(Linear3)^2))
+rmse.linear5<-sqrt(mean(residuals(Linear5)^2))
+rmse.linear7<-sqrt(mean(residuals(Linear7)^2))
+rmse.linear9<-sqrt(mean(residuals(Linear9)^2))
+rmse.linear10<-sqrt(mean(residuals(Linear10)^2))
+rmse.linear12<-sqrt(mean(residuals(Linear12)^2))
+rmse.model1<-sqrt(mean(residuals(model1)^2))
+rmse.model2<-sqrt(mean(residuals(model2)^2))
+rmse.model4<-sqrt(mean(residuals(model4)^2))
+rmse.model6<-sqrt(mean(residuals(model6)^2))
+rmse.model7<-sqrt(mean(residuals(model7)^2))
+rmse.model8<-sqrt(mean(residuals(model8)^2))
+rmse.model9<-sqrt(mean(residuals(model9)^2))
+rmse.model11<-sqrt(mean(residuals(model11)^2))
+rmse.model12<-sqrt(mean(residuals(model12)^2))
+rmse.model13<-sqrt(mean(residuals(model13)^2))
+rmse.model14<-sqrt(mean(residuals(model14)^2))
+rmse.model15<-sqrt(mean(residuals(model15)^2))
+rmse.model17<-sqrt(mean(residuals(model17)^2))
+rmse.model18<-sqrt(mean(residuals(model18)^2))
+rmse.model20<-sqrt(mean(residuals(model20)^2))
 
+## R^2:
+options(digits=4)
+r2linear1<-r.squaredLR(Linear1)
+r2linear2<-r.squaredLR(Linear2)
+r2linear3<-r.squaredLR(Linear3)
+r2linear5<-r.squaredLR(Linear5)
+r2linear7<-r.squaredLR(Linear7)
+r2linear9<-r.squaredLR(Linear9)
+r2linear10<-r.squaredLR(Linear10)
+r2linear12<-r.squaredLR(Linear12)
+LRmodel1<-r.squaredLR(model1)
+LRmodel2<-r.squaredLR(model2)
+LRmodel4<-r.squaredLR(model4)
+LRmodel6<-r.squaredLR(model6)
+LRmodel7<-r.squaredLR(model7)
+LRmodel8<-r.squaredLR(model8)
+LRmodel9<-r.squaredLR(model9)
+LRmodel11<-r.squaredLR(model11)
+LRmodel12<-r.squaredLR(model12)
+LRmodel13<-r.squaredLR(model13)
+LRmodel14<-r.squaredLR(model14)
+LRmodel15<-r.squaredLR(model15)
+LRmodel17<-r.squaredLR(model17)
+LRmodel18<-r.squaredLR(model18)
+LRmodel20<-r.squaredLR(model20)
 
+## Residual Variance - "sc" = residual standard deviation, (sd^2=variance)
+## the physical variance of the error, or the variability around the regression line.
+## Minimize this value to limit residual variance from line of best fi:
+options(digits=7)
+sig.linear1<-as.numeric(summary(Linear1)$sigma^2)
+sig.linear2<-as.numeric(summary(Linear2)$sigma^2)
+sig.linear3<-as.numeric(summary(Linear3)$sigma^2)
+sig.linear5<-as.numeric(summary(Linear5)$sigma^2)
+sig.linear7<-as.numeric(summary(Linear7)$sigma^2)
+sig.linear9<-as.numeric(summary(Linear9)$sigma^2)
+sig.linear10<-as.numeric(summary(Linear10)$sigma^2)
+sig.linear12<-as.numeric(summary(Linear12)$sigma^2)
+sig.model1<-as.numeric(summary(model1)$sigma^2)
+sig.model2<-as.numeric(summary(model2)$sigma^2)
+sig.model4<-as.numeric(summary(model4)$sigma^2)
+sig.model6<-as.numeric(summary(model6)$sigma^2)
+sig.model7<-as.numeric(summary(model7)$sigma^2)
+sig.model8<-as.numeric(summary(model8)$sigma^2)
+sig.model9<-as.numeric(summary(model9)$sigma^2)
+sig.model11<-as.numeric(summary(model11)$sigma^2)
+sig.model12<-as.numeric(summary(model12)$sigma^2)
+sig.model13<-as.numeric(summary(model13)$sigma^2)
+sig.model14<-as.numeric(summary(model14)$sigma^2)
+sig.model15<-as.numeric(summary(model15)$sigma^2)
+sig.model17<-as.numeric(summary(model17)$sigma^2)
+sig.model18<-as.numeric(summary(model18)$sigma^2)
+sig.model20<-as.numeric(summary(model20)$sigma^2)
 
-## **CV & RSME Comparisons**
+## Standard Error of the Difference between two means (SED):
+sed.l1<-predictmeans(Linear1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.l2<-predictmeans(Linear2, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.l3<-predictmeans(Linear3, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.l5<-predictmeans(Linear5, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.l7<-predictmeans(Linear7, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.l9<-predictmeans(Linear9, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.l10<-predictmeans(Linear10, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.l12<-predictmeans(Linear12, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model1<-predictmeans(model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model2<-predictmeans(model2, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model4<-predictmeans(model4, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model6<-predictmeans(model6, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model7<-predictmeans(model7, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model8<-predictmeans(model8, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model9<-predictmeans(model9, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model11<-predictmeans(model11, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model12<-predictmeans(model12, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model13<-predictmeans(model13, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model14<-predictmeans(model14, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model15<-predictmeans(model15, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model17<-predictmeans(model17, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model18<-predictmeans(model18, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.model20<-predictmeans(model20, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+sed.l1<-sed.l1[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.l2<-sed.l2[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.l3<-sed.l3[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.l5<-sed.l5[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.l7<-sed.l7[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.l9<-sed.l9[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.l10<-sed.l10[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.l12<-sed.l12[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model1<-sed.model1[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model2<-sed.model2[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model4<-sed.model4[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model6<-sed.model6[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model7<-sed.model7[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model8<-sed.model8[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model9<-sed.model9[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model11<-sed.model11[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model12<-sed.model12[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model13<-sed.model13[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model14<-sed.model14[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model15<-sed.model15[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model17<-sed.model17[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model18<-sed.model18[["Standard Error of Differences"]][["Aveg.SED"]]
+sed.model20<-sed.model20[["Standard Error of Differences"]][["Aveg.SED"]]
 
-```{r rsme, echo=FALSE, rows.print=25}
-m1<-sqrt(mean(residuals(model1)^2))
-m2<-sqrt(mean(residuals(model2)^2))
+RMSE.R2.Sigma_e.SED<-data.frame("Model"=c("Linear1", "Linear2", "Linear3", "Linear5", "Linear7", "Linear9", "Linear10", "Linear12", "Model1", "Model2", "Model4", "Model6", "Model7", "Model8", "Model9", "Model11",  "Model12", "Model13", "Model14", "Model15", "Model17",  "Model18",  "Model20"),"RMSE" = c(rmse.linear1, rmse.linear2, rmse.linear3, rmse.linear5, rmse.linear7, rmse.linear9, rmse.linear10, rmse.linear12, rmse.model1, rmse.model2, rmse.model4, rmse.model6, rmse.model7, rmse.model8, rmse.model9, rmse.model11, rmse.model12, rmse.model13, rmse.model14, rmse.model15, rmse.model17, rmse.model18, rmse.model20), "R2" = c(r2linear1, r2linear2, r2linear3, r2linear5, r2linear7, r2linear9, r2linear10, r2linear12, LRmodel1, LRmodel2, LRmodel4, LRmodel6, LRmodel7, LRmodel8, LRmodel9, LRmodel11, LRmodel12, LRmodel13, LRmodel14, LRmodel15, LRmodel17, LRmodel18, LRmodel20), "Residual Sigma" = c(sig.linear1, sig.linear2, sig.linear3, sig.linear5, sig.linear7, sig.linear9, sig.linear10, sig.linear12, sig.model1, sig.model2, sig.model4, sig.model6, sig.model7, sig.model8, sig.model9, sig.model11, sig.model12, sig.model13, sig.model14, sig.model15, sig.model17, sig.model18, sig.model20), "SED" = c(sed.l1, sed.l2, sed.l3, sed.l5, sed.l7, sed.l9, sed.l10, sed.l12, sed.model1, sed.model2, sed.model4, sed.model6, sed.model7, sed.model8, sed.model9, sed.model11, sed.model12, sed.model13, sed.model14, sed.model15, sed.model17, sed.model18, sed.model20))
 
-m4<-sqrt(mean(residuals(model4)^2))
+rmsecomb.order<-as.numeric(rank(RMSE.R2.Sigma_e.SED$RMSE))
+r2comb.order<-as.numeric(rank(-RMSE.R2.Sigma_e.SED$R2))
+sigmacomb.order<-as.numeric(rank(RMSE.R2.Sigma_e.SED$Residual.Sigma))
+sedcomb.order<-as.numeric(rank(RMSE.R2.Sigma_e.SED$SED))
 
-m6<-sqrt(mean(residuals(model6)^2))
-m7<-sqrt(mean(residuals(model7)^2))
-m8<-sqrt(mean(residuals(model8)^2))
-m9<-sqrt(mean(residuals(model9)^2))
-
-m11<-sqrt(mean(residuals(model11)^2))
-m12<-sqrt(mean(residuals(model12)^2))
-m13<-sqrt(mean(residuals(model13)^2))
-mjim<-sqrt(mean(residuals(model.jim)^2))
-m15<-sqrt(mean(residuals(model15)^2))
-
-m17<-sqrt(mean(residuals(model17)^2))
-m18<-sqrt(mean(residuals(model18)^2))
-
-m20<-sqrt(mean(residuals(model20)^2))
-
-cv1<-LSDer::CVer(model1)
-cv2<-LSDer::CVer(model2)
-
-cv4<-LSDer::CVer(model4)
-
-cv6<-LSDer::CVer(model6)
-cv7<-LSDer::CVer(model7)
-cv8<-LSDer::CVer(model8)
-cv9<-LSDer::CVer(model9)
-
-cv11<-LSDer::CVer(model11)
-cv12<-LSDer::CVer(model12)
-cv13<-LSDer::CVer(model13)
-cvjim<-LSDer::CVer(model.jim)
-cv15<-LSDer::CVer(model15)
-
-cv17<-LSDer::CVer(model17)
-cv18<-LSDer::CVer(model18)
-
-cv20<-LSDer::CVer(model20)
-
-cvs<-data.frame("Model"=c("Model1", "Model2", "Model4", "Model6", "Model7", "Model8", "Model9", "Model11", "Model12", "Jim", "Model14", "Model15", "Model 17", "Model 18", "Model 20"), "CV" = c(cv1, cv2, cv4, cv6, cv7, cv8, cv9, cv11, cv12, cv13, cvjim, cv15, cv17, cv18, cv20), "RMSE" = c(m1, m2, m4, m6, m7, m8, m9, m11, m12, m13, mjim, m15, m17, m18, m20))
-paged_table(cvs)
+RMSE.R2.Sigma_e.SED$RMSE.Rank<-as.factor(paste(rmsecomb.order))
+RMSE.R2.Sigma_e.SED$R2.Rank<-as.factor(paste(r2comb.order))
+RMSE.R2.Sigma_e.SED$Sigma.Rank<-as.factor(paste(sigmacomb.order))
+RMSE.R2.Sigma_e.SED$SED.Rank<-as.factor(paste(sedcomb.order))
+  
+paged_table(RMSE.R2.Sigma_e.SED)
 ```
