@@ -49,7 +49,7 @@ htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documen
 
 ---
 
-**`r params$exp`** Trial, at the **`r params$book.name`** Location
+**`r params$exp`** Trial, at the **`r params$book.name`** Location.
 
 ```{r libs, include = FALSE}
 library(rmarkdown)
@@ -820,7 +820,7 @@ paged_table(anova(model20))
 
 ## **Model Comparisons**
 
-```{r Comp.Stats, comment=NA, echo=FALSE, cols.print=11, rows.print=20, message=FALSE}
+```{r Comp.Stats, comment=NA, echo=FALSE, cols.print=5, rows.print=23, message=FALSE}
 # Root Mean Square Error, (RMSE):
 options(digits=6)
 rmse.linear1<-sqrt(mean(residuals(Linear1)^2))
