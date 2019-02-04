@@ -1,0 +1,233 @@
+---
+title: "**District Export**"
+author: "Ryan Budnik"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float:
+      collapsed: true
+params:
+  data:
+    label: "Input dataset:"
+    value: 18CC.csv
+    input: select
+    choices: [18CC.csv]
+  list:
+    label: "Entry List:"
+    value: CEL18.csv
+    input: select
+    choices: [CEL18.csv]
+  storage:
+    label: "Cold Storage:"
+    value: CCS18.csv
+    input: select
+    choices: [CCS18.csv]
+  exp:
+    label: "Experiment:"
+    value: C81A
+    input: select
+    choices: [C81A,C81B,C82A,C82B,C83A,C83B]
+  book.name1:
+    label: "Location 1:"
+    value: CF811
+    input: select
+    choices: [CF811,CF821,CF831]
+  book.name2:
+    label: "Location 2:"
+    value: CF812
+    input: select
+    choices: [CF812,CF822,CF832]
+  book.name3:
+    label: "Location 3:"
+    value: CF811
+    input: select
+    choices: [CF813,CF823,CF833]
+  book.name4:
+    label: "Location 4:"
+    value: CF811
+    input: select
+    choices: [CF814,CF824,CF834]
+  book.name5:
+    label: "Location 5:"
+    value: CF811
+    input: select
+    choices: [CF815,CF825,CF835]
+  year:
+    label: "Year"
+    value: 2018
+    input: select
+    choices: [2018, 2017, 2016]
+  district:
+    label: "District:"
+    value: Northern
+    input: select
+    choices: [Northern, Central, Southern]
+  season:
+    label: "Season Length:"
+    value: Early
+    input: select
+    choices: [Early, Full]
+---
+
+# Overview:
+The following report renders a district-wide mixed model analysis with corresponding figures for the *`r params$year` `r params$district` District `r params$season`-season Test*, **`r params$exp`**.
+
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(randomcoloR)
+library(car)
+library(predictmeans)
+library(shiny)
+library(shinythemes)
+library(psych)
+library(MuMIn)
+```
+
+```{r setup, echo = FALSE}
+EL<-read.csv(c(params$list),header=T)
+EL<-filter(EL, book.name==c(params$exp))
+EL<-EL[!EL$private == "Yes", ]
+EL<-EL%>%select("company", "hybrid", "pedid", "code")
+
+CS<-read.csv(c(params$storage),header=T)
+CS<-subset(CS, pedid %in% EL$pedid)
+CS<-CS%>%select("pedid", "seedtrt", "traitpkg", "herbtech")
+
+Combo<-left_join(EL,CS)
+
+district<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+CCF<-8.067
+PPB<-3.25
+district<-district%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+district<-district%>%mutate(moist.percent=(moist*(100-moist)/84.5))
+
+district<-district%>%mutate(wetyield=((yld*84.5)/(100-moist)))
+district<-district%>%mutate(moistureshrink=(1.183*(moist-15.5)))
+district<-district%>%mutate(totalshrink=(moistureshrink+0.5))
+district<-district%>%mutate(dryyield=(((100-totalshrink)/100)*wetyield))
+district<-district%>%mutate(grossvalue=(dryyield*PPB))
+district<-district%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
+district<-district%>%mutate(AGV=(grossvalue-dryingcost))
+Moist.AGV<-data.frame(aggregate(moist.percent~entry, data=district, function(x) c(mean(x))), aggregate(AGV~entry, data=district, function(x) c(mean(x))))
+
+district<-filter(district, exp==c(params$exp))
+district$book.name<-factor(district$book.name)
+district$exp<-factor(district$exp)
+district$plot<-factor(district$plot)
+district$rep<-factor(district$rep)
+district$entry<-factor(district$entry)
+district$pass<-factor(district$pass)
+district$rng<-factor(district$rng)
+
+model.district<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=district, REML=TRUE)
+LSM.district<-as.data.frame(emmeans(model.district, spec="entry"))
+LSM.district<-LSM.district%>%select(entry, emmean)
+
+dis.yld.rank<-as.numeric(-rank(district$yld))
+
+
+F1<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+CCF<-8.067
+F1<-F1%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+F1.data<-filter(F1, book.name==c(params$book.name1) & exp==c(params$exp))
+F1.data$book.name<-factor(F1.data$book.name)
+F1.data$exp<-factor(F1.data$exp)
+F1.data$entry<-factor(F1.data$entry)
+F1.data$ped.id<-factor(F1.data$ped.id)
+F1.data$code<-factor(F1.data$code)
+F1.data$range<-factor(F1.data$range)
+F1.data$pass<-factor(F1.data$pass)
+F1.data$rep<-factor(F1.data$rep)
+
+F2<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+CCF<-8.067
+F2<-F2%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+F2.data<-filter(F2, book.name==c(params$book.name2) & exp==c(params$exp))
+F2.data$book.name<-factor(F2.data$book.name)
+F2.data$exp<-factor(F2.data$exp)
+F2.data$entry<-factor(F2.data$entry)
+F2.data$ped.id<-factor(F2.data$ped.id)
+F2.data$code<-factor(F2.data$code)
+F2.data$range<-factor(F2.data$range)
+F2.data$pass<-factor(F2.data$pass)
+F2.data$rep<-factor(F2.data$rep)
+
+F3<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+CCF<-8.067
+F3<-F3%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+F3.data<-filter(F1, book.name==c(params$book.name3) & exp==c(params$exp))
+F3.data$book.name<-factor(F3.data$book.name)
+F3.data$exp<-factor(F3.data$exp)
+F3.data$entry<-factor(F3.data$entry)
+F3.data$ped.id<-factor(F3.data$ped.id)
+F3.data$code<-factor(F3.data$code)
+F3.data$range<-factor(F3.data$range)
+F3.data$pass<-factor(F3.data$pass)
+F3.data$rep<-factor(F3.data$rep)
+
+F4<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+CCF<-8.067
+F4<-F4%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+F4.data<-filter(F4, book.name==c(params$book.name4) & exp==c(params$exp))
+F4.data$book.name<-factor(F4.data$book.name)
+F4.data$exp<-factor(F4.data$exp)
+F4.data$entry<-factor(F4.data$entry)
+F4.data$ped.id<-factor(F4.data$ped.id)
+F4.data$code<-factor(F4.data$code)
+F4.data$range<-factor(F4.data$range)
+F4.data$pass<-factor(F4.data$pass)
+F4.data$rep<-factor(F4.data$rep)
+
+F5<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+CCF<-8.067
+F5<-F5%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+F5.data<-filter(F5, book.name==c(params$book.name5) & exp==c(params$exp))
+F5.data$book.name<-factor(F5.data$book.name)
+F5.data$exp<-factor(F5.data$exp)
+F5.data$entry<-factor(F5.data$entry)
+F5.data$ped.id<-factor(F5.data$ped.id)
+F5.data$code<-factor(F5.data$code)
+F5.data$range<-factor(F5.data$range)
+F5.data$pass<-factor(F5.data$pass)
+F5.data$rep<-factor(F5.data$rep)
+
+model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=F1.data, REML=TRUE)
+model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=F2.data, REML=TRUE)
+model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=F3.data, REML=TRUE)
+model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=F4.data, REML=TRUE)
+model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:range), data=F5.data, REML=TRUE)
+
+LSM1<-as.data.frame(emmeans(model1, spec="entry"))
+LSM1<-LSM1%>%select(entry, emmean)
+LSM2<-as.data.frame(emmeans(model2, spec="entry"))
+LSM2<-LSM2%>%select(entry, emmean)
+LSM3<-as.data.frame(emmeans(model3, spec="entry"))
+LSM3<-LSM3%>%select(entry, emmean)
+LSM4<-as.data.frame(emmeans(model4, spec="entry"))
+LSM4<-LSM4%>%select(entry, emmean)
+LSM5<-as.data.frame(emmeans(model5, spec="entry"))
+LSM5<-LSM5%>%select(entry, emmean)
+
+
+
+names(Combo)[1:7]<-c("Company","Hybrid","PedId","Code","IST","Pkg","Herb")
+
+# ###View Classifications & Set Factors:
+# data$book.name<-factor(data$book.name)
+# data$exp<-factor(data$exp)
+# data$entry<-factor(data$entry)
+# data$ped.id<-factor(data$ped.id)
+# data$code<-factor(data$code)
+# data$rng<-factor(data$rng)
+# data$pass<-factor(data$pass)
+# data$rep<-factor(data$rep)
+# data$plot<-factor(data$plot)
+```
