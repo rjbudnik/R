@@ -91,6 +91,7 @@ library(psych)
 library(MuMIn)
 library(emmeans)
 library(sjstats)
+library(XLConnect)
 ```
 
 ## District Yields
@@ -271,19 +272,27 @@ Combo<-data.frame(append(Combo, list(Stalk_Ldg= ""), after =  10))
 ## District Stats Table
 
 ```{r District.Stats.Table, echo=FALSE}
+CV<-function(model){
+  if(class(model)=="merMod"|class(model)=="merModLmerTest"|class(model)=="lmerMod"|class(model)=="lmerModLmerTest"){
+   
+    GM<-mean(model@frame[,1])
+    MS<-sigma(model)**2
+return(paste(round(100*sqrt(MS)/GM,3)))
+  }
+  else(stop("model not of class merMod or merModLmerTest"))
+}
+
 Combo.Mean<-mean(LSM.district$yld)
 Combo.Min<-min(LSM.district$yld)
 Combo.Max<-max(LSM.district$yld)
-Combo.CV<-LSDer::CVer(model.district)
+Combo.CV<-CV(model.district)
 Combo.lsd<-predictmeans(model.district, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
 Combo.LSD<-Combo.lsd[["LSD"]][["Aveg.LSD"]]
 
 Moist.Mean<-mean(LSM.moist$moist)
 Moist.Min<-min(LSM.moist$moist)
 Moist.Max<-max(LSM.moist$moist)
-Moist.CV<-cv(Combo$moist)
-percent<-function(x, digits = 3, format = "f", ...) {paste0(formatC( x*100, format = format, digits = digits, ...), "%")}
-Moist.CV<-percent(Moist.CV)
+Moist.CV<-cv(Combo$moist)*100
 
 AGV.Mean<-mean(Combo$AGV)
 AGV.Min<-min(Combo$AGV)
@@ -292,39 +301,44 @@ AGV.Max<-max(Combo$AGV)
 F1.Mean<-mean(LSM1$F1)
 F1.Min<-min(LSM1$F1)
 F1.Max<-max(LSM1$F1)
-F1.CV<-LSDer::CVer(model1)
+F1.CV<-CV(model1)
 F1.lsd<-predictmeans(model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
 F1.LSD<-F1.lsd[["LSD"]][["Aveg.LSD"]]
 
 F2.Mean<-mean(LSM2$F2)
 F2.Min<-min(LSM2$F2)
 F2.Max<-max(LSM2$F2)
-F2.CV<-LSDer::CVer(model2)
+F2.CV<-CV(model2)
 F2.lsd<-predictmeans(model2, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
 F2.LSD<-F2.lsd[["LSD"]][["Aveg.LSD"]]
-options(digits=5)
+
 # F3.Mean<-mean(LSM3$F3)
 # F3.Min<-min(LSM3$F3)
 # F3.Max<-max(LSM3$F3)
-# F3.CV<-LSDer::CVer(model3)
+# F3.CV<-CV(model3)
 # F3.lsd<-predictmeans(model3, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
 # F3.LSD<-F3.lsd[["LSD"]][["Aveg.LSD"]]
 
 F4.Mean<-mean(LSM4$F4)
 F4.Min<-min(LSM4$F4)
 F4.Max<-max(LSM4$F4)
-F4.CV<-LSDer::CVer(model4)
+F4.CV<-CV(model4)
 F4.lsd<-predictmeans(model4, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
 F4.LSD<-F4.lsd[["LSD"]][["Aveg.LSD"]]
 
 F5.Mean<-mean(LSM5$F5)
 F5.Min<-min(LSM5$F5)
 F5.Max<-max(LSM5$F5)
-F5.CV<-LSDer::CVer(model5)
+F5.CV<-CV(model5)
 F5.lsd<-predictmeans(model5, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
 F5.LSD<-F5.lsd[["LSD"]][["Aveg.LSD"]]
 
-Combo.Stats<- data.frame("Value" = c("Experiment Mean",	"Minimum Mean",	"Maximum Mean",	"LSD(0.25)", 	"Coefficient of Variability") ,"yldM" = c(Combo.Mean, Combo.Min, Combo.Max, Combo.LSD, Combo.CV), "moistM" = c(Moist.Mean, Moist.Min, Moist.Max,"", Moist.CV), "AGVM" = c(AGV.Mean, AGV.Min, AGV.Max, "", ""), "F1M" = c(F1.Mean, F1.Min, F1.Max, F1.LSD, F1.CV), "F2M" = c(F2.Mean, F2.Min, F2.Max, F2.LSD, F2.CV), "F4M" = c(F4.Mean, F4.Min, F4.Max, F4.LSD, F4.CV), "F5M" = c(F5.Mean, F5.Min, F5.Max, F5.LSD, F5.CV))
+Combo.Stats<- data.frame("Value" = c("Experiment Mean",	"Minimum Mean",	"Maximum Mean",	"LSD(0.25)", 	"Coefficient of Variability") ,"yldM" = as.numeric(c(Combo.Mean, Combo.Min, Combo.Max, Combo.LSD, Combo.CV)), "moistM" = as.numeric(c(Moist.Mean, Moist.Min, Moist.Max," ", Moist.CV)), "AGVM" = as.numeric(c(AGV.Mean, AGV.Min, AGV.Max, " ", " ")), "F1M" = as.numeric(c(F1.Mean, F1.Min, F1.Max, F1.LSD, F1.CV)), "F2M" = as.numeric(c(F2.Mean, F2.Min, F2.Max, F2.LSD, F2.CV)), "F4M" = as.numeric(c(F4.Mean, F4.Min, F4.Max, F4.LSD, F4.CV)), "F5M" = as.numeric(c(F5.Mean, F5.Min, F5.Max, F5.LSD, F5.CV)))
+
+Combo.Stats$moistM<-as.numeric(Combo.Stats$moistM)
+Combo.Stats$AGVM<-as.numeric(Combo.Stats$AGVM)
+
+Combo.Stats%>%mutate_if(is.numeric, round, digits=2)
 
 Combo.Stats<-data.frame(append(Combo.Stats, list(hybrid= ""), after =  1))
 Combo.Stats<-data.frame(append(Combo.Stats, list(pkg= ""), after =  2))
@@ -332,5 +346,19 @@ Combo.Stats<-data.frame(append(Combo.Stats, list(herb= ""), after =  3))
 Combo.Stats<-data.frame(append(Combo.Stats, list(dist.rank= ""), after =  5))
 Combo.Stats<-data.frame(append(Combo.Stats, list(NW= ""), after =  6))
 Combo.Stats<-data.frame(append(Combo.Stats, list(NE= ""), after =  7))
-Combo.Stats<-data.frame(append(Combo.Stats, list(F3= ""), after =  12))
+Combo.Stats<-data.frame(append(Combo.Stats, list(F3M= ""), after =  12))
+
+Combo.Stats[is.na(Combo.Stats)] <- ""
+Combo.Stats$moistM<-as.numeric(Combo.Stats$moistM)
+Combo.Stats$AGVM<-as.numeric(Combo.Stats$AGVM)
+```
+
+## EXPORT!
+
+```{r Export.to.Formatted.Excel,echo=FALSE}
+wb<-loadWorkbook("District_Corn_Web.xlsx", create=FALSE)
+setStyleAction(wb,XLC$"STYLE_ACTION.NONE")
+writeWorksheet(wb, Combo, "C1A", startRow=5, startCol=1, header=FALSE)
+writeWorksheet(wb, Combo.Stats, "C1A", startRow=50, startCol=1, header=FALSE)
+saveWorkbook(wb)
 ```
