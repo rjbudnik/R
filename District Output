@@ -1,6 +1,6 @@
 ---
 title: "**District Export**"
-author: "Ryan Budnik"
+author: '`r params$author`'
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: 
   html_document:
@@ -9,6 +9,11 @@ output:
     toc_float:
       collapsed: true
 params:
+  author:
+    label: "Analysis Conducted By:"
+    value: Ryan Budnik
+    input: select
+    choices: [Ryan Budnik, Graydon Marzen, Jim Rouse, Ryan Frasch, Shawn Bryant]
   data:
     label: "Input dataset:"
     value: 18CC.csv
@@ -24,10 +29,17 @@ params:
     value: CCS18.csv
     input: select
     choices: [CCS18.csv]
+  year:
+    label: "Year"
+    value: 2018
+    input: select
+    choices: [2018, 2017, 2016]
 ---
 
 # Overview:
-The following report renders a district-wide mixed model analysis with corresponding figures for the *`r params$year` `r params$district` District `r params$season`-season Test*, **`r params$exp`**.
+The following report renders the complete **District_Corn_Web** pre-formatted Excel tables, with the yearly (`r params$year`) cleaned data for Internet publication purposes.
+
+Un-used locations must be physically commented out to remove them from tables.
 
 ```{r libs, include = FALSE}
 library(rmarkdown)
@@ -49,8 +61,11 @@ library(XLConnect)
 
 ```{r Globa_Parameters, echo=FALSE, comments=NA, messages=FALSE}
 ## Global Parameters:
-YR<-8
+  ## Year Code:
+YR<-8 
+  ## Converison Factor:
 CCF<-8.067
+  ## Yearly Price Per Bushel Average:
 PPB<-3.25
 ```
 
