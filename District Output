@@ -59,7 +59,7 @@ library(XLConnect)
 
 # Global Parameters:
 
-```{r Global_Parameters, echo=FALSE, comments=NA, messages=FALSE}
+```{r Global_Parameters, echo=FALSE, comment=NA, message=FALSE}
 ## Global Parameters:
   ## Year Code:
 YR<-8 
@@ -71,7 +71,7 @@ PPB<-3.25
 
 # Functions:
 
-```{r Functions, echo=FALSE, comments=NA, messages=FALSE}
+```{r Functions, echo=FALSE, comment=NA, message=FALSE}
 ## CV Function:
 CV<-function(model){
   if(class(model)=="merMod"|class(model)=="merModLmerTest"|class(model)=="lmerMod"|class(model)=="lmerModLmerTest"){
@@ -85,7 +85,7 @@ return(paste(round(100*sqrt(MS)/GM,3)))
 
 # District Data:
 
-```{r District_Data_Import, echo=FALSE, comments=NA, messages=FALSE}
+```{r District_Data_Import, echo=FALSE, comment=NA, message=FALSE}
 ## ALLYearly District Data:
 district.all<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
 ## Add Yield Values::
@@ -104,7 +104,7 @@ S_Full<-filter(district.all, exp==paste("C", c(YR), "3B", sep=""))
 
 ## North Early
 
-```{r North_Early, echo=FALSE, comments=NA, messages=FALSE}
+```{r North_Early, echo=FALSE, comment=NA, message=FALSE}
 ## North Early
 N_Early$book.name<-factor(N_Early$book.name)
 N_Early$exp<-factor(N_Early$exp)
@@ -141,7 +141,7 @@ District.N_Early<-District.N_Early[,c(1,2,3,10)]
 
 ## North Full
 
-```{r North_Full, echo=FALSE, comments=NA, messages=FALSE}
+```{r North_Full, echo=FALSE, comment=NA, message=FALSE}
 ## North Full::
 N_Full$book.name<-factor(N_Full$book.name)
 N_Full$exp<-factor(N_Full$exp)
@@ -178,7 +178,7 @@ District.N_Full<-District.N_Full[,c(1,2,3,10)]
 
 ## Central Early
 
-```{r Central_Early, echo=FALSE, comments=NA, messages=FALSE}
+```{r Central_Early, echo=FALSE, comment=NA, message=FALSE}
 ## Central Early::
 C_Early$book.name<-factor(C_Early$book.name)
 C_Early$exp<-factor(C_Early$exp)
@@ -215,7 +215,7 @@ District.C_Early<-District.C_Early[,c(1,2,3,10)]
 
 ## Central Full
 
-```{r Central_Full, echo=FALSE, comments=NA, messages=FALSE}
+```{r Central_Full, echo=FALSE, comment=NA, message=FALSE}
 ## Central Full::
 C_Full$book.name<-factor(C_Full$book.name)
 C_Full$exp<-factor(C_Full$exp)
@@ -252,7 +252,7 @@ District.C_Full<-District.C_Full[,c(1,2,3,10)]
 
 ## South Early
 
-```{r South_Early, echo=FALSE, comments=NA, messages=FALSE}
+```{r South_Early, echo=FALSE, comment=NA, message=FALSE}
 ## South Early::
 S_Early$book.name<-factor(S_Early$book.name)
 S_Early$exp<-factor(S_Early$exp)
@@ -289,7 +289,7 @@ District.S_Early<-District.S_Early[,c(1,2,3,10)]
 
 ## South Full
 
-```{r South_Full, echo=FALSE, comments=NA, messages=FALSE}
+```{r South_Full, echo=FALSE, comment=NA, message=FALSE}
 ## South Full::
 S_Full$book.name<-factor(S_Full$book.name)
 S_Full$exp<-factor(S_Full$exp)
@@ -327,7 +327,7 @@ District.S_Full<-District.S_Full[,c(1,2,3,10)]
 
 # Entry List (EL)
 
-```{r Entry_List_Data, echo=FALSE, comments=NA, messages=FALSE}
+```{r Entry_List_Data, echo=FALSE, comment=NA, message=FALSE}
 ## Entry List Data Import::
 EL<-read.csv(c(params$list),header=T)
 
@@ -364,7 +364,7 @@ S.F.EL<-S.F.EL%>%select("company", "hybrid", "pedid", "code", "entry")
 
 # Cold Storage (CS)
 
-```{r Cold_Storage_Data, echo=FALSE, comments=NA, messages=FALSE}
+```{r Cold_Storage_Data, echo=FALSE, comment=NA, message=FALSE}
 ## Import Cold Storage Data:
 CS<-read.csv(c(params$storage),header=T)
 
@@ -394,7 +394,7 @@ S.F.CS<-S.F.CS%>%select("pedid", "seedtrt", "traitpkg", "herbtech")
 
 # Combine EL & CS
 
-```{r CS_EL_COMBO, echo=FALSE, comments=NA, messages=FALSE}
+```{r CS_EL_COMBO, echo=FALSE, comment=NA, message=FALSE}
 ## Combine Cold Storage & Entry Lists
 ## NORTH
 N.E.Combo<-left_join(N.E.EL, N.E.CS)
@@ -433,7 +433,7 @@ S.F.Combo<-left_join(S.F.Combo,District.S_Full)
 
 # Single Location Data:
 
-```{r Single_Location_Data, echo=FALSE, comments=NA, messages=FALSE}
+```{r Single_Location_Data, echo=FALSE, comment=NA, message=FALSE}
 ## NORTH:
 ## Location 3 NOT Included:
 ## North Early Locations::
@@ -482,7 +482,7 @@ S_Full.F5<-filter(district.all, book.name==paste("CF", c(YR), "35", sep="") & ex
 
 ## Single Location Factors
 
-```{r Set_Single_Loc_Factors, echo=FALSE, comments=NA, messages=FALSE}
+```{r Set_Single_Loc_Factors, echo=FALSE, comment=NA, message=FALSE}
 ## NORTH
 ## Location 3 NOT Included:
 ## North EARLY::
@@ -741,7 +741,7 @@ S_Full.F5$rep<-factor(S_Full.F5$rep)
 
 ## Single Location Models
 
-``` {r Single_Location_Models, echo=FALSE, comments=NA, messages=FALSE}
+``` {r Single_Location_Models, echo=FALSE, comment=NA, message=FALSE}
 ## NORTH
 ## Location 3 NOT Included:
 ## North Early:
@@ -792,7 +792,7 @@ S_Full.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=S
 
 ### North (1)
 
-```{r North.Single_Location_LSMs, echo=FALSE, comments=NA, messages=FALSE}
+```{r North.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
 ## NORTH
 ## Location 3 NOT Included:
 ## North Early:
@@ -831,7 +831,7 @@ names(N.F.LSM5)[1]<-c("F5")
 
 ### Central (2)
 
-```{r Central.Single_Location_LSMs, echo=FALSE, comments=NA, messages=FALSE}
+```{r Central.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
 ## CENTRAL
 ## Location 1 NOT Included:
 ## Central Early:
@@ -870,7 +870,7 @@ names(C.F.LSM5)[1]<-c("F5")
 
 ### South (3)
 
-```{r South.Single_Location_LSMs, echo=FALSE, comments=NA, messages=FALSE}
+```{r South.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
 ## SOUTH
 ## Location 1 NOT Included:
 ## South Early:
@@ -909,7 +909,7 @@ names(S.F.LSM5)[1]<-c("F5")
 
 ### Combine Single Location LSMs
 
-```{r Single_Location_LSMs_COMBO, echo=FALSE, comments=NA, messages=FALSE}
+```{r Single_Location_LSMs_COMBO, echo=FALSE, comment=NA, message=FALSE}
 ## NORTH
 ## Location 3 NOT Included::
 NE.LSMs<-cbind(N.E.LSM1, N.E.LSM2, N.E.LSM4, N.E.LSM5)
@@ -926,7 +926,7 @@ SF.LSMs<-cbind(S.F.LSM2, S.F.LSM3, S.F.LSM4, S.F.LSM5)
 
 # District Merge, Rank, & Sort
 
-```{r}
+```{r District.Merge.Rank.Sort, comment=NA, echo=FALSE, message=FALSE}
 ## Add blank columns for excluded locations:
 ## North = Exclude Location 3
 NE.LSMs<-data.frame(append(NE.LSMs, list(F3= ""), after =  3))
@@ -1468,7 +1468,7 @@ SF.Combo.Stats<-data.frame(append(SF.Combo.Stats, list(F1M= ""), after =  12))
 
 # EXPORT!
 
-```{r Export.to.Formatted.Excel,echo=FALSE}
+```{r Export.to.Formatted.Excel, comment=NA, echo=FALSE, message=FALSE}
 wb<-loadWorkbook("District_Corn_Web.xlsx", create=FALSE)
 setStyleAction(wb,XLC$"STYLE_ACTION.NONE")
 
