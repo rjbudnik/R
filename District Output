@@ -59,7 +59,7 @@ library(XLConnect)
 
 # Global Parameters:
 
-```{r Globa_Parameters, echo=FALSE, comments=NA, messages=FALSE}
+```{r Global_Parameters, echo=FALSE, comments=NA, messages=FALSE}
 ## Global Parameters:
   ## Year Code:
 YR<-8 
@@ -71,7 +71,7 @@ PPB<-3.25
 
 # Functions:
 
-```{r Globa_Parameters, echo=FALSE, comments=NA, messages=FALSE}
+```{r Functions, echo=FALSE, comments=NA, messages=FALSE}
 ## CV Function:
 CV<-function(model){
   if(class(model)=="merMod"|class(model)=="merModLmerTest"|class(model)=="lmerMod"|class(model)=="lmerModLmerTest"){
