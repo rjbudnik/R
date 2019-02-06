@@ -37,6 +37,7 @@ params:
 ---
 
 # Overview:
+
 The following report renders the complete **District_Corn_Web** pre-formatted Excel tables, with the yearly (`r params$year`) cleaned data for Internet publication purposes.
 
 Un-used locations must be physically commented out to remove them from tables.
@@ -924,7 +925,255 @@ SE.LSMs<-cbind(S.E.LSM2, S.E.LSM3, S.E.LSM4, S.E.LSM5)
 SF.LSMs<-cbind(S.F.LSM2, S.F.LSM3, S.F.LSM4, S.F.LSM5)
 ```
 
-# District Merge, Rank, & Sort
+
+# E & W Yield Data
+
+```{r NE.NW.Data, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
+## NORTH
+## Excluding Location 3, LOCATION DROPPED!
+NEast<-c((paste("CF", c(YR), "11", sep="")), (paste("CF", c(YR), "12", sep="")))
+NWest<-c((paste("CF", c(YR), "14", sep="")), (paste("CF", c(YR), "15", sep="")))
+## CENTRAL
+## Excluding Location 1, LOCATION DROPPED!
+CEast<-c((paste("CF", c(YR), "22", sep="")), (paste("CF", c(YR), "23", sep="")))
+CWest<-c((paste("CF", c(YR), "23", sep="")), (paste("CF", c(YR), "24", sep="")), (paste("CF", c(YR), "25", sep="")))
+## SOUTH
+## Excluding Location 1, LOCATION DROPPED!
+SEast<-c((paste("CF", c(YR), "32", sep="")), (paste("CF", c(YR), "33", sep="")))
+SWest<-c((paste("CF", c(YR), "33", sep="")), (paste("CF", c(YR), "34", sep="")), (paste("CF", c(YR), "35", sep="")))
+
+
+## NORTH
+## Excluding Location 3, LOCATION DROPPED!
+## North Early:
+NE.East<-filter(N_Early, book.name==NEast)
+NE.West<-filter(N_Early, book.name==NWest)
+## North Full:
+NF.East<-filter(N_Full, book.name==NEast)
+NF.West<-filter(N_Full, book.name==NWest)
+
+## CENTRAL
+## Excluding Location 1, LOCATION DROPPED!
+## Central Early:
+CE.East<-filter(C_Early, book.name==CEast)
+CE.West<-filter(C_Early, book.name==CWest)
+## Central Full:
+CF.East<-filter(C_Full, book.name==CEast)
+CF.West<-filter(C_Full, book.name==CWest)
+
+## SOUTH
+## Excluding Location 1, LOCATION DROPPED!
+## South Early:
+SE.East<-filter(S_Early, book.name==SEast)
+SE.West<-filter(S_Early, book.name==SWest)
+## South Full:
+SF.East<-filter(S_Full, book.name==SEast)
+SF.West<-filter(S_Full, book.name==SWest)
+```
+
+## E & W Modeling with LSMs
+
+```{r EW.Models_LSM, comment=NA, echo=FALSE, message=FALSE}
+## East & West Models and LSM Calculations
+## NORTH
+## North Early (1A) - East
+NE.East$book.name<-factor(NE.East$book.name)
+NE.East$exp<-factor(NE.East$exp)
+NE.East$plot<-factor(NE.East$plot)
+NE.East$rep<-factor(NE.East$rep)
+NE.East$entry<-factor(NE.East$entry)
+NE.East$pass<-factor(NE.East$pass)
+NE.East$rng<-factor(NE.East$rng)
+model.NE.East<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=NE.East, REML=TRUE)
+LSM.NE.East<-as.data.frame(emmeans(model.NE.East, spec="entry"))
+LSM.NE.East<-LSM.NE.East%>%select(entry,emmean)
+names(LSM.NE.East)[2]<-c("NEE.yld")
+## North Early (1A) - West
+NE.West$book.name<-factor(NE.West$book.name)
+NE.West$exp<-factor(NE.West$exp)
+NE.West$plot<-factor(NE.West$plot)
+NE.West$rep<-factor(NE.West$rep)
+NE.West$entry<-factor(NE.West$entry)
+NE.West$pass<-factor(NE.West$pass)
+NE.West$rng<-factor(NE.West$rng)
+model.NE.West<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=NE.West, REML=TRUE)
+LSM.NE.West<-as.data.frame(emmeans(model.NE.West, spec="entry"))
+LSM.NE.West<-LSM.NE.West%>%select(entry,emmean)
+names(LSM.NE.West)[2]<-c("NEW.yld")
+## North Full (1B) - East
+NF.East$book.name<-factor(NF.East$book.name)
+NF.East$exp<-factor(NF.East$exp)
+NF.East$plot<-factor(NF.East$plot)
+NF.East$rep<-factor(NF.East$rep)
+NF.East$entry<-factor(NF.East$entry)
+NF.East$pass<-factor(NF.East$pass)
+NF.East$rng<-factor(NF.East$rng)
+model.NF.East<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=NF.East, REML=TRUE)
+LSM.NF.East<-as.data.frame(emmeans(model.NF.East, spec="entry"))
+LSM.NF.East<-LSM.NF.East%>%select(entry,emmean)
+names(LSM.NF.East)[2]<-c("NFE.yld")
+## North Full (1B) - West
+NF.West$book.name<-factor(NF.West$book.name)
+NF.West$exp<-factor(NF.West$exp)
+NF.West$plot<-factor(NF.West$plot)
+NF.West$rep<-factor(NF.West$rep)
+NF.West$entry<-factor(NF.West$entry)
+NF.West$pass<-factor(NF.West$pass)
+NF.West$rng<-factor(NF.West$rng)
+model.NF.West<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=NF.West, REML=TRUE)
+LSM.NF.West<-as.data.frame(emmeans(model.NF.West, spec="entry"))
+LSM.NF.West<-LSM.NF.West%>%select(entry,emmean)
+names(LSM.NF.West)[2]<-c("NFW.yld")
+
+## CENTRAL
+## Central Early (2A) - East
+CE.East$book.name<-factor(CE.East$book.name)
+CE.East$exp<-factor(CE.East$exp)
+CE.East$plot<-factor(CE.East$plot)
+CE.East$rep<-factor(CE.East$rep)
+CE.East$entry<-factor(CE.East$entry)
+CE.East$pass<-factor(CE.East$pass)
+CE.East$rng<-factor(CE.East$rng)
+model.CE.East<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=CE.East, REML=TRUE)
+LSM.CE.East<-as.data.frame(emmeans(model.CE.East, spec="entry"))
+LSM.CE.East<-LSM.CE.East%>%select(entry,emmean)
+names(LSM.CE.East)[2]<-c("CEE.yld")
+## Central Early (2A) - West
+CE.West$book.name<-factor(CE.West$book.name)
+CE.West$exp<-factor(CE.West$exp)
+CE.West$plot<-factor(CE.West$plot)
+CE.West$rep<-factor(CE.West$rep)
+CE.West$entry<-factor(CE.West$entry)
+CE.West$pass<-factor(CE.West$pass)
+CE.West$rng<-factor(CE.West$rng)
+model.CE.West<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=CE.West, REML=TRUE)
+LSM.CE.West<-as.data.frame(emmeans(model.CE.West, spec="entry"))
+LSM.CE.West<-LSM.CE.West%>%select(entry,emmean)
+names(LSM.CE.West)[2]<-c("CEW.yld")
+## Central Full (2A) - East
+CF.East$book.name<-factor(CF.East$book.name)
+CF.East$exp<-factor(CF.East$exp)
+CF.East$plot<-factor(CF.East$plot)
+CF.East$rep<-factor(CF.East$rep)
+CF.East$entry<-factor(CF.East$entry)
+CF.East$pass<-factor(CF.East$pass)
+CF.East$rng<-factor(CF.East$rng)
+model.CF.East<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=CF.East, REML=TRUE)
+LSM.CF.East<-as.data.frame(emmeans(model.CF.East, spec="entry"))
+LSM.CF.East<-LSM.CF.East%>%select(entry,emmean)
+names(LSM.CF.East)[2]<-c("CFE.yld")
+## Central Full (2A) - West
+CF.West$book.name<-factor(CF.West$book.name)
+CF.West$exp<-factor(CF.West$exp)
+CF.West$plot<-factor(CF.West$plot)
+CF.West$rep<-factor(CF.West$rep)
+CF.West$entry<-factor(CF.West$entry)
+CF.West$pass<-factor(CF.West$pass)
+CF.West$rng<-factor(CF.West$rng)
+model.CF.West<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=CF.West, REML=TRUE)
+LSM.CF.West<-as.data.frame(emmeans(model.CF.West, spec="entry"))
+LSM.CF.West<-LSM.CF.West%>%select(entry,emmean)
+names(LSM.CF.West)[2]<-c("CFW.yld")
+
+## SOUTH
+## South Early (3A) - East
+SE.East$book.name<-factor(SE.East$book.name)
+SE.East$exp<-factor(SE.East$exp)
+SE.East$plot<-factor(SE.East$plot)
+SE.East$rep<-factor(SE.East$rep)
+SE.East$entry<-factor(SE.East$entry)
+SE.East$pass<-factor(SE.East$pass)
+SE.East$rng<-factor(SE.East$rng)
+model.SE.East<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=SE.East, REML=TRUE)
+LSM.SE.East<-as.data.frame(emmeans(model.SE.East, spec="entry"))
+LSM.SE.East<-LSM.SE.East%>%select(entry,emmean)
+names(LSM.SE.East)[2]<-c("SEE.yld")
+## South Early (3A) - West
+SE.West$book.name<-factor(SE.West$book.name)
+SE.West$exp<-factor(SE.West$exp)
+SE.West$plot<-factor(SE.West$plot)
+SE.West$rep<-factor(SE.West$rep)
+SE.West$entry<-factor(SE.West$entry)
+SE.West$pass<-factor(SE.West$pass)
+SE.West$rng<-factor(SE.West$rng)
+model.SE.West<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=SE.West, REML=TRUE)
+LSM.SE.West<-as.data.frame(emmeans(model.SE.West, spec="entry"))
+LSM.SE.West<-LSM.SE.West%>%select(entry,emmean)
+names(LSM.SE.West)[2]<-c("SEW.yld")
+## South Full (3A) - East
+SF.East$book.name<-factor(SF.East$book.name)
+SF.East$exp<-factor(SF.East$exp)
+SF.East$plot<-factor(SF.East$plot)
+SF.East$rep<-factor(SF.East$rep)
+SF.East$entry<-factor(SF.East$entry)
+SF.East$pass<-factor(SF.East$pass)
+SF.East$rng<-factor(SF.East$rng)
+model.SF.East<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=SF.East, REML=TRUE)
+LSM.SF.East<-as.data.frame(emmeans(model.SF.East, spec="entry"))
+LSM.SF.East<-LSM.SF.East%>%select(entry,emmean)
+names(LSM.SF.East)[2]<-c("SFE.yld")
+## South Full (3A) - West
+SF.West$book.name<-factor(SF.West$book.name)
+SF.West$exp<-factor(SF.West$exp)
+SF.West$plot<-factor(SF.West$plot)
+SF.West$rep<-factor(SF.West$rep)
+SF.West$entry<-factor(SF.West$entry)
+SF.West$pass<-factor(SF.West$pass)
+SF.West$rng<-factor(SF.West$rng)
+model.SF.West<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=SF.West, REML=TRUE)
+LSM.SF.West<-as.data.frame(emmeans(model.SF.West, spec="entry"))
+LSM.SF.West<-LSM.SF.West%>%select(entry,emmean)
+names(LSM.SF.West)[2]<-c("SFW.yld")
+```
+
+## Merge E & W
+
+```{r Merge.EW, comment=NA, echo=FALSE, message=FALSE}
+## Merge
+## NORTH
+LSM.NE.Split<-left_join(LSM.NE.East, LSM.NE.West)
+LSM.NF.Split<-left_join(LSM.NF.East, LSM.NF.West)
+## CENTRAL
+LSM.CE.Split<-left_join(LSM.CE.East, LSM.CE.West)
+LSM.CF.Split<-left_join(LSM.CF.East, LSM.CF.West)
+## SOUTH
+LSM.SE.Split<-left_join(LSM.SE.East, LSM.SE.West)
+LSM.SF.Split<-left_join(LSM.SF.East, LSM.SF.West)
+```
+
+# Lodging
+
+```{r Lodging, comment=NA, echo=FALSE, message=FALSE}
+## NORTH
+NE.rt<-aggregate(rtldg~entry, data=N_Early, function(x) c(mean(x)))
+NE.sk<-aggregate(skldg~entry, data=N_Early, function(x) c(mean(x)))
+NF.rt<-aggregate(rtldg~entry, data=N_Full, function(x) c(mean(x)))
+NF.sk<-aggregate(skldg~entry, data=N_Full, function(x) c(mean(x)))
+## CENTRAL
+CE.rt<-aggregate(rtldg~entry, data=C_Early, function(x) c(mean(x)))
+CE.sk<-aggregate(skldg~entry, data=C_Early, function(x) c(mean(x)))
+CF.rt<-aggregate(rtldg~entry, data=C_Full, function(x) c(mean(x)))
+CF.sk<-aggregate(skldg~entry, data=C_Full, function(x) c(mean(x)))
+## SOUTH
+SE.rt<-aggregate(rtldg~entry, data=S_Early, function(x) c(mean(x)))
+SE.sk<-aggregate(skldg~entry, data=S_Early, function(x) c(mean(x)))
+SF.rt<-aggregate(rtldg~entry, data=S_Full, function(x) c(mean(x)))
+SF.sk<-aggregate(skldg~entry, data=S_Full, function(x) c(mean(x)))
+
+## Merge
+## NORTH
+NE.ldg<-left_join(NE.rt, NE.sk)
+NF.ldg<-left_join(NF.rt, NF.sk)
+## CENTRAL
+CE.ldg<-left_join(CE.rt, CE.sk)
+CF.ldg<-left_join(CF.rt, CF.sk)
+## SOUTH
+SE.ldg<-left_join(SE.rt, SE.sk)
+SF.ldg<-left_join(SF.rt, SF.sk)
+```
+
+
+# District Merge & Rank
 
 ```{r District.Merge.Rank.Sort, comment=NA, echo=FALSE, message=FALSE}
 ## Add blank columns for excluded locations:
@@ -949,6 +1198,28 @@ C.F.Combo<-left_join(C.F.Combo, CF.LSMs)
 S.E.Combo<-left_join(S.E.Combo, SE.LSMs)
 S.F.Combo<-left_join(S.F.Combo, SF.LSMs)
 
+## Combine COMBO directly above with E/W Split Yields:
+## NORTH
+N.E.Combo<-left_join(N.E.Combo, LSM.NE.Split)
+N.F.Combo<-left_join(N.F.Combo, LSM.NF.Split)
+## CENTRAL
+C.E.Combo<-left_join(C.E.Combo, LSM.CE.Split)
+C.F.Combo<-left_join(C.F.Combo, LSM.CF.Split)
+## SOUTH
+S.E.Combo<-left_join(S.E.Combo, LSM.SE.Split)
+S.F.Combo<-left_join(S.F.Combo, LSM.SF.Split)
+
+## Combine COMBO directly above with E/W Split Yields:
+## NORTH
+N.E.Combo<-left_join(N.E.Combo, NE.ldg)
+N.F.Combo<-left_join(N.F.Combo, NF.ldg)
+## CENTRAL
+C.E.Combo<-left_join(C.E.Combo, CE.ldg)
+C.F.Combo<-left_join(C.F.Combo, CF.ldg)
+## SOUTH
+S.E.Combo<-left_join(S.E.Combo, SE.ldg)
+S.F.Combo<-left_join(S.F.Combo, SF.ldg)
+
 ## ADD Rankings:
 N.E.Combo$yld.rank<-as.numeric(rank(-N.E.Combo$yld))
 N.F.Combo$yld.rank<-as.numeric(rank(-N.F.Combo$yld))
@@ -956,46 +1227,29 @@ C.E.Combo$yld.rank<-as.numeric(rank(-C.E.Combo$yld))
 C.F.Combo$yld.rank<-as.numeric(rank(-C.F.Combo$yld))
 S.E.Combo$yld.rank<-as.numeric(rank(-S.E.Combo$yld))
 S.F.Combo$yld.rank<-as.numeric(rank(-S.F.Combo$yld))
+```
 
+## Re-Arrange & Sort
+
+```{r Rearrange.Sort, comment=NA, echo=FALSE, message=FALSE}
 ## NORTH
 ## North Early
-N.E.Combo<-N.E.Combo[,c(1,2,7,8,9,17,10,11,12,13,14,15,16)]
-N.E.Combo<-data.frame(append(N.E.Combo, list(NE_Yld= ""), after =  6))
-N.E.Combo<-data.frame(append(N.E.Combo, list(NW_Yld= ""), after =  7))
-N.E.Combo<-data.frame(append(N.E.Combo, list(Root_Ldg= ""), after =  9))
-N.E.Combo<-data.frame(append(N.E.Combo, list(Stalk_Ldg= ""), after =  10))
+N.E.Combo<-N.E.Combo[,c(1,2,7,8,9,19,17,18,10,21,22,11,12,13,14,15,16)]
 ## North Full
-N.F.Combo<-N.F.Combo[,c(1,2,7,8,9,17,10,11,12,13,14,15,16)]
-N.F.Combo<-data.frame(append(N.F.Combo, list(NE_Yld= ""), after =  6))
-N.F.Combo<-data.frame(append(N.F.Combo, list(NW_Yld= ""), after =  7))
-N.F.Combo<-data.frame(append(N.F.Combo, list(Root_Ldg= ""), after =  9))
-N.F.Combo<-data.frame(append(N.F.Combo, list(Stalk_Ldg= ""), after =  10))
+N.F.Combo<-N.F.Combo[,c(1,2,7,8,9,19,17,18,10,21,22,11,12,13,14,15,16)]
+
 ## CENTRAL
 ## Central Early
-C.E.Combo<-C.E.Combo[,c(1,2,7,8,9,17,10,11,12,13,14,15,16)]
-C.E.Combo<-data.frame(append(C.E.Combo, list(NE_Yld= ""), after =  6))
-C.E.Combo<-data.frame(append(C.E.Combo, list(NW_Yld= ""), after =  7))
-C.E.Combo<-data.frame(append(C.E.Combo, list(Root_Ldg= ""), after =  9))
-C.E.Combo<-data.frame(append(C.E.Combo, list(Stalk_Ldg= ""), after =  10))
+C.E.Combo<-C.E.Combo[,c(1,2,7,8,9,19,17,18,10,21,22,11,12,13,14,15,16)]
 ## Central Full
-C.F.Combo<-C.F.Combo[,c(1,2,7,8,9,17,10,11,12,13,14,15,16)]
-C.F.Combo<-data.frame(append(C.F.Combo, list(NE_Yld= ""), after =  6))
-C.F.Combo<-data.frame(append(C.F.Combo, list(NW_Yld= ""), after =  7))
-C.F.Combo<-data.frame(append(C.F.Combo, list(Root_Ldg= ""), after =  9))
-C.F.Combo<-data.frame(append(C.F.Combo, list(Stalk_Ldg= ""), after =  10))
+C.F.Combo<-C.F.Combo[,c(1,2,7,8,9,19,17,18,10,21,22,11,12,13,14,15,16)]
+
 ## SOUTH
 ## South Early
-S.E.Combo<-S.E.Combo[,c(1,2,7,8,9,17,10,11,12,13,14,15,16)]
-S.E.Combo<-data.frame(append(S.E.Combo, list(NE_Yld= ""), after =  6))
-S.E.Combo<-data.frame(append(S.E.Combo, list(NW_Yld= ""), after =  7))
-S.E.Combo<-data.frame(append(S.E.Combo, list(Root_Ldg= ""), after =  9))
-S.E.Combo<-data.frame(append(S.E.Combo, list(Stalk_Ldg= ""), after =  10))
+S.E.Combo<-S.E.Combo[,c(1,2,7,8,9,19,17,18,10,21,22,11,12,13,14,15,16)]
 ## South Full
-S.F.Combo<-S.F.Combo[,c(1,2,7,8,9,17,10,11,12,13,14,15,16)]
-S.F.Combo<-data.frame(append(S.F.Combo, list(NE_Yld= ""), after =  6))
-S.F.Combo<-data.frame(append(S.F.Combo, list(NW_Yld= ""), after =  7))
-S.F.Combo<-data.frame(append(S.F.Combo, list(Root_Ldg= ""), after =  9))
-S.F.Combo<-data.frame(append(S.F.Combo, list(Stalk_Ldg= ""), after =  10))
+S.F.Combo<-S.F.Combo[,c(1,2,7,8,9,19,17,18,10,21,22,11,12,13,14,15,16)]
+
 
 ## Sort By Rank:
 N.E.Combo<-N.E.Combo[order(N.E.Combo$yld.rank),]
