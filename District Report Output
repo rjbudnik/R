@@ -1,0 +1,1543 @@
+---
+title: "**District Export**"
+author: '`r params$author`'
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float:
+      collapsed: true
+params:
+  author:
+    label: "Analysis Conducted By:"
+    value: Ryan Budnik
+    input: select
+    choices: [Ryan Budnik, Graydon Marzen, Jim Rouse, Ryan Frasch, Shawn Bryant]
+  data:
+    label: "Input dataset:"
+    value: 18CC.csv
+    input: select
+    choices: [18CC.csv]
+  list:
+    label: "Entry List:"
+    value: CEL18.csv
+    input: select
+    choices: [CEL18.csv]
+  storage:
+    label: "Cold Storage:"
+    value: CCS18.csv
+    input: select
+    choices: [CCS18.csv]
+  year:
+    label: "Year"
+    value: 2018
+    input: select
+    choices: [2018, 2017, 2016]
+---
+
+# Overview:
+
+The following report renders the complete **District_Corn_Web** pre-formatted Excel tables, with the yearly (`r params$year`) cleaned data for Internet publication purposes.
+
+Un-used locations must be physically commented out to remove them from tables.
+
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
+library(dplyr)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(predictmeans)
+library(shiny)
+library(shinythemes)
+library(emmeans)
+library(sjstats)
+library(rJava)
+library(XLConnect)
+```
+
+# Global Parameters:
+
+```{r Global_Parameters, echo=FALSE, comment=NA, message=FALSE}
+## Global Parameters:
+  ## Year Code:
+YR<-8 
+  ## Converison Factor:
+CCF<-8.067
+  ## Yearly Price Per Bushel Average:
+PPB<-3.25
+```
+
+# Functions:
+
+```{r Functions, echo=FALSE, comment=NA, message=FALSE}
+## CV Function:
+CV<-function(model){
+  if(class(model)=="merMod"|class(model)=="merModLmerTest"|class(model)=="lmerMod"|class(model)=="lmerModLmerTest"){
+    GM<-mean(model@frame[,1])
+    MS<-sigma(model)**2
+return(paste(round(100*sqrt(MS)/GM,3)))
+  }
+  else(stop("model not of class merMod or merModLmerTest"))
+}
+```
+
+# District Data:
+
+```{r District_Data_Import, echo=FALSE, comment=NA, message=FALSE}
+## ALLYearly District Data:
+district.all<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+## Add Yield Values::
+district.all<-district.all%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+
+## North::
+N_Early<-filter(district.all, exp==paste("C", c(YR), "1A", sep=""))
+N_Full<-filter(district.all, exp==paste("C", c(YR), "1B", sep=""))
+## Central::
+C_Early<-filter(district.all, exp==paste("C", c(YR), "2A", sep=""))
+C_Full<-filter(district.all, exp==paste("C", c(YR), "2B", sep=""))
+## South::
+S_Early<-filter(district.all, exp==paste("C", c(YR), "3A", sep=""))
+S_Full<-filter(district.all, exp==paste("C", c(YR), "3B", sep=""))
+```
+
+## North Early (1A)
+
+```{r North_Early, echo=FALSE, comment=NA, message=FALSE}
+## North Early
+N_Early$book.name<-factor(N_Early$book.name)
+N_Early$exp<-factor(N_Early$exp)
+N_Early$plot<-factor(N_Early$plot)
+N_Early$rep<-factor(N_Early$rep)
+N_Early$entry<-factor(N_Early$entry)
+N_Early$pass<-factor(N_Early$pass)
+N_Early$rng<-factor(N_Early$rng)
+
+## Mixed model for generating LS Means for YIELD:
+model.N_Early<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=N_Early, REML=TRUE)
+LSM.N_Early<-as.data.frame(emmeans(model.N_Early, spec="entry"))
+LSM.N_Early<-LSM.N_Early%>%select(entry, emmean)
+names(LSM.N_Early)[2]<-c("yld")
+
+## Mixed model for generating LS Means for MOISTURE:
+model.N_Early.moist<-lmer(moist~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=N_Early, REML=TRUE)
+LSM.N_Early.moist<-as.data.frame(emmeans(model.N_Early.moist, spec="entry"))
+LSM.N_Early.moist<-LSM.N_Early.moist%>%select(emmean)
+names(LSM.N_Early.moist)[1]<-c("moist")
+
+District.N_Early<-cbind(LSM.N_Early, LSM.N_Early.moist)
+District.N_Early$yld<-as.numeric(District.N_Early$yld)
+District.N_Early$moist<-as.numeric(District.N_Early$moist)
+District.N_Early<-District.N_Early%>%mutate(wetyield=((yld*84.5)/(100-moist)))
+District.N_Early<-District.N_Early%>%mutate(moistureshrink=(1.183*(moist-15.5)))
+District.N_Early<-District.N_Early%>%mutate(totalshrink=(moistureshrink+0.5))
+District.N_Early<-District.N_Early%>%mutate(dryyield=(((100-totalshrink)/100)*wetyield))
+District.N_Early<-District.N_Early%>%mutate(grossvalue=(dryyield*PPB))
+District.N_Early<-District.N_Early%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
+District.N_Early<-District.N_Early%>%mutate(AGV=(grossvalue-dryingcost))
+District.N_Early<-District.N_Early[,c(1,2,3,10)]
+```
+
+## North Full (1B)
+
+```{r North_Full, echo=FALSE, comment=NA, message=FALSE}
+## North Full::
+N_Full$book.name<-factor(N_Full$book.name)
+N_Full$exp<-factor(N_Full$exp)
+N_Full$plot<-factor(N_Full$plot)
+N_Full$rep<-factor(N_Full$rep)
+N_Full$entry<-factor(N_Full$entry)
+N_Full$pass<-factor(N_Full$pass)
+N_Full$rng<-factor(N_Full$rng)
+
+## Mixed model for generating LS Means for YIELD:
+model.N_Full<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=N_Full, REML=TRUE)
+LSM.N_Full<-as.data.frame(emmeans(model.N_Full, spec="entry"))
+LSM.N_Full<-LSM.N_Full%>%select(entry, emmean)
+names(LSM.N_Full)[2]<-c("yld")
+
+## Mixed model for generating LS Means for MOISTURE:
+model.N_Full.moist<-lmer(moist~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=N_Full, REML=TRUE)
+LSM.N_Full.moist<-as.data.frame(emmeans(model.N_Full.moist, spec="entry"))
+LSM.N_Full.moist<-LSM.N_Full.moist%>%select(emmean)
+names(LSM.N_Full.moist)[1]<-c("moist")
+
+District.N_Full<-cbind(LSM.N_Full, LSM.N_Full.moist)
+District.N_Full$yld<-as.numeric(District.N_Full$yld)
+District.N_Full$moist<-as.numeric(District.N_Full$moist)
+District.N_Full<-District.N_Full%>%mutate(wetyield=((yld*84.5)/(100-moist)))
+District.N_Full<-District.N_Full%>%mutate(moistureshrink=(1.183*(moist-15.5)))
+District.N_Full<-District.N_Full%>%mutate(totalshrink=(moistureshrink+0.5))
+District.N_Full<-District.N_Full%>%mutate(dryyield=(((100-totalshrink)/100)*wetyield))
+District.N_Full<-District.N_Full%>%mutate(grossvalue=(dryyield*PPB))
+District.N_Full<-District.N_Full%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
+District.N_Full<-District.N_Full%>%mutate(AGV=(grossvalue-dryingcost))
+District.N_Full<-District.N_Full[,c(1,2,3,10)]
+```
+
+## Central Early (2A)
+
+```{r Central_Early, echo=FALSE, comment=NA, message=FALSE}
+## Central Early::
+C_Early$book.name<-factor(C_Early$book.name)
+C_Early$exp<-factor(C_Early$exp)
+C_Early$plot<-factor(C_Early$plot)
+C_Early$rep<-factor(C_Early$rep)
+C_Early$entry<-factor(C_Early$entry)
+C_Early$pass<-factor(C_Early$pass)
+C_Early$rng<-factor(C_Early$rng)
+
+## Mixed model for generating LS Means for YIELD:
+model.C_Early<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=C_Early, REML=TRUE)
+LSM.C_Early<-as.data.frame(emmeans(model.C_Early, spec="entry"))
+LSM.C_Early<-LSM.C_Early%>%select(entry, emmean)
+names(LSM.C_Early)[2]<-c("yld")
+
+## Mixed model for generating LS Means for MOISTURE:
+model.C_Early.moist<-lmer(moist~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=C_Early, REML=TRUE)
+LSM.C_Early.moist<-as.data.frame(emmeans(model.C_Early.moist, spec="entry"))
+LSM.C_Early.moist<-LSM.C_Early.moist%>%select(emmean)
+names(LSM.C_Early.moist)[1]<-c("moist")
+
+District.C_Early<-cbind(LSM.C_Early, LSM.C_Early.moist)
+District.C_Early$yld<-as.numeric(District.C_Early$yld)
+District.C_Early$moist<-as.numeric(District.C_Early$moist)
+District.C_Early<-District.C_Early%>%mutate(wetyield=((yld*84.5)/(100-moist)))
+District.C_Early<-District.C_Early%>%mutate(moistureshrink=(1.183*(moist-15.5)))
+District.C_Early<-District.C_Early%>%mutate(totalshrink=(moistureshrink+0.5))
+District.C_Early<-District.C_Early%>%mutate(dryyield=(((100-totalshrink)/100)*wetyield))
+District.C_Early<-District.C_Early%>%mutate(grossvalue=(dryyield*PPB))
+District.C_Early<-District.C_Early%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
+District.C_Early<-District.C_Early%>%mutate(AGV=(grossvalue-dryingcost))
+District.C_Early<-District.C_Early[,c(1,2,3,10)]
+```
+
+## Central Full (2B)
+
+```{r Central_Full, echo=FALSE, comment=NA, message=FALSE}
+## Central Full::
+C_Full$book.name<-factor(C_Full$book.name)
+C_Full$exp<-factor(C_Full$exp)
+C_Full$plot<-factor(C_Full$plot)
+C_Full$rep<-factor(C_Full$rep)
+C_Full$entry<-factor(C_Full$entry)
+C_Full$pass<-factor(C_Full$pass)
+C_Full$rng<-factor(C_Full$rng)
+
+## Mixed model for generating LS Means for YIELD:
+model.C_Full<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=C_Full, REML=TRUE)
+LSM.C_Full<-as.data.frame(emmeans(model.C_Full, spec="entry"))
+LSM.C_Full<-LSM.C_Full%>%select(entry, emmean)
+names(LSM.C_Full)[2]<-c("yld")
+
+## Mixed model for generating LS Means for MOISTURE:
+model.C_Full.moist<-lmer(moist~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=C_Full, REML=TRUE)
+LSM.C_Full.moist<-as.data.frame(emmeans(model.C_Full.moist, spec="entry"))
+LSM.C_Full.moist<-LSM.C_Full.moist%>%select(emmean)
+names(LSM.C_Full.moist)[1]<-c("moist")
+
+District.C_Full<-cbind(LSM.C_Full, LSM.C_Full.moist)
+District.C_Full$yld<-as.numeric(District.C_Full$yld)
+District.C_Full$moist<-as.numeric(District.C_Full$moist)
+District.C_Full<-District.C_Full%>%mutate(wetyield=((yld*84.5)/(100-moist)))
+District.C_Full<-District.C_Full%>%mutate(moistureshrink=(1.183*(moist-15.5)))
+District.C_Full<-District.C_Full%>%mutate(totalshrink=(moistureshrink+0.5))
+District.C_Full<-District.C_Full%>%mutate(dryyield=(((100-totalshrink)/100)*wetyield))
+District.C_Full<-District.C_Full%>%mutate(grossvalue=(dryyield*PPB))
+District.C_Full<-District.C_Full%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
+District.C_Full<-District.C_Full%>%mutate(AGV=(grossvalue-dryingcost))
+District.C_Full<-District.C_Full[,c(1,2,3,10)]
+```
+
+## South Early (3A)
+
+```{r South_Early, echo=FALSE, comment=NA, message=FALSE}
+## South Early::
+S_Early$book.name<-factor(S_Early$book.name)
+S_Early$exp<-factor(S_Early$exp)
+S_Early$plot<-factor(S_Early$plot)
+S_Early$rep<-factor(S_Early$rep)
+S_Early$entry<-factor(S_Early$entry)
+S_Early$pass<-factor(S_Early$pass)
+S_Early$rng<-factor(S_Early$rng)
+
+## Mixed model for generating LS Means for YIELD:
+model.S_Early<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=S_Early, REML=TRUE)
+LSM.S_Early<-as.data.frame(emmeans(model.S_Early, spec="entry"))
+LSM.S_Early<-LSM.S_Early%>%select(entry, emmean)
+names(LSM.S_Early)[2]<-c("yld")
+
+## Mixed model for generating LS Means for MOISTURE:
+model.S_Early.moist<-lmer(moist~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=S_Early, REML=TRUE)
+LSM.S_Early.moist<-as.data.frame(emmeans(model.S_Early.moist, spec="entry"))
+LSM.S_Early.moist<-LSM.S_Early.moist%>%select(emmean)
+names(LSM.S_Early.moist)[1]<-c("moist")
+
+District.S_Early<-cbind(LSM.S_Early, LSM.S_Early.moist)
+District.S_Early$yld<-as.numeric(District.S_Early$yld)
+District.S_Early$moist<-as.numeric(District.S_Early$moist)
+District.S_Early<-District.S_Early%>%mutate(wetyield=((yld*84.5)/(100-moist)))
+District.S_Early<-District.S_Early%>%mutate(moistureshrink=(1.183*(moist-15.5)))
+District.S_Early<-District.S_Early%>%mutate(totalshrink=(moistureshrink+0.5))
+District.S_Early<-District.S_Early%>%mutate(dryyield=(((100-totalshrink)/100)*wetyield))
+District.S_Early<-District.S_Early%>%mutate(grossvalue=(dryyield*PPB))
+District.S_Early<-District.S_Early%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
+District.S_Early<-District.S_Early%>%mutate(AGV=(grossvalue-dryingcost))
+District.S_Early<-District.S_Early[,c(1,2,3,10)]
+```
+
+## South Full (3B)
+
+```{r South_Full, echo=FALSE, comment=NA, message=FALSE}
+## South Full::
+S_Full$book.name<-factor(S_Full$book.name)
+S_Full$exp<-factor(S_Full$exp)
+S_Full$plot<-factor(S_Full$plot)
+S_Full$rep<-factor(S_Full$rep)
+S_Full$entry<-factor(S_Full$entry)
+S_Full$pass<-factor(S_Full$pass)
+S_Full$rng<-factor(S_Full$rng)
+
+## Mixed model for generating LS Means for YIELD:
+model.S_Full<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=S_Full, REML=TRUE)
+LSM.S_Full<-as.data.frame(emmeans(model.S_Full, spec="entry"))
+LSM.S_Full<-LSM.S_Full%>%select(entry, emmean)
+names(LSM.S_Full)[2]<-c("yld")
+
+## Mixed model for generating LS Means for MOISTURE:
+model.S_Full.moist<-lmer(moist~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=S_Full, REML=TRUE)
+LSM.S_Full.moist<-as.data.frame(emmeans(model.S_Full.moist, spec="entry"))
+LSM.S_Full.moist<-LSM.S_Full.moist%>%select(emmean)
+names(LSM.S_Full.moist)[1]<-c("moist")
+
+District.S_Full<-cbind(LSM.S_Full, LSM.S_Full.moist)
+District.S_Full$yld<-as.numeric(District.S_Full$yld)
+District.S_Full$moist<-as.numeric(District.S_Full$moist)
+District.S_Full<-District.S_Full%>%mutate(wetyield=((yld*84.5)/(100-moist)))
+District.S_Full<-District.S_Full%>%mutate(moistureshrink=(1.183*(moist-15.5)))
+District.S_Full<-District.S_Full%>%mutate(totalshrink=(moistureshrink+0.5))
+District.S_Full<-District.S_Full%>%mutate(dryyield=(((100-totalshrink)/100)*wetyield))
+District.S_Full<-District.S_Full%>%mutate(grossvalue=(dryyield*PPB))
+District.S_Full<-District.S_Full%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
+District.S_Full<-District.S_Full%>%mutate(AGV=(grossvalue-dryingcost))
+District.S_Full<-District.S_Full[,c(1,2,3,10)]
+```
+
+
+# Entry List (EL)
+
+```{r Entry_List_Data, echo=FALSE, comment=NA, message=FALSE}
+## Entry List Data Import::
+EL<-read.csv(c(params$list),header=T)
+
+## NORTH
+## North Early:
+N.E.EL<-filter(EL, book.name==paste("C", c(YR), "1A", sep=""))
+N.E.EL<-N.E.EL[!N.E.EL$private == "Yes", ]
+N.E.EL<-N.E.EL%>%select("company", "hybrid", "pedid", "code", "entry")
+## North Full:
+N.F.EL<-filter(EL, book.name==paste("C", c(YR), "1B", sep=""))
+N.F.EL<-N.F.EL[!N.F.EL$private == "Yes", ]
+N.F.EL<-N.F.EL%>%select("company", "hybrid", "pedid", "code", "entry")
+
+## CENTRAL
+## Central Early:
+C.E.EL<-filter(EL, book.name==paste("C", c(YR), "2A", sep=""))
+C.E.EL<-C.E.EL[!C.E.EL$private == "Yes", ]
+C.E.EL<-C.E.EL%>%select("company", "hybrid", "pedid", "code", "entry")
+## Central Full:
+C.F.EL<-filter(EL, book.name==paste("C", c(YR), "2B", sep=""))
+C.F.EL<-C.F.EL[!C.F.EL$private == "Yes", ]
+C.F.EL<-C.F.EL%>%select("company", "hybrid", "pedid", "code", "entry")
+
+## SOUTH
+## South Early:
+S.E.EL<-filter(EL, book.name==paste("C", c(YR), "3A", sep=""))
+S.E.EL<-S.E.EL[!S.E.EL$private == "Yes", ]
+S.E.EL<-S.E.EL%>%select("company", "hybrid", "pedid", "code", "entry")
+## South Full:
+S.F.EL<-filter(EL, book.name==paste("C", c(YR), "3B", sep=""))
+S.F.EL<-S.F.EL[!S.F.EL$private == "Yes", ]
+S.F.EL<-S.F.EL%>%select("company", "hybrid", "pedid", "code", "entry")
+```
+
+# Cold Storage (CS)
+
+```{r Cold_Storage_Data, echo=FALSE, comment=NA, message=FALSE}
+## Import Cold Storage Data:
+CS<-read.csv(c(params$storage),header=T)
+
+## Subset Cold Storage:
+## NORTH
+## North Early
+N.E.CS<-subset(CS, pedid %in% N.E.EL$pedid)
+N.E.CS<-N.E.CS%>%select("pedid", "seedtrt", "traitpkg", "herbtech")
+## North Full
+N.F.CS<-subset(CS, pedid %in% N.F.EL$pedid)
+N.F.CS<-N.F.CS%>%select("pedid", "seedtrt", "traitpkg", "herbtech")
+## CENTRAL
+## Central Early
+C.E.CS<-subset(CS, pedid %in% C.E.EL$pedid)
+C.E.CS<-C.E.CS%>%select("pedid", "seedtrt", "traitpkg", "herbtech")
+## Central Full
+C.F.CS<-subset(CS, pedid %in% C.F.EL$pedid)
+C.F.CS<-C.F.CS%>%select("pedid", "seedtrt", "traitpkg", "herbtech")
+## SOUTH
+## South Early
+S.E.CS<-subset(CS, pedid %in% S.E.EL$pedid)
+S.E.CS<-S.E.CS%>%select("pedid", "seedtrt", "traitpkg", "herbtech")
+## South Full
+S.F.CS<-subset(CS, pedid %in% S.F.EL$pedid)
+S.F.CS<-S.F.CS%>%select("pedid", "seedtrt", "traitpkg", "herbtech")
+```
+
+# Combine EL & CS
+
+```{r CS_EL_COMBO, echo=FALSE, comment=NA, message=FALSE}
+## Combine Cold Storage & Entry Lists
+## NORTH
+N.E.Combo<-left_join(N.E.EL, N.E.CS)
+N.F.Combo<-left_join(N.F.EL, N.F.CS)
+## CENTRAL
+C.E.Combo<-left_join(C.E.EL, C.E.CS)
+C.F.Combo<-left_join(C.F.EL, C.F.CS)
+## SOUTH
+S.E.Combo<-left_join(S.E.EL, S.E.CS)
+S.F.Combo<-left_join(S.F.EL, S.F.CS)
+
+## Set "Entry" as Factors:
+## NORTH
+N.E.Combo$entry<-factor(N.E.Combo$entry)
+N.F.Combo$entry<-factor(N.F.Combo$entry)
+## CENTRAL
+C.E.Combo$entry<-factor(C.E.Combo$entry)
+C.F.Combo$entry<-factor(C.F.Combo$entry)
+## SOUTH
+S.E.Combo$entry<-factor(S.E.Combo$entry)
+S.F.Combo$entry<-factor(S.F.Combo$entry)
+
+## Create COMBO Stats Tables:
+## NORTH
+N.E.Combo<-left_join(N.E.Combo,District.N_Early)
+N.F.Combo<-left_join(N.F.Combo,District.N_Full)
+## CENTRAL
+C.E.Combo<-left_join(C.E.Combo,District.C_Early)
+C.F.Combo<-left_join(C.F.Combo,District.C_Full)
+## SOUTH
+S.E.Combo<-left_join(S.E.Combo,District.S_Early)
+S.F.Combo<-left_join(S.F.Combo,District.S_Full)
+```
+
+
+
+# Single Location Data:
+
+```{r Single_Location_Data, echo=FALSE, comment=NA, message=FALSE}
+## NORTH:
+## Location 3 NOT Included:
+## North Early Locations::
+N_Early.F1<-filter(district.all, book.name==paste("CF", c(YR), "11", sep="") & exp==paste("C", c(YR), "1A", sep=""))
+N_Early.F2<-filter(district.all, book.name==paste("CF", c(YR), "12", sep="") & exp==paste("C", c(YR), "1A", sep=""))
+# N_Early.F3<-filter(district.all, book.name==paste("CF", c(YR), "13", sep="") & exp==paste("C", c(YR), "1A", sep=""))
+N_Early.F4<-filter(district.all, book.name==paste("CF", c(YR), "14", sep="") & exp==paste("C", c(YR), "1A", sep=""))
+N_Early.F5<-filter(district.all, book.name==paste("CF", c(YR), "15", sep="") & exp==paste("C", c(YR), "1A", sep=""))
+### North Full Locations::
+N_Full.F1<-filter(district.all, book.name==paste("CF", c(YR), "11", sep="") & exp==paste("C", c(YR), "1B", sep=""))
+N_Full.F2<-filter(district.all, book.name==paste("CF", c(YR), "12", sep="") & exp==paste("C", c(YR), "1B", sep=""))
+# N_Full.F3<-filter(district.all, book.name==paste("CF", c(YR), "13", sep="") & exp==paste("C", c(YR), "1B", sep=""))
+N_Full.F4<-filter(district.all, book.name==paste("CF", c(YR), "14", sep="") & exp==paste("C", c(YR), "1B", sep=""))
+N_Full.F5<-filter(district.all, book.name==paste("CF", c(YR), "15", sep="") & exp==paste("C", c(YR), "1B", sep=""))
+
+## CENTRAL:
+## Location 1 NOT Included:
+## Central Early Locations::
+# C_Early.F1<-filter(district.all, book.name==paste("CF", c(YR), "21", sep="") & exp==paste("C", c(YR), "2A", sep=""))
+C_Early.F2<-filter(district.all, book.name==paste("CF", c(YR), "22", sep="") & exp==paste("C", c(YR), "2A", sep=""))
+C_Early.F3<-filter(district.all, book.name==paste("CF", c(YR), "23", sep="") & exp==paste("C", c(YR), "2A", sep=""))
+C_Early.F4<-filter(district.all, book.name==paste("CF", c(YR), "24", sep="") & exp==paste("C", c(YR), "2A", sep=""))
+C_Early.F5<-filter(district.all, book.name==paste("CF", c(YR), "25", sep="") & exp==paste("C", c(YR), "2A", sep=""))
+### Central Full Locations::
+# C_Full.F1<-filter(district.all, book.name==paste("CF", c(YR), "21", sep="") & exp==paste("C", c(YR), "2B", sep=""))
+C_Full.F2<-filter(district.all, book.name==paste("CF", c(YR), "22", sep="") & exp==paste("C", c(YR), "2B", sep=""))
+C_Full.F3<-filter(district.all, book.name==paste("CF", c(YR), "23", sep="") & exp==paste("C", c(YR), "2B", sep=""))
+C_Full.F4<-filter(district.all, book.name==paste("CF", c(YR), "24", sep="") & exp==paste("C", c(YR), "2B", sep=""))
+C_Full.F5<-filter(district.all, book.name==paste("CF", c(YR), "25", sep="") & exp==paste("C", c(YR), "2B", sep=""))
+
+## SOUTH:
+## Location 1 NOT Included:
+## South Early Locations::
+# S_Early.F1<-filter(district.all, book.name==paste("CF", c(YR), "31", sep="") & exp==paste("C", c(YR), "3A", sep=""))
+S_Early.F2<-filter(district.all, book.name==paste("CF", c(YR), "32", sep="") & exp==paste("C", c(YR), "3A", sep=""))
+S_Early.F3<-filter(district.all, book.name==paste("CF", c(YR), "33", sep="") & exp==paste("C", c(YR), "3A", sep=""))
+S_Early.F4<-filter(district.all, book.name==paste("CF", c(YR), "34", sep="") & exp==paste("C", c(YR), "3A", sep=""))
+S_Early.F5<-filter(district.all, book.name==paste("CF", c(YR), "35", sep="") & exp==paste("C", c(YR), "3A", sep=""))
+### South Full Locations::
+# S_Full.F1<-filter(district.all, book.name==paste("CF", c(YR), "31", sep="") & exp==paste("C", c(YR), "3B", sep=""))
+S_Full.F2<-filter(district.all, book.name==paste("CF", c(YR), "32", sep="") & exp==paste("C", c(YR), "3B", sep=""))
+S_Full.F3<-filter(district.all, book.name==paste("CF", c(YR), "33", sep="") & exp==paste("C", c(YR), "3B", sep=""))
+S_Full.F4<-filter(district.all, book.name==paste("CF", c(YR), "34", sep="") & exp==paste("C", c(YR), "3B", sep=""))
+S_Full.F5<-filter(district.all, book.name==paste("CF", c(YR), "35", sep="") & exp==paste("C", c(YR), "3B", sep=""))
+```
+
+## Single Location Factors
+
+```{r Set_Single_Loc_Factors, echo=FALSE, comment=NA, message=FALSE}
+## NORTH
+## Location 3 NOT Included:
+## North EARLY::
+N_Early.F1$book.name<-factor(N_Early.F1$book.name)
+N_Early.F1$exp<-factor(N_Early.F1$exp)
+N_Early.F1$entry<-factor(N_Early.F1$entry)
+N_Early.F1$rng<-factor(N_Early.F1$rng)
+N_Early.F1$pass<-factor(N_Early.F1$pass)
+N_Early.F1$rep<-factor(N_Early.F1$rep)
+N_Early.F2$book.name<-factor(N_Early.F2$book.name)
+N_Early.F2$exp<-factor(N_Early.F2$exp)
+N_Early.F2$entry<-factor(N_Early.F2$entry)
+N_Early.F2$rng<-factor(N_Early.F2$rng)
+N_Early.F2$pass<-factor(N_Early.F2$pass)
+N_Early.F2$rep<-factor(N_Early.F2$rep)
+# N_Early.F3$book.name<-factor(N_Early.F3$book.name)
+# N_Early.F3$exp<-factor(N_Early.F3$exp)
+# N_Early.F3$entry<-factor(N_Early.F3$entry)
+# N_Early.F3$rng<-factor(N_Early.F3$rng)
+# N_Early.F3$pass<-factor(N_Early.F3$pass)
+# N_Early.F3$rep<-factor(N_Early.F3$rep)
+N_Early.F4$book.name<-factor(N_Early.F4$book.name)
+N_Early.F4$exp<-factor(N_Early.F4$exp)
+N_Early.F4$entry<-factor(N_Early.F4$entry)
+N_Early.F4$rng<-factor(N_Early.F4$rng)
+N_Early.F4$pass<-factor(N_Early.F4$pass)
+N_Early.F4$rep<-factor(N_Early.F4$rep)
+N_Early.F5$book.name<-factor(N_Early.F5$book.name)
+N_Early.F5$exp<-factor(N_Early.F5$exp)
+N_Early.F5$entry<-factor(N_Early.F5$entry)
+N_Early.F5$rng<-factor(N_Early.F5$rng)
+N_Early.F5$pass<-factor(N_Early.F5$pass)
+N_Early.F5$rep<-factor(N_Early.F5$rep)
+## North Full:
+N_Full.F1$book.name<-factor(N_Full.F1$book.name)
+N_Full.F1$exp<-factor(N_Full.F1$exp)
+N_Full.F1$entry<-factor(N_Full.F1$entry)
+N_Full.F1$rng<-factor(N_Full.F1$rng)
+N_Full.F1$pass<-factor(N_Full.F1$pass)
+N_Full.F1$rep<-factor(N_Full.F1$rep)
+N_Full.F2$book.name<-factor(N_Full.F2$book.name)
+N_Full.F2$exp<-factor(N_Full.F2$exp)
+N_Full.F2$entry<-factor(N_Full.F2$entry)
+N_Full.F2$rng<-factor(N_Full.F2$rng)
+N_Full.F2$pass<-factor(N_Full.F2$pass)
+N_Full.F2$rep<-factor(N_Full.F2$rep)
+# N_Full.F3$book.name<-factor(N_Full.F3$book.name)
+# N_Full.F3$exp<-factor(N_Full.F3$exp)
+# N_Full.F3$entry<-factor(N_Full.F3$entry)
+# N_Full.F3$rng<-factor(N_Full.F3$rng)
+# N_Full.F3$pass<-factor(N_Full.F3$pass)
+# N_Full.F3$rep<-factor(N_Full.F3$rep)
+N_Full.F4$book.name<-factor(N_Full.F4$book.name)
+N_Full.F4$exp<-factor(N_Full.F4$exp)
+N_Full.F4$entry<-factor(N_Full.F4$entry)
+N_Full.F4$rng<-factor(N_Full.F4$rng)
+N_Full.F4$pass<-factor(N_Full.F4$pass)
+N_Full.F4$rep<-factor(N_Full.F4$rep)
+N_Full.F5$book.name<-factor(N_Full.F5$book.name)
+N_Full.F5$exp<-factor(N_Full.F5$exp)
+N_Full.F5$entry<-factor(N_Full.F5$entry)
+N_Full.F5$rng<-factor(N_Full.F5$rng)
+N_Full.F5$pass<-factor(N_Full.F5$pass)
+N_Full.F5$rep<-factor(N_Full.F5$rep)
+
+## CENTRAL
+## Location 1 NOT Included:
+## Central Early
+# C_Early.F1$book.name<-factor(C_Early.F1$book.name)
+# C_Early.F1$exp<-factor(C_Early.F1$exp)
+# C_Early.F1$entry<-factor(C_Early.F1$entry)
+# C_Early.F1$rng<-factor(C_Early.F1$rng)
+# C_Early.F1$pass<-factor(C_Early.F1$pass)
+# C_Early.F1$rep<-factor(C_Early.F1$rep)
+C_Early.F2$book.name<-factor(C_Early.F2$book.name)
+C_Early.F2$exp<-factor(C_Early.F2$exp)
+C_Early.F2$entry<-factor(C_Early.F2$entry)
+C_Early.F2$rng<-factor(C_Early.F2$rng)
+C_Early.F2$pass<-factor(C_Early.F2$pass)
+C_Early.F2$rep<-factor(C_Early.F2$rep)
+C_Early.F3$book.name<-factor(C_Early.F3$book.name)
+C_Early.F3$exp<-factor(C_Early.F3$exp)
+C_Early.F3$entry<-factor(C_Early.F3$entry)
+C_Early.F3$rng<-factor(C_Early.F3$rng)
+C_Early.F3$pass<-factor(C_Early.F3$pass)
+C_Early.F3$rep<-factor(C_Early.F3$rep)
+C_Early.F4$book.name<-factor(C_Early.F4$book.name)
+C_Early.F4$exp<-factor(C_Early.F4$exp)
+C_Early.F4$entry<-factor(C_Early.F4$entry)
+C_Early.F4$rng<-factor(C_Early.F4$rng)
+C_Early.F4$pass<-factor(C_Early.F4$pass)
+C_Early.F4$rep<-factor(C_Early.F4$rep)
+C_Early.F5$book.name<-factor(C_Early.F5$book.name)
+C_Early.F5$exp<-factor(C_Early.F5$exp)
+C_Early.F5$entry<-factor(C_Early.F5$entry)
+C_Early.F5$rng<-factor(C_Early.F5$rng)
+C_Early.F5$pass<-factor(C_Early.F5$pass)
+C_Early.F5$rep<-factor(C_Early.F5$rep)
+## Central Full
+# C_Full.F1$book.name<-factor(C_Full.F1$book.name)
+# C_Full.F1$exp<-factor(C_Full.F1$exp)
+# C_Full.F1$entry<-factor(C_Full.F1$entry)
+# C_Full.F1$rng<-factor(C_Full.F1$rng)
+# C_Full.F1$pass<-factor(C_Full.F1$pass)
+# C_Full.F1$rep<-factor(C_Full.F1$rep)
+C_Full.F2$book.name<-factor(C_Full.F2$book.name)
+C_Full.F2$exp<-factor(C_Full.F2$exp)
+C_Full.F2$entry<-factor(C_Full.F2$entry)
+C_Full.F2$rng<-factor(C_Full.F2$rng)
+C_Full.F2$pass<-factor(C_Full.F2$pass)
+C_Full.F2$rep<-factor(C_Full.F2$rep)
+C_Full.F3$book.name<-factor(C_Full.F3$book.name)
+C_Full.F3$exp<-factor(C_Full.F3$exp)
+C_Full.F3$entry<-factor(C_Full.F3$entry)
+C_Full.F3$rng<-factor(C_Full.F3$rng)
+C_Full.F3$pass<-factor(C_Full.F3$pass)
+C_Full.F3$rep<-factor(C_Full.F3$rep)
+C_Full.F4$book.name<-factor(C_Full.F4$book.name)
+C_Full.F4$exp<-factor(C_Full.F4$exp)
+C_Full.F4$entry<-factor(C_Full.F4$entry)
+C_Full.F4$rng<-factor(C_Full.F4$rng)
+C_Full.F4$pass<-factor(C_Full.F4$pass)
+C_Full.F4$rep<-factor(C_Full.F4$rep)
+C_Full.F5$book.name<-factor(C_Full.F5$book.name)
+C_Full.F5$exp<-factor(C_Full.F5$exp)
+C_Full.F5$entry<-factor(C_Full.F5$entry)
+C_Full.F5$rng<-factor(C_Full.F5$rng)
+C_Full.F5$pass<-factor(C_Full.F5$pass)
+C_Full.F5$rep<-factor(C_Full.F5$rep)
+
+## SOUTH
+## Location 1 NOT Included:
+## South Early
+# S_Early.F1$book.name<-factor(S_Early.F1$book.name)
+# S_Early.F1$exp<-factor(S_Early.F1$exp)
+# S_Early.F1$entry<-factor(S_Early.F1$entry)
+# S_Early.F1$rng<-factor(S_Early.F1$rng)
+# S_Early.F1$pass<-factor(S_Early.F1$pass)
+# S_Early.F1$rep<-factor(S_Early.F1$rep)
+S_Early.F2$book.name<-factor(S_Early.F2$book.name)
+S_Early.F2$exp<-factor(S_Early.F2$exp)
+S_Early.F2$entry<-factor(S_Early.F2$entry)
+S_Early.F2$rng<-factor(S_Early.F2$rng)
+S_Early.F2$pass<-factor(S_Early.F2$pass)
+S_Early.F2$rep<-factor(S_Early.F2$rep)
+S_Early.F3$book.name<-factor(S_Early.F3$book.name)
+S_Early.F3$exp<-factor(S_Early.F3$exp)
+S_Early.F3$entry<-factor(S_Early.F3$entry)
+S_Early.F3$rng<-factor(S_Early.F3$rng)
+S_Early.F3$pass<-factor(S_Early.F3$pass)
+S_Early.F3$rep<-factor(S_Early.F3$rep)
+S_Early.F4$book.name<-factor(S_Early.F4$book.name)
+S_Early.F4$exp<-factor(S_Early.F4$exp)
+S_Early.F4$entry<-factor(S_Early.F4$entry)
+S_Early.F4$rng<-factor(S_Early.F4$rng)
+S_Early.F4$pass<-factor(S_Early.F4$pass)
+S_Early.F4$rep<-factor(S_Early.F4$rep)
+S_Early.F5$book.name<-factor(S_Early.F5$book.name)
+S_Early.F5$exp<-factor(S_Early.F5$exp)
+S_Early.F5$entry<-factor(S_Early.F5$entry)
+S_Early.F5$rng<-factor(S_Early.F5$rng)
+S_Early.F5$pass<-factor(S_Early.F5$pass)
+S_Early.F5$rep<-factor(S_Early.F5$rep)
+## South Full
+# S_Full.F1$book.name<-factor(S_Full.F1$book.name)
+# S_Full.F1$exp<-factor(S_Full.F1$exp)
+# S_Full.F1$entry<-factor(S_Full.F1$entry)
+# S_Full.F1$rng<-factor(S_Full.F1$rng)
+# S_Full.F1$pass<-factor(S_Full.F1$pass)
+# S_Full.F1$rep<-factor(S_Full.F1$rep)
+S_Full.F2$book.name<-factor(S_Full.F2$book.name)
+S_Full.F2$exp<-factor(S_Full.F2$exp)
+S_Full.F2$entry<-factor(S_Full.F2$entry)
+S_Full.F2$rng<-factor(S_Full.F2$rng)
+S_Full.F2$pass<-factor(S_Full.F2$pass)
+S_Full.F2$rep<-factor(S_Full.F2$rep)
+S_Full.F3$book.name<-factor(S_Full.F3$book.name)
+S_Full.F3$exp<-factor(S_Full.F3$exp)
+S_Full.F3$entry<-factor(S_Full.F3$entry)
+S_Full.F3$rng<-factor(S_Full.F3$rng)
+S_Full.F3$pass<-factor(S_Full.F3$pass)
+S_Full.F3$rep<-factor(S_Full.F3$rep)
+S_Full.F4$book.name<-factor(S_Full.F4$book.name)
+S_Full.F4$exp<-factor(S_Full.F4$exp)
+S_Full.F4$entry<-factor(S_Full.F4$entry)
+S_Full.F4$rng<-factor(S_Full.F4$rng)
+S_Full.F4$pass<-factor(S_Full.F4$pass)
+S_Full.F4$rep<-factor(S_Full.F4$rep)
+S_Full.F5$book.name<-factor(S_Full.F5$book.name)
+S_Full.F5$exp<-factor(S_Full.F5$exp)
+S_Full.F5$entry<-factor(S_Full.F5$entry)
+S_Full.F5$rng<-factor(S_Full.F5$rng)
+S_Full.F5$pass<-factor(S_Full.F5$pass)
+S_Full.F5$rep<-factor(S_Full.F5$rep)
+```
+
+## Single Location Models
+
+**USER MUST SELECT WHICH LOCATIONS WERE DROPPED!!**
+
+**USER MUST SELECT WHICH LOCATIONS WERE DROPPED!!**
+
+**USER MUST SELECT WHICH LOCATIONS WERE DROPPED!!**
+
+``` {r Single_Location_Models, echo=FALSE, comment=NA, message=FALSE}
+## NORTH
+## Location 3 NOT Included:
+## North Early:
+N_Early.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=N_Early.F1, REML=TRUE)
+N_Early.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=N_Early.F2, REML=TRUE)
+# N_Early.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=N_Early.F3, REML=TRUE)
+N_Early.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=N_Early.F4, REML=TRUE)
+N_Early.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=N_Early.F5, REML=TRUE)
+## North Full:
+N_Full.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=N_Full.F1, REML=TRUE)
+N_Full.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=N_Full.F2, REML=TRUE)
+# N_Full.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=N_Full.F3, REML=TRUE)
+N_Full.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=N_Full.F4, REML=TRUE)
+N_Full.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=N_Full.F5, REML=TRUE)
+
+## CENTRAL
+## Location 1 NOT Included:
+## Central Early:
+# C_Early.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Early.F1, REML=TRUE)
+C_Early.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Early.F2, REML=TRUE)
+C_Early.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Early.F3, REML=TRUE)
+C_Early.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Early.F4, REML=TRUE)
+C_Early.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Early.F5, REML=TRUE)
+## Central Full:
+# C_Full.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Full.F1, REML=TRUE)
+C_Full.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Full.F2, REML=TRUE)
+C_Full.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Full.F3, REML=TRUE)
+C_Full.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Full.F4, REML=TRUE)
+C_Full.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Full.F5, REML=TRUE)
+
+## SOUTH
+## Location 1 NOT Included:
+## South Early:
+# S_Early.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Early.F1, REML=TRUE)
+S_Early.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=S_Early.F2, REML=TRUE)
+S_Early.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=S_Early.F3, REML=TRUE)
+S_Early.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=S_Early.F4, REML=TRUE)
+S_Early.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=S_Early.F5, REML=TRUE)
+## South Full:
+# S_Full.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=C_Full.F1, REML=TRUE)
+S_Full.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=S_Full.F2, REML=TRUE)
+S_Full.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=S_Full.F3, REML=TRUE)
+S_Full.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=S_Full.F4, REML=TRUE)
+S_Full.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=S_Full.F5, REML=TRUE)
+```
+
+## Single Location LS-Means (LSMs)
+
+### North (1)
+
+```{r North.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
+## NORTH
+## Location 3 NOT Included:
+## North Early:
+N.E.LSM1<-as.data.frame(emmeans(N_Early.model1, spec="entry"))
+N.E.LSM1<-N.E.LSM1%>%select(entry, emmean)
+names(N.E.LSM1)[2]<-c("F1")
+N.E.LSM2<-as.data.frame(emmeans(N_Early.model2, spec="entry"))
+N.E.LSM2<-N.E.LSM2%>%select(emmean)
+names(N.E.LSM2)[1]<-c("F2")
+# N.E.LSM3<-as.data.frame(emmeans(N_Early.model3, spec="entry"))
+# N.E.LSM3<-N.E.LSM3%>%select(emmean)
+# names(N.E.LSM3)[1]<-c("F3")
+N.E.LSM4<-as.data.frame(emmeans(N_Early.model4, spec="entry"))
+N.E.LSM4<-N.E.LSM4%>%select(emmean)
+names(N.E.LSM4)[1]<-c("F4")
+N.E.LSM5<-as.data.frame(emmeans(N_Early.model5, spec="entry"))
+N.E.LSM5<-N.E.LSM5%>%select(emmean)
+names(N.E.LSM5)[1]<-c("F5")
+## North Full:
+N.F.LSM1<-as.data.frame(emmeans(N_Full.model1, spec="entry"))
+N.F.LSM1<-N.F.LSM1%>%select(entry, emmean)
+names(N.F.LSM1)[2]<-c("F1")
+N.F.LSM2<-as.data.frame(emmeans(N_Full.model2, spec="entry"))
+N.F.LSM2<-N.F.LSM2%>%select(emmean)
+names(N.F.LSM2)[1]<-c("F2")
+# N.F.LSM3<-as.data.frame(emmeans(N_Full.model3, spec="entry"))
+# N.F.LSM3<-N.F.LSM3%>%select(emmean)
+# names(N.F.LSM3)[1]<-c("F3")
+N.F.LSM4<-as.data.frame(emmeans(N_Full.model4, spec="entry"))
+N.F.LSM4<-N.F.LSM4%>%select(emmean)
+names(N.F.LSM4)[1]<-c("F4")
+N.F.LSM5<-as.data.frame(emmeans(N_Full.model5, spec="entry"))
+N.F.LSM5<-N.F.LSM5%>%select(emmean)
+names(N.F.LSM5)[1]<-c("F5")
+```
+
+### Central (2)
+
+```{r Central.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
+## CENTRAL
+## Location 1 NOT Included:
+## Central Early:
+# C.E.LSM1<-as.data.frame(emmeans(C_Early.model1, spec="entry"))
+# C.E.LSM1<-C.E.LSM1%>%select(entry, emmean)
+# names(C.E.LSM1)[2]<-c("F1")
+C.E.LSM2<-as.data.frame(emmeans(C_Early.model2, spec="entry"))
+C.E.LSM2<-C.E.LSM2%>%select(entry, emmean)
+names(C.E.LSM2)[2]<-c("F2")
+C.E.LSM3<-as.data.frame(emmeans(C_Early.model3, spec="entry"))
+C.E.LSM3<-C.E.LSM3%>%select(emmean)
+names(C.E.LSM3)[1]<-c("F3")
+C.E.LSM4<-as.data.frame(emmeans(C_Early.model4, spec="entry"))
+C.E.LSM4<-C.E.LSM4%>%select(emmean)
+names(C.E.LSM4)[1]<-c("F4")
+C.E.LSM5<-as.data.frame(emmeans(C_Early.model5, spec="entry"))
+C.E.LSM5<-C.E.LSM5%>%select(emmean)
+names(C.E.LSM5)[1]<-c("F5")
+## Central Full:
+# C.F.LSM1<-as.data.frame(emmeans(C_Full.model1, spec="entry"))
+# C.F.LSM1<-C.F.LSM1%>%select(entry, emmean)
+# names(C.F.LSM1)[2]<-c("F1")
+C.F.LSM2<-as.data.frame(emmeans(C_Full.model2, spec="entry"))
+C.F.LSM2<-C.F.LSM2%>%select(entry, emmean)
+names(C.F.LSM2)[2]<-c("F2")
+C.F.LSM3<-as.data.frame(emmeans(C_Full.model3, spec="entry"))
+C.F.LSM3<-C.F.LSM3%>%select(emmean)
+names(C.F.LSM3)[1]<-c("F3")
+C.F.LSM4<-as.data.frame(emmeans(C_Full.model4, spec="entry"))
+C.F.LSM4<-C.F.LSM4%>%select(emmean)
+names(C.F.LSM4)[1]<-c("F4")
+C.F.LSM5<-as.data.frame(emmeans(C_Full.model5, spec="entry"))
+C.F.LSM5<-C.F.LSM5%>%select(emmean)
+names(C.F.LSM5)[1]<-c("F5")
+```
+
+### South (3)
+
+```{r South.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
+## SOUTH
+## Location 1 NOT Included:
+## South Early:
+# S.E.LSM1<-as.data.frame(emmeans(S_Early.model1, spec="entry"))
+# S.E.LSM1<-S.E.LSM1%>%select(entry, emmean)
+# names(S.E.LSM1)[2]<-c("F1")
+S.E.LSM2<-as.data.frame(emmeans(S_Early.model2, spec="entry"))
+S.E.LSM2<-S.E.LSM2%>%select(entry, emmean)
+names(S.E.LSM2)[2]<-c("F2")
+S.E.LSM3<-as.data.frame(emmeans(S_Early.model3, spec="entry"))
+S.E.LSM3<-S.E.LSM3%>%select(emmean)
+names(S.E.LSM3)[1]<-c("F3")
+S.E.LSM4<-as.data.frame(emmeans(S_Early.model4, spec="entry"))
+S.E.LSM4<-S.E.LSM4%>%select(emmean)
+names(S.E.LSM4)[1]<-c("F4")
+S.E.LSM5<-as.data.frame(emmeans(S_Early.model5, spec="entry"))
+S.E.LSM5<-S.E.LSM5%>%select(emmean)
+names(S.E.LSM5)[1]<-c("F5")
+## South Full:
+# S.F.LSM1<-as.data.frame(emmeans(S_Full.model1, spec="entry"))
+# S.F.LSM1<-S.F.LSM1%>%select(entry, emmean)
+# names(S.F.LSM1)[2]<-c("F1")
+S.F.LSM2<-as.data.frame(emmeans(S_Full.model2, spec="entry"))
+S.F.LSM2<-S.F.LSM2%>%select(entry, emmean)
+names(S.F.LSM2)[2]<-c("F2")
+S.F.LSM3<-as.data.frame(emmeans(S_Full.model3, spec="entry"))
+S.F.LSM3<-S.F.LSM3%>%select(emmean)
+names(S.F.LSM3)[1]<-c("F3")
+S.F.LSM4<-as.data.frame(emmeans(S_Full.model4, spec="entry"))
+S.F.LSM4<-S.F.LSM4%>%select(emmean)
+names(S.F.LSM4)[1]<-c("F4")
+S.F.LSM5<-as.data.frame(emmeans(S_Full.model5, spec="entry"))
+S.F.LSM5<-S.F.LSM5%>%select(emmean)
+names(S.F.LSM5)[1]<-c("F5")
+```
+
+### Combine Single Location LSMs
+
+```{r Single_Location_LSMs_COMBO, echo=FALSE, comment=NA, message=FALSE}
+## NORTH
+## Location 3 NOT Included::
+NE.LSMs<-cbind(N.E.LSM1, N.E.LSM2, N.E.LSM4, N.E.LSM5)
+NF.LSMs<-cbind(N.F.LSM1, N.F.LSM2, N.F.LSM4, N.F.LSM5)
+## CENTRAL
+## Location 1 NOT Included::
+CE.LSMs<-cbind(C.E.LSM2, C.E.LSM3, C.E.LSM4, C.E.LSM5)
+CF.LSMs<-cbind(C.F.LSM2, C.F.LSM3, C.F.LSM4, C.F.LSM5)
+## SOUTH
+## Location 1 NOT Included::
+SE.LSMs<-cbind(S.E.LSM2, S.E.LSM3, S.E.LSM4, S.E.LSM5)
+SF.LSMs<-cbind(S.F.LSM2, S.F.LSM3, S.F.LSM4, S.F.LSM5)
+```
+
+
+# E & W Yield Data
+
+```{r NE.NW.Data, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
+## NORTH
+## Excluding Location 3, LOCATION DROPPED!
+NEast<-c((paste("CF", c(YR), "11", sep="")), (paste("CF", c(YR), "12", sep="")))
+NWest<-c((paste("CF", c(YR), "14", sep="")), (paste("CF", c(YR), "15", sep="")))
+## CENTRAL
+## Excluding Location 1, LOCATION DROPPED!
+CEast<-c((paste("CF", c(YR), "22", sep="")), (paste("CF", c(YR), "23", sep="")))
+CWest<-c((paste("CF", c(YR), "23", sep="")), (paste("CF", c(YR), "24", sep="")), (paste("CF", c(YR), "25", sep="")))
+## SOUTH
+## Excluding Location 1, LOCATION DROPPED!
+SEast<-c((paste("CF", c(YR), "32", sep="")), (paste("CF", c(YR), "33", sep="")))
+SWest<-c((paste("CF", c(YR), "33", sep="")), (paste("CF", c(YR), "34", sep="")), (paste("CF", c(YR), "35", sep="")))
+
+
+## NORTH
+## Excluding Location 3, LOCATION DROPPED!
+## North Early:
+NE.East<-filter(N_Early, book.name==NEast)
+NE.West<-filter(N_Early, book.name==NWest)
+## North Full:
+NF.East<-filter(N_Full, book.name==NEast)
+NF.West<-filter(N_Full, book.name==NWest)
+
+## CENTRAL
+## Excluding Location 1, LOCATION DROPPED!
+## Central Early:
+CE.East<-filter(C_Early, book.name==CEast)
+CE.West<-filter(C_Early, book.name==CWest)
+## Central Full:
+CF.East<-filter(C_Full, book.name==CEast)
+CF.West<-filter(C_Full, book.name==CWest)
+
+## SOUTH
+## Excluding Location 1, LOCATION DROPPED!
+## South Early:
+SE.East<-filter(S_Early, book.name==SEast)
+SE.West<-filter(S_Early, book.name==SWest)
+## South Full:
+SF.East<-filter(S_Full, book.name==SEast)
+SF.West<-filter(S_Full, book.name==SWest)
+```
+
+## E & W Arithmetic Means
+
+```{r EW.Models_LSM, comment=NA, echo=FALSE, message=FALSE}
+## Arithmetic Means
+## NORTH
+## North Early (1A) - East
+NE.East$entry<-factor(NE.East$entry)
+M.NE.East<-data.frame(aggregate(yld~entry, data=NE.East, function(x) c(mean(x))))
+names(M.NE.East)[2]<-c("NEE.yld")
+## North Early (1A) - West
+NE.West$entry<-factor(NE.West$entry)
+M.NE.West<-data.frame(aggregate(yld~entry, data=NE.West, function(x) c(mean(x))))
+names(M.NE.West)[2]<-c("NEW.yld")
+## North Full (1B) - East
+NF.East$entry<-factor(NF.East$entry)
+M.NF.East<-data.frame(aggregate(yld~entry, data=NF.East, function(x) c(mean(x))))
+names(M.NF.East)[2]<-c("NFE.yld")
+## North Full (1B) - West
+NF.West$entry<-factor(NF.West$entry)
+M.NF.West<-data.frame(aggregate(yld~entry, data=NF.West, function(x) c(mean(x))))
+names(M.NF.West)[2]<-c("NFW.yld")
+
+## CENTRAL
+## Central Early (2A) - East
+CE.East$entry<-factor(CE.East$entry)
+M.CE.East<-data.frame(aggregate(yld~entry, data=CE.East, function(x) c(mean(x))))
+names(M.CE.East)[2]<-c("CEE.yld")
+## Central Early (2A) - West
+CE.West$entry<-factor(CE.West$entry)
+M.CE.West<-data.frame(aggregate(yld~entry, data=CE.West, function(x) c(mean(x))))
+names(M.CE.West)[2]<-c("CEW.yld")
+## Central Full (2A) - East
+CF.East$entry<-factor(CF.East$entry)
+M.CF.East<-data.frame(aggregate(yld~entry, data=CF.East, function(x) c(mean(x))))
+names(M.CF.East)[2]<-c("CFE.yld")
+## Central Full (2A) - West
+CF.West$entry<-factor(CF.West$entry)
+M.CF.West<-data.frame(aggregate(yld~entry, data=CF.West, function(x) c(mean(x))))
+names(M.CF.West)[2]<-c("CFW.yld")
+
+## SOUTH
+## South Early (3A) - East
+SE.East$entry<-factor(SE.East$entry)
+M.SE.East<-data.frame(aggregate(yld~entry, data=SE.East, function(x) c(mean(x))))
+names(M.SE.East)[2]<-c("SEE.yld")
+## South Early (3A) - West
+SE.West$entry<-factor(SE.West$entry)
+M.SE.West<-data.frame(aggregate(yld~entry, data=SE.West, function(x) c(mean(x))))
+names(M.SE.West)[2]<-c("SEW.yld")
+## South Full (3A) - East
+SF.East$entry<-factor(SF.East$entry)
+M.SF.East<-data.frame(aggregate(yld~entry, data=SF.East, function(x) c(mean(x))))
+names(M.SF.East)[2]<-c("SFE.yld")
+## South Full (3A) - West
+SF.West$entry<-factor(SF.West$entry)
+M.SF.West<-data.frame(aggregate(yld~entry, data=SF.West, function(x) c(mean(x))))
+names(M.SF.West)[2]<-c("SFW.yld")
+```
+
+## Merge E & W
+
+```{r Merge.EW, comment=NA, echo=FALSE, message=FALSE}
+## Merge
+## NORTH
+M.NE.Split<-left_join(M.NE.East, M.NE.West)
+M.NF.Split<-left_join(M.NF.East, M.NF.West)
+## CENTRAL
+M.CE.Split<-left_join(M.CE.East, M.CE.West)
+M.CF.Split<-left_join(M.CF.East, M.CF.West)
+## SOUTH
+M.SE.Split<-left_join(M.SE.East, M.SE.West)
+M.SF.Split<-left_join(M.SF.East, M.SF.West)
+```
+
+
+# District Merge & Rank
+
+```{r District.Merge.Rank.Sort, comment=NA, echo=FALSE, message=FALSE}
+## Add blank columns for excluded locations:
+## North = Exclude Location 3
+NE.LSMs<-data.frame(append(NE.LSMs, list(F3= ""), after =  3))
+NF.LSMs<-data.frame(append(NF.LSMs, list(F3= ""), after =  3))
+## Central = Exclude Location 1
+CE.LSMs<-data.frame(append(CE.LSMs, list(F1= ""), after =  1))
+CF.LSMs<-data.frame(append(CF.LSMs, list(F1= ""), after =  1))
+## South = Exclude Location 1
+SE.LSMs<-data.frame(append(SE.LSMs, list(F1= ""), after =  1))
+SF.LSMs<-data.frame(append(SF.LSMs, list(F1= ""), after =  1))
+
+## Combine EL/CS & LSMs:
+## NORTH
+N.E.Combo<-left_join(N.E.Combo, NE.LSMs)
+N.F.Combo<-left_join(N.F.Combo, NF.LSMs)
+## CENTRAL
+C.E.Combo<-left_join(C.E.Combo, CE.LSMs)
+C.F.Combo<-left_join(C.F.Combo, CF.LSMs)
+## SOUTH
+S.E.Combo<-left_join(S.E.Combo, SE.LSMs)
+S.F.Combo<-left_join(S.F.Combo, SF.LSMs)
+
+## Combine COMBO directly above with E/W Split Yields:
+## NORTH
+N.E.Combo<-left_join(N.E.Combo, M.NE.Split)
+N.F.Combo<-left_join(N.F.Combo, M.NF.Split)
+## CENTRAL
+C.E.Combo<-left_join(C.E.Combo, M.CE.Split)
+C.F.Combo<-left_join(C.F.Combo, M.CF.Split)
+## SOUTH
+S.E.Combo<-left_join(S.E.Combo, M.SE.Split)
+S.F.Combo<-left_join(S.F.Combo, M.SF.Split)
+
+
+## ADD Rankings:
+N.E.Combo$yld.rank<-as.numeric(rank(-N.E.Combo$yld))
+N.F.Combo$yld.rank<-as.numeric(rank(-N.F.Combo$yld))
+C.E.Combo$yld.rank<-as.numeric(rank(-C.E.Combo$yld))
+C.F.Combo$yld.rank<-as.numeric(rank(-C.F.Combo$yld))
+S.E.Combo$yld.rank<-as.numeric(rank(-S.E.Combo$yld))
+S.F.Combo$yld.rank<-as.numeric(rank(-S.F.Combo$yld))
+
+## Sort By Rank:
+N.E.Combo<-N.E.Combo[order(N.E.Combo$yld.rank),]
+N.F.Combo<-N.F.Combo[order(N.F.Combo$yld.rank),]
+C.E.Combo<-C.E.Combo[order(C.E.Combo$yld.rank),]
+C.F.Combo<-C.F.Combo[order(C.F.Combo$yld.rank),]
+S.E.Combo<-S.E.Combo[order(S.E.Combo$yld.rank),]
+S.F.Combo<-S.F.Combo[order(S.F.Combo$yld.rank),]
+```
+
+## Re-Arrange & Sort
+
+```{r Rearrange.Sort, comment=NA, echo=FALSE, message=FALSE}
+## NORTH
+## North Early
+N.E.Combo<-N.E.Combo[,c(1,2,7,8,9,17,18,10,11,12,13,14,15,16)]
+## North Full
+N.F.Combo<-N.F.Combo[,c(1,2,7,8,9,17,18,10,11,12,13,14,15,16)]
+
+## CENTRAL
+## Central Early
+C.E.Combo<-C.E.Combo[,c(1,2,7,8,9,17,18,10,11,12,13,14,15,16)]
+## Central Full
+C.F.Combo<-C.F.Combo[,c(1,2,7,8,9,17,18,10,11,12,13,14,15,16)]
+
+## SOUTH
+## South Early
+S.E.Combo<-S.E.Combo[,c(1,2,7,8,9,17,18,10,11,12,13,14,15,16)]
+## South Full
+S.F.Combo<-S.F.Combo[,c(1,2,7,8,9,17,18,10,11,12,13,14,15,16)]
+```
+
+
+# District Summary Stats Tables
+
+## North Early (1A)
+
+```{r NE.District.Stats.Table, echo=FALSE}
+## North Early
+## District Yield
+NE.Combo.Mean<-mean(LSM.N_Early$yld)
+NE.Combo.Min<-min(LSM.N_Early$yld)
+NE.Combo.Max<-max(LSM.N_Early$yld)
+NE.Combo.CV<-CV(model.N_Early)
+NE.Combo.lsd<-predictmeans(model.N_Early, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NE.Combo.LSD<-NE.Combo.lsd[["LSD"]][["Aveg.LSD"]]
+## Moisture
+NE.Moist.Mean<-mean(LSM.N_Early.moist$moist)
+NE.Moist.Min<-min(LSM.N_Early.moist$moist)
+NE.Moist.Max<-max(LSM.N_Early.moist$moist)
+NE.Moist.lsd<-predictmeans(model.N_Early.moist, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NE.Moist.LSD<-NE.Moist.lsd[["LSD"]][["Aveg.LSD"]]
+## AGV
+NE.AGV.Mean<-mean(N.E.Combo$AGV)
+NE.AGV.Min<-min(N.E.Combo$AGV)
+NE.AGV.Max<-max(N.E.Combo$AGV)
+## Single Location Yields
+## Location 1
+NE.F1.Mean<-mean(N.E.LSM1$F1)
+NE.F1.Min<-min(N.E.LSM1$F1)
+NE.F1.Max<-max(N.E.LSM1$F1)
+NE.F1.CV<-CV(N_Early.model1)
+NE.F1.lsd<-predictmeans(N_Early.model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NE.F1.LSD<-NE.F1.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 2
+NE.F2.Mean<-mean(N.E.LSM2$F2)
+NE.F2.Min<-min(N.E.LSM2$F2)
+NE.F2.Max<-max(N.E.LSM2$F2)
+NE.F2.CV<-CV(N_Early.model2)
+NE.F2.lsd<-predictmeans(N_Early.model2, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NE.F2.LSD<-NE.F2.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 3
+# NE.F3.Mean<-mean(N.E.LSM3$F3)
+# NE.F3.Min<-min(N.E.LSM3$F3)
+# NE.F3.Max<-max(N.E.LSM3$F3)
+# NE.F3.CV<-CV(N_Early.model3)
+# NE.F3.lsd<-predictmeans(N_Early.model3, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+# NE.F3.LSD<-NE.F3.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+NE.F4.Mean<-mean(N.E.LSM4$F4)
+NE.F4.Min<-min(N.E.LSM4$F4)
+NE.F4.Max<-max(N.E.LSM4$F4)
+NE.F4.CV<-CV(N_Early.model4)
+NE.F4.lsd<-predictmeans(N_Early.model4, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NE.F4.LSD<-NE.F4.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+NE.F5.Mean<-mean(N.E.LSM5$F5)
+NE.F5.Min<-min(N.E.LSM5$F5)
+NE.F5.Max<-max(N.E.LSM5$F5)
+NE.F5.CV<-CV(N_Early.model5)
+NE.F5.lsd<-predictmeans(N_Early.model5, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NE.F5.LSD<-NE.F5.lsd[["LSD"]][["Aveg.LSD"]]
+
+## COMBO Stats Table:
+NE.Combo.Stats<- data.frame("Value" = c("Experiment Mean",	"Minimum Mean",	"Maximum Mean",	"LSD(0.25)", 	"Coefficient of Variability") ,"yldM" = as.numeric(c(NE.Combo.Mean, NE.Combo.Min, NE.Combo.Max, NE.Combo.LSD, NE.Combo.CV)), "moistM" = as.numeric(c(NE.Moist.Mean, NE.Moist.Min, NE.Moist.Max, NE.Moist.LSD, "")), "AGVM" = as.numeric(c(NE.AGV.Mean, NE.AGV.Min, NE.AGV.Max, "", "")), "F1M" = as.numeric(c(NE.F1.Mean, NE.F1.Min, NE.F1.Max, NE.F1.LSD, NE.F1.CV)), "F2M" = as.numeric(c(NE.F2.Mean, NE.F2.Min, NE.F2.Max, NE.F2.LSD, NE.F2.CV)), "F4M" = as.numeric(c(NE.F4.Mean, NE.F4.Min, NE.F4.Max, NE.F4.LSD, NE.F4.CV)), "F5M" = as.numeric(c(NE.F5.Mean, NE.F5.Min, NE.F5.Max, NE.F5.LSD, NE.F5.CV)))
+## Round Digits:
+NE.Combo.Stats$moistM<-as.numeric(NE.Combo.Stats$moistM)
+NE.Combo.Stats$AGVM<-as.numeric(NE.Combo.Stats$AGVM)
+NE.Combo.Stats%>%mutate_if(is.numeric, round, digits=2)
+
+## Add Blank Columns:
+NE.Combo.Stats<-data.frame(append(NE.Combo.Stats, list(hybrid= ""), after =  1))
+NE.Combo.Stats<-data.frame(append(NE.Combo.Stats, list(pkg= ""), after =  2))
+NE.Combo.Stats<-data.frame(append(NE.Combo.Stats, list(herb= ""), after =  3))
+NE.Combo.Stats<-data.frame(append(NE.Combo.Stats, list(nw.yld= ""), after =  5))
+NE.Combo.Stats<-data.frame(append(NE.Combo.Stats, list(ne.yld= ""), after =  6))
+NE.Combo.Stats<-data.frame(append(NE.Combo.Stats, list(F3M= ""), after =  11))
+```
+
+## North Full (1B)
+
+```{r NF.District.Stats.Table, echo=FALSE}
+## North Full
+## District Yield
+NF.Combo.Mean<-mean(LSM.N_Full$yld)
+NF.Combo.Min<-min(LSM.N_Full$yld)
+NF.Combo.Max<-max(LSM.N_Full$yld)
+NF.Combo.CV<-CV(model.N_Full)
+NF.Combo.lsd<-predictmeans(model.N_Full, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NF.Combo.LSD<-NF.Combo.lsd[["LSD"]][["Aveg.LSD"]]
+## Moisture
+NF.Moist.Mean<-mean(LSM.N_Full.moist$moist)
+NF.Moist.Min<-min(LSM.N_Full.moist$moist)
+NF.Moist.Max<-max(LSM.N_Full.moist$moist)
+NF.Moist.lsd<-predictmeans(model.N_Full.moist, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NF.Moist.LSD<-NF.Moist.lsd[["LSD"]][["Aveg.LSD"]]
+## AGV
+NF.AGV.Mean<-mean(N.F.Combo$AGV)
+NF.AGV.Min<-min(N.F.Combo$AGV)
+NF.AGV.Max<-max(N.F.Combo$AGV)
+## Single Location Yields
+## Location 1
+NF.F1.Mean<-mean(N.F.LSM1$F1)
+NF.F1.Min<-min(N.F.LSM1$F1)
+NF.F1.Max<-max(N.F.LSM1$F1)
+NF.F1.CV<-CV(N_Full.model1)
+NF.F1.lsd<-predictmeans(N_Full.model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NF.F1.LSD<-NF.F1.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 2
+NF.F2.Mean<-mean(N.F.LSM2$F2)
+NF.F2.Min<-min(N.F.LSM2$F2)
+NF.F2.Max<-max(N.F.LSM2$F2)
+NF.F2.CV<-CV(N_Full.model2)
+NF.F2.lsd<-predictmeans(N_Full.model2, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NF.F2.LSD<-NF.F2.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 3
+# NF.F3.Mean<-mean(N.F.LSM3$F3)
+# NF.F3.Min<-min(N.F.LSM3$F3)
+# NF.F3.Max<-max(N.F.LSM3$F3)
+# NF.F3.CV<-CV(N_Full.model3)
+# NF.F3.lsd<-predictmeans(N_Full.model3, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+# NF.F3.LSD<-NF.F3.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+NF.F4.Mean<-mean(N.F.LSM4$F4)
+NF.F4.Min<-min(N.F.LSM4$F4)
+NF.F4.Max<-max(N.F.LSM4$F4)
+NF.F4.CV<-CV(N_Full.model4)
+NF.F4.lsd<-predictmeans(N_Full.model4, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NF.F4.LSD<-NF.F4.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+NF.F5.Mean<-mean(N.F.LSM5$F5)
+NF.F5.Min<-min(N.F.LSM5$F5)
+NF.F5.Max<-max(N.F.LSM5$F5)
+NF.F5.CV<-CV(N_Full.model5)
+NF.F5.lsd<-predictmeans(N_Full.model5, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+NF.F5.LSD<-NF.F5.lsd[["LSD"]][["Aveg.LSD"]]
+
+## COMBO Stats Table:
+NF.Combo.Stats<- data.frame("Value" = c("Experiment Mean",	"Minimum Mean",	"Maximum Mean",	"LSD(0.25)", 	"Coefficient of Variability") ,"yldM" = as.numeric(c(NF.Combo.Mean, NF.Combo.Min, NF.Combo.Max, NF.Combo.LSD, NF.Combo.CV)), "moistM" = as.numeric(c(NF.Moist.Mean, NF.Moist.Min, NF.Moist.Max, NF.Moist.LSD, "")), "AGVM" = as.numeric(c(NF.AGV.Mean, NF.AGV.Min, NF.AGV.Max, "", "")), "F1M" = as.numeric(c(NF.F1.Mean, NF.F1.Min, NF.F1.Max, NF.F1.LSD, NF.F1.CV)), "F2M" = as.numeric(c(NF.F2.Mean, NF.F2.Min, NF.F2.Max, NF.F2.LSD, NF.F2.CV)), "F4M" = as.numeric(c(NF.F4.Mean, NF.F4.Min, NF.F4.Max, NF.F4.LSD, NF.F4.CV)), "F5M" = as.numeric(c(NF.F5.Mean, NF.F5.Min, NF.F5.Max, NF.F5.LSD, NF.F5.CV)))
+## Round Digits:
+NF.Combo.Stats$moistM<-as.numeric(NF.Combo.Stats$moistM)
+NF.Combo.Stats$AGVM<-as.numeric(NF.Combo.Stats$AGVM)
+NF.Combo.Stats%>%mutate_if(is.numeric, round, digits=2)
+## Add Blank Columns:
+NF.Combo.Stats<-data.frame(append(NF.Combo.Stats, list(hybrid= ""), after =  1))
+NF.Combo.Stats<-data.frame(append(NF.Combo.Stats, list(pkg= ""), after =  2))
+NF.Combo.Stats<-data.frame(append(NF.Combo.Stats, list(herb= ""), after =  3))
+NF.Combo.Stats<-data.frame(append(NF.Combo.Stats, list(nw.yld= ""), after =  5))
+NF.Combo.Stats<-data.frame(append(NF.Combo.Stats, list(ne.yld= ""), after =  6))
+NF.Combo.Stats<-data.frame(append(NF.Combo.Stats, list(F3M= ""), after =  11))
+```
+
+## Central Early (2A)
+
+```{r CE.District.Stats.Table, echo=FALSE}
+## Central Early
+## District Yield
+CE.Combo.Mean<-mean(LSM.C_Early$yld)
+CE.Combo.Min<-min(LSM.C_Early$yld)
+CE.Combo.Max<-max(LSM.C_Early$yld)
+CE.Combo.CV<-CV(model.C_Early)
+CE.Combo.lsd<-predictmeans(model.C_Early, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CE.Combo.LSD<-CE.Combo.lsd[["LSD"]][["Aveg.LSD"]]
+## Moisture
+CE.Moist.Mean<-mean(LSM.C_Early.moist$moist)
+CE.Moist.Min<-min(LSM.C_Early.moist$moist)
+CE.Moist.Max<-max(LSM.C_Early.moist$moist)
+CE.Moist.lsd<-predictmeans(model.C_Early.moist, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CE.Moist.LSD<-CE.Moist.lsd[["LSD"]][["Aveg.LSD"]]
+## AGV
+CE.AGV.Mean<-mean(C.E.Combo$AGV)
+CE.AGV.Min<-min(C.E.Combo$AGV)
+CE.AGV.Max<-max(C.E.Combo$AGV)
+## Single Location Yields
+## Location 1
+# CE.F1.Mean<-mean(C.E.LSM1$F1)
+# CE.F1.Min<-min(C.E.LSM1$F1)
+# CE.F1.Max<-max(C.E.LSM1$F1)
+# CE.F1.CV<-CV(C_Early.model1)
+# CE.F1.lsd<-predictmeans(C_Early.model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+# CE.F1.LSD<-CE.F1.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 2
+CE.F2.Mean<-mean(C.E.LSM2$F2)
+CE.F2.Min<-min(C.E.LSM2$F2)
+CE.F2.Max<-max(C.E.LSM2$F2)
+CE.F2.CV<-CV(C_Early.model2)
+CE.F2.lsd<-predictmeans(C_Early.model2, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CE.F2.LSD<-CE.F2.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 3
+CE.F3.Mean<-mean(C.E.LSM3$F3)
+CE.F3.Min<-min(C.E.LSM3$F3)
+CE.F3.Max<-max(C.E.LSM3$F3)
+CE.F3.CV<-CV(C_Early.model3)
+CE.F3.lsd<-predictmeans(C_Early.model3, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CE.F3.LSD<-CE.F3.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+CE.F4.Mean<-mean(C.E.LSM4$F4)
+CE.F4.Min<-min(C.E.LSM4$F4)
+CE.F4.Max<-max(C.E.LSM4$F4)
+CE.F4.CV<-CV(C_Early.model4)
+CE.F4.lsd<-predictmeans(C_Early.model4, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CE.F4.LSD<-CE.F4.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+CE.F5.Mean<-mean(C.E.LSM5$F5)
+CE.F5.Min<-min(C.E.LSM5$F5)
+CE.F5.Max<-max(C.E.LSM5$F5)
+CE.F5.CV<-CV(C_Early.model5)
+CE.F5.lsd<-predictmeans(C_Early.model5, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CE.F5.LSD<-CE.F5.lsd[["LSD"]][["Aveg.LSD"]]
+
+## COMBO Stats Table:
+CE.Combo.Stats<- data.frame("Value" = c("Experiment Mean",	"Minimum Mean",	"Maximum Mean",	"LSD(0.25)", 	"Coefficient of Variability") ,"yldM" = as.numeric(c(CE.Combo.Mean, CE.Combo.Min, CE.Combo.Max, CE.Combo.LSD, CE.Combo.CV)), "moistM" = as.numeric(c(CE.Moist.Mean, CE.Moist.Min, CE.Moist.Max, CE.Moist.LSD, "")), "AGVM" = as.numeric(c(CE.AGV.Mean, CE.AGV.Min, CE.AGV.Max, "", "")), "F2M" = as.numeric(c(CE.F2.Mean, CE.F2.Min, CE.F2.Max, CE.F2.LSD, CE.F2.CV)), "F3M" = as.numeric(c(CE.F3.Mean, CE.F3.Min, CE.F3.Max, CE.F3.LSD, CE.F3.CV)), "F4M" = as.numeric(c(CE.F4.Mean, CE.F4.Min, CE.F4.Max, CE.F4.LSD, CE.F4.CV)), "F5M" = as.numeric(c(CE.F5.Mean, CE.F5.Min, CE.F5.Max, CE.F5.LSD, CE.F5.CV)))
+## Round Digits:
+CE.Combo.Stats$moistM<-as.numeric(CE.Combo.Stats$moistM)
+CE.Combo.Stats$AGVM<-as.numeric(CE.Combo.Stats$AGVM)
+CE.Combo.Stats%>%mutate_if(is.numeric, round, digits=2)
+## Add Blank Columns:
+CE.Combo.Stats<-data.frame(append(CE.Combo.Stats, list(hybrid= ""), after =  1))
+CE.Combo.Stats<-data.frame(append(CE.Combo.Stats, list(pkg= ""), after =  2))
+CE.Combo.Stats<-data.frame(append(CE.Combo.Stats, list(herb= ""), after =  3))
+CE.Combo.Stats<-data.frame(append(CE.Combo.Stats, list(nw.yld= ""), after =  5))
+CE.Combo.Stats<-data.frame(append(CE.Combo.Stats, list(ne.yld= ""), after =  6))
+CE.Combo.Stats<-data.frame(append(CE.Combo.Stats, list(F1M= ""), after =  12))
+```
+
+## Central Full (2B)
+
+```{r CF.District.Stats.Table, echo=FALSE}
+## Central Full
+## District Yield
+CF.Combo.Mean<-mean(LSM.C_Full$yld)
+CF.Combo.Min<-min(LSM.C_Full$yld)
+CF.Combo.Max<-max(LSM.C_Full$yld)
+CF.Combo.CV<-CV(model.C_Full)
+CF.Combo.lsd<-predictmeans(model.C_Full, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CF.Combo.LSD<-CF.Combo.lsd[["LSD"]][["Aveg.LSD"]]
+## Moisture
+CF.Moist.Mean<-mean(LSM.C_Full.moist$moist)
+CF.Moist.Min<-min(LSM.C_Full.moist$moist)
+CF.Moist.Max<-max(LSM.C_Full.moist$moist)
+CF.Moist.lsd<-predictmeans(model.C_Full.moist, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CF.Moist.LSD<-CF.Moist.lsd[["LSD"]][["Aveg.LSD"]]
+## AGV
+CF.AGV.Mean<-mean(C.F.Combo$AGV)
+CF.AGV.Min<-min(C.F.Combo$AGV)
+CF.AGV.Max<-max(C.F.Combo$AGV)
+## Single Location Yields
+## Location 1
+# CF.F1.Mean<-mean(C.F.LSM1$F1)
+# CF.F1.Min<-min(C.F.LSM1$F1)
+# CF.F1.Max<-max(C.F.LSM1$F1)
+# CF.F1.CV<-CV(C_Full.model1)
+# CF.F1.lsd<-predictmeans(C_Full.model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+# CF.F1.LSD<-CF.F1.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 2
+CF.F2.Mean<-mean(C.F.LSM2$F2)
+CF.F2.Min<-min(C.F.LSM2$F2)
+CF.F2.Max<-max(C.F.LSM2$F2)
+CF.F2.CV<-CV(C_Full.model2)
+CF.F2.lsd<-predictmeans(C_Full.model2, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CF.F2.LSD<-CF.F2.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 3
+CF.F3.Mean<-mean(C.F.LSM3$F3)
+CF.F3.Min<-min(C.F.LSM3$F3)
+CF.F3.Max<-max(C.F.LSM3$F3)
+CF.F3.CV<-CV(C_Full.model3)
+CF.F3.lsd<-predictmeans(C_Full.model3, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CF.F3.LSD<-CF.F3.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+CF.F4.Mean<-mean(C.F.LSM4$F4)
+CF.F4.Min<-min(C.F.LSM4$F4)
+CF.F4.Max<-max(C.F.LSM4$F4)
+CF.F4.CV<-CV(C_Full.model4)
+CF.F4.lsd<-predictmeans(C_Full.model4, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CF.F4.LSD<-CF.F4.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+CF.F5.Mean<-mean(C.F.LSM5$F5)
+CF.F5.Min<-min(C.F.LSM5$F5)
+CF.F5.Max<-max(C.F.LSM5$F5)
+CF.F5.CV<-CV(C_Full.model5)
+CF.F5.lsd<-predictmeans(C_Full.model5, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+CF.F5.LSD<-CF.F5.lsd[["LSD"]][["Aveg.LSD"]]
+
+## COMBO Stats Table:
+CF.Combo.Stats<- data.frame("Value" = c("Experiment Mean",	"Minimum Mean",	"Maximum Mean",	"LSD(0.25)", 	"Coefficient of Variability") ,"yldM" = as.numeric(c(CF.Combo.Mean, CF.Combo.Min, CF.Combo.Max, CF.Combo.LSD, CF.Combo.CV)), "moistM" = as.numeric(c(CF.Moist.Mean, CF.Moist.Min, CF.Moist.Max, CF.Moist.LSD, "")), "AGVM" = as.numeric(c(CF.AGV.Mean, CF.AGV.Min, CF.AGV.Max, "", "")), "F2M" = as.numeric(c(CF.F2.Mean, CF.F2.Min, CF.F2.Max, CF.F2.LSD, CF.F2.CV)), "F3M" = as.numeric(c(CF.F3.Mean, CF.F3.Min, CF.F3.Max, CF.F3.LSD, CF.F3.CV)), "F4M" = as.numeric(c(CF.F4.Mean, CF.F4.Min, CF.F4.Max, CF.F4.LSD, CF.F4.CV)), "F5M" = as.numeric(c(CF.F5.Mean, CF.F5.Min, CF.F5.Max, CF.F5.LSD, CF.F5.CV)))
+## Round Digits:
+CF.Combo.Stats$moistM<-as.numeric(CF.Combo.Stats$moistM)
+CF.Combo.Stats$AGVM<-as.numeric(CF.Combo.Stats$AGVM)
+CF.Combo.Stats%>%mutate_if(is.numeric, round, digits=2)
+## Add Blank Columns:
+CF.Combo.Stats<-data.frame(append(CF.Combo.Stats, list(hybrid= ""), after =  1))
+CF.Combo.Stats<-data.frame(append(CF.Combo.Stats, list(pkg= ""), after =  2))
+CF.Combo.Stats<-data.frame(append(CF.Combo.Stats, list(herb= ""), after =  3))
+CF.Combo.Stats<-data.frame(append(CF.Combo.Stats, list(nw.yld= ""), after =  5))
+CF.Combo.Stats<-data.frame(append(CF.Combo.Stats, list(ne.yld= ""), after =  6))
+CF.Combo.Stats<-data.frame(append(CF.Combo.Stats, list(F1M= ""), after =  9))
+```
+
+## South Early (3A)
+
+```{r SE.District.Stats.Table, echo=FALSE}
+## South Early
+## District Yield
+SE.Combo.Mean<-mean(LSM.S_Early$yld)
+SE.Combo.Min<-min(LSM.S_Early$yld)
+SE.Combo.Max<-max(LSM.S_Early$yld)
+SE.Combo.CV<-CV(model.S_Early)
+SE.Combo.lsd<-predictmeans(model.S_Early, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SE.Combo.LSD<-SE.Combo.lsd[["LSD"]][["Aveg.LSD"]]
+## Moisture
+SE.Moist.Mean<-mean(LSM.S_Early.moist$moist)
+SE.Moist.Min<-min(LSM.S_Early.moist$moist)
+SE.Moist.Max<-max(LSM.S_Early.moist$moist)
+SE.Moist.lsd<-predictmeans(model.S_Early.moist, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SE.Moist.LSD<-SE.Moist.lsd[["LSD"]][["Aveg.LSD"]]
+## AGV
+SE.AGV.Mean<-mean(S.E.Combo$AGV)
+SE.AGV.Min<-min(S.E.Combo$AGV)
+SE.AGV.Max<-max(S.E.Combo$AGV)
+## Single Location Yields
+## Location 1
+# SE.F1.Mean<-mean(S.E.LSM1$F1)
+# SE.F1.Min<-min(S.E.LSM1$F1)
+# SE.F1.Max<-max(S.E.LSM1$F1)
+# SE.F1.CV<-CV(S_Early.model1)
+# SE.F1.lsd<-predictmeans(S_Early.model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+# SE.F1.LSD<-SE.F1.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 2
+SE.F2.Mean<-mean(S.E.LSM2$F2)
+SE.F2.Min<-min(S.E.LSM2$F2)
+SE.F2.Max<-max(S.E.LSM2$F2)
+SE.F2.CV<-CV(S_Early.model2)
+SE.F2.lsd<-predictmeans(S_Early.model2, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SE.F2.LSD<-SE.F2.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 3
+SE.F3.Mean<-mean(S.E.LSM3$F3)
+SE.F3.Min<-min(S.E.LSM3$F3)
+SE.F3.Max<-max(S.E.LSM3$F3)
+SE.F3.CV<-CV(S_Early.model3)
+SE.F3.lsd<-predictmeans(S_Early.model3, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SE.F3.LSD<-SE.F3.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+SE.F4.Mean<-mean(S.E.LSM4$F4)
+SE.F4.Min<-min(S.E.LSM4$F4)
+SE.F4.Max<-max(S.E.LSM4$F4)
+SE.F4.CV<-CV(S_Early.model4)
+SE.F4.lsd<-predictmeans(S_Early.model4, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SE.F4.LSD<-SE.F4.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+SE.F5.Mean<-mean(S.E.LSM5$F5)
+SE.F5.Min<-min(S.E.LSM5$F5)
+SE.F5.Max<-max(S.E.LSM5$F5)
+SE.F5.CV<-CV(S_Early.model5)
+SE.F5.lsd<-predictmeans(S_Early.model5, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SE.F5.LSD<-SE.F5.lsd[["LSD"]][["Aveg.LSD"]]
+
+## COMBO Stats Table:
+SE.Combo.Stats<- data.frame("Value" = c("Experiment Mean",	"Minimum Mean",	"Maximum Mean",	"LSD(0.25)", 	"Coefficient of Variability") ,"yldM" = as.numeric(c(SE.Combo.Mean, SE.Combo.Min, SE.Combo.Max, SE.Combo.LSD, SE.Combo.CV)), "moistM" = as.numeric(c(SE.Moist.Mean, SE.Moist.Min, SE.Moist.Max, SE.Moist.LSD, "")), "AGVM" = as.numeric(c(SE.AGV.Mean, SE.AGV.Min, SE.AGV.Max, "", "")), "F2M" = as.numeric(c(SE.F2.Mean, SE.F2.Min, SE.F2.Max, SE.F2.LSD, SE.F2.CV)), "F3M" = as.numeric(c(SE.F3.Mean, SE.F3.Min, SE.F3.Max, SE.F3.LSD, SE.F3.CV)), "F4M" = as.numeric(c(SE.F4.Mean, SE.F4.Min, SE.F4.Max, SE.F4.LSD, SE.F4.CV)), "F5M" = as.numeric(c(SE.F5.Mean, SE.F5.Min, SE.F5.Max, SE.F5.LSD, SE.F5.CV)))
+## Round Digits:
+SE.Combo.Stats$moistM<-as.numeric(SE.Combo.Stats$moistM)
+SE.Combo.Stats$AGVM<-as.numeric(SE.Combo.Stats$AGVM)
+SE.Combo.Stats%>%mutate_if(is.numeric, round, digits=2)
+## Add Blank Columns:
+SE.Combo.Stats<-data.frame(append(SE.Combo.Stats, list(hybrid= ""), after =  1))
+SE.Combo.Stats<-data.frame(append(SE.Combo.Stats, list(pkg= ""), after =  2))
+SE.Combo.Stats<-data.frame(append(SE.Combo.Stats, list(herb= ""), after =  3))
+SE.Combo.Stats<-data.frame(append(SE.Combo.Stats, list(nw.yld= ""), after =  5))
+SE.Combo.Stats<-data.frame(append(SE.Combo.Stats, list(ne.yld= ""), after =  6))
+SE.Combo.Stats<-data.frame(append(SE.Combo.Stats, list(F1M= ""), after =  9))
+```
+
+## South Full (3B)
+
+```{r SF.District.Stats.Table, echo=FALSE}
+## South Full
+## District Yield
+SF.Combo.Mean<-mean(LSM.S_Full$yld)
+SF.Combo.Min<-min(LSM.S_Full$yld)
+SF.Combo.Max<-max(LSM.S_Full$yld)
+SF.Combo.CV<-CV(model.S_Full)
+SF.Combo.lsd<-predictmeans(model.S_Full, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SF.Combo.LSD<-SF.Combo.lsd[["LSD"]][["Aveg.LSD"]]
+## Moisture
+SF.Moist.Mean<-mean(LSM.S_Full.moist$moist)
+SF.Moist.Min<-min(LSM.S_Full.moist$moist)
+SF.Moist.Max<-max(LSM.S_Full.moist$moist)
+SF.Moist.lsd<-predictmeans(model.S_Full.moist, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SF.Moist.LSD<-SF.Moist.lsd[["LSD"]][["Aveg.LSD"]]
+## AGV
+SF.AGV.Mean<-mean(S.F.Combo$AGV)
+SF.AGV.Min<-min(S.F.Combo$AGV)
+SF.AGV.Max<-max(S.F.Combo$AGV)
+## Single Location Yields
+## Location 1
+# SF.F1.Mean<-mean(S.F.LSM1$F1)
+# SF.F1.Min<-min(S.F.LSM1$F1)
+# SF.F1.Max<-max(S.F.LSM1$F1)
+# SF.F1.CV<-CV(S_Full.model1)
+# SF.F1.lsd<-predictmeans(S_Full.model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+# SF.F1.LSD<-SF.F1.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 2
+SF.F2.Mean<-mean(S.F.LSM2$F2)
+SF.F2.Min<-min(S.F.LSM2$F2)
+SF.F2.Max<-max(S.F.LSM2$F2)
+SF.F2.CV<-CV(S_Full.model2)
+SF.F2.lsd<-predictmeans(S_Full.model2, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SF.F2.LSD<-SF.F2.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 3
+SF.F3.Mean<-mean(S.F.LSM3$F3)
+SF.F3.Min<-min(S.F.LSM3$F3)
+SF.F3.Max<-max(S.F.LSM3$F3)
+SF.F3.CV<-CV(S_Full.model3)
+SF.F3.lsd<-predictmeans(S_Full.model3, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SF.F3.LSD<-SF.F3.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+SF.F4.Mean<-mean(S.F.LSM4$F4)
+SF.F4.Min<-min(S.F.LSM4$F4)
+SF.F4.Max<-max(S.F.LSM4$F4)
+SF.F4.CV<-CV(S_Full.model4)
+SF.F4.lsd<-predictmeans(S_Full.model4, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SF.F4.LSD<-SF.F4.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+SF.F5.Mean<-mean(S.F.LSM5$F5)
+SF.F5.Min<-min(S.F.LSM5$F5)
+SF.F5.Max<-max(S.F.LSM5$F5)
+SF.F5.CV<-CV(S_Full.model5)
+SF.F5.lsd<-predictmeans(S_Full.model5, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+SF.F5.LSD<-SF.F5.lsd[["LSD"]][["Aveg.LSD"]]
+
+## COMBO Stats Table:
+SF.Combo.Stats<- data.frame("Value" = c("Experiment Mean",	"Minimum Mean",	"Maximum Mean",	"LSD(0.25)", 	"Coefficient of Variability") ,"yldM" = as.numeric(c(SF.Combo.Mean, SF.Combo.Min, SF.Combo.Max, SF.Combo.LSD, SF.Combo.CV)), "moistM" = as.numeric(c(SF.Moist.Mean, SF.Moist.Min, SF.Moist.Max, SF.Moist.LSD, "")), "AGVM" = as.numeric(c(SF.AGV.Mean, SF.AGV.Min, SF.AGV.Max, "", "")), "F2M" = as.numeric(c(SF.F2.Mean, SF.F2.Min, SF.F2.Max, SF.F2.LSD, SF.F2.CV)), "F3M" = as.numeric(c(SF.F3.Mean, SF.F3.Min, SF.F3.Max, SF.F3.LSD, SF.F3.CV)), "F4M" = as.numeric(c(SF.F4.Mean, SF.F4.Min, SF.F4.Max, SF.F4.LSD, SF.F4.CV)), "F5M" = as.numeric(c(SF.F5.Mean, SF.F5.Min, SF.F5.Max, SF.F5.LSD, SF.F5.CV)))
+## Round Digits:
+SF.Combo.Stats$moistM<-as.numeric(SF.Combo.Stats$moistM)
+SF.Combo.Stats$AGVM<-as.numeric(SF.Combo.Stats$AGVM)
+SF.Combo.Stats%>%mutate_if(is.numeric, round, digits=2)
+## Add Blank Columns:
+SF.Combo.Stats<-data.frame(append(SF.Combo.Stats, list(hybrid= ""), after =  1))
+SF.Combo.Stats<-data.frame(append(SF.Combo.Stats, list(pkg= ""), after =  2))
+SF.Combo.Stats<-data.frame(append(SF.Combo.Stats, list(herb= ""), after =  3))
+SF.Combo.Stats<-data.frame(append(SF.Combo.Stats, list(nw.yld= ""), after =  5))
+SF.Combo.Stats<-data.frame(append(SF.Combo.Stats, list(ne.yld= ""), after =  6))
+SF.Combo.Stats<-data.frame(append(SF.Combo.Stats, list(F1M= ""), after =  9))
+```
+
+
+# EXPORT!
+
+```{r Export.to.Formatted.Excel, comment=NA, echo=FALSE, message=FALSE}
+wb<-loadWorkbook("District_Corn_Report.xlsx", create=FALSE)
+setStyleAction(wb,XLC$"STYLE_ACTION.NONE")
+
+## Write NORTH
+## Write North Early
+writeWorksheet(wb, N.E.Combo, "T6", startRow=5, startCol=1, header=FALSE)
+writeWorksheet(wb, NE.Combo.Stats, "T6", startRow=50, startCol=1, header=FALSE)
+## Write North Full
+writeWorksheet(wb, N.F.Combo, "T7", startRow=5, startCol=1, header=FALSE)
+writeWorksheet(wb, NF.Combo.Stats, "T7", startRow=51, startCol=1, header=FALSE)
+## Write CENTRAL
+## Write Central Early
+writeWorksheet(wb, C.E.Combo, "T8", startRow=5, startCol=1, header=FALSE)
+writeWorksheet(wb, CE.Combo.Stats, "T8", startRow=58, startCol=1, header=FALSE)
+## Write Central Full
+writeWorksheet(wb, C.F.Combo, "T9", startRow=5, startCol=1, header=FALSE)
+writeWorksheet(wb, CF.Combo.Stats, "T9", startRow=58, startCol=1, header=FALSE)
+## Write SOUTH
+## Write South Early
+writeWorksheet(wb, S.E.Combo, "T10", startRow=5, startCol=1, header=FALSE)
+writeWorksheet(wb, SE.Combo.Stats, "T10", startRow=50, startCol=1, header=FALSE)
+## Write South Full
+writeWorksheet(wb, S.F.Combo, "T11", startRow=5, startCol=1, header=FALSE)
+writeWorksheet(wb, SF.Combo.Stats, "T11", startRow=42, startCol=1, header=FALSE)
+
+saveWorkbook(wb)
+```
