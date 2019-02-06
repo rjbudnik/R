@@ -1,0 +1,170 @@
+---
+title: "**2-Year Analysis**"
+author: '`r params$author`'
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float:
+      collapsed: true
+params:
+  author:
+    label: "Analysis Conducted By:"
+    value: Ryan Budnik
+    input: select
+    choices: [Ryan Budnik, Graydon Marzen, Jim Rouse, Ryan Frasch, Shawn Bryant]
+  data1:
+    label: "Current Year's Dataset:"
+    value: 18CC.csv
+    input: select
+    choices: [18CC.csv]
+  data2:
+    label: "Preivous Year's Dataset:"
+    value: 17CC.csv
+    input: select
+    choices: [17CC.csv]
+  exp1:
+    label: "Experiment Current Year:"
+    value: C81A
+    input: select
+    choices: [C81A,	C81B,	C82A, C82B,	C83A,	C83B]
+  exp2:
+    label: "Experiment Previous Year:"
+    value: C71A
+    input: select
+    choices: [C71A,	C71B,	C72A,	C72B,	C73A,	C73B]
+  year:
+    label: "Year"
+    value: 2018
+    input: select
+    choices: [2018, 2017, 2016]
+  district:
+    label: "District:"
+    value: Northern
+    input: select
+    choices: [Northern, Central, Southern]
+  season:
+    label: "Season Length:"
+    value: Early
+    input: select
+    choices: [Early, Full]
+---
+
+```{r logo, cache=TRUE, echo=FALSE}
+htmltools::img(src = knitr::image_uri(file.path("C:","Users","rjbudnik","Documents", "DistrictAnalysis","inst","rmarkdown","templates","report","district","ICIA_logo.png")), alt = 'logo', style = 'position:absolute; top:0; right:0; padding:10px;')
+```
+
+---
+
+# Overview:
+The following report renders a 2-Year mixed model analysis with corresponding figures for the *`r params$year` `r params$district` District `r params$season`-season Test*, **`r params$exp`**.
+
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(randomcoloR)
+library(car)
+library(predictmeans)
+library(shiny)
+library(shinythemes)
+library(psych)
+library(emmeans)
+library(MuMIn)
+```
+
+- Corn Coversion Factor = **8.067**
+- Bean Conversion Factor = **7.779**
+
+# Current Year's Data
+
+```{r Current.Year.Data, echo = FALSE}
+## Import Current Years Dataset::
+df.C<-read.csv(c(params$data1),header=T,na.strings=c("", " ", "NA"))
+
+## ADD Yield::
+CCF<-8.067
+df.C<-df.C%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+
+## Subset *experiment* specific data of interest:
+data.C<-filter(df.C, exp==c(params$exp1))
+
+###Reduce data to include only neccessary variables:: 
+data.C<-data.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+
+## Set Factors:
+data.C$book.name<-factor(data.C$book.name)
+data.C$exp<-factor(data.C$exp)
+data.C$plot<-factor(data.C$plot)
+data.C$rep<-factor(data.C$rep)
+data.C$entry<-factor(data.C$entry)
+data.C$pass<-factor(data.C$pass)
+data.C$rng<-factor(data.C$rng)
+
+###Variance, Mean & IQRS:
+# Entry.Variance<-var(as.numeric(data.C$entry))
+# avg.yld <- mean(data.C$yld, na.rm = TRUE)
+# max.yld <- quantile(data.C$yld,0.75, na.rm=TRUE) + (IQR(data.C$yld, na.rm=TRUE) * 1.5 )
+# min.yld <- quantile(data.C$yld,0.25, na.rm=TRUE) - (IQR(data.C$yld, na.rm=TRUE) * 1.5 )
+```
+
+# Previous Year's Data
+
+```{r Previous.Year.Data, echo = FALSE}
+## Import Current Years Dataset::
+df.P<-read.csv(c(params$data2),header=T,na.strings=c("", " ", "NA"))
+
+## ADD Yield::
+CCF<-8.067
+df.P<-df.P%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+
+## Subset *experiment* specific data of interest:
+data.P<-filter(df.P, exp==c(params$exp2))
+
+###Reduce data to include only neccessary variables:: 
+data.P<-data.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+
+
+## Set Factors:
+data.P$book.name<-factor(data.P$book.name)
+data.P$exp<-factor(data.P$exp)
+data.P$plot<-factor(data.P$plot)
+data.P$rep<-factor(data.P$rep)
+data.P$entry<-factor(data.P$entry)
+data.P$pass<-factor(data.P$pass)
+data.P$rng<-factor(data.P$rng)
+
+# ###Variance, Mean & IQRS:
+# Entry.Variance<-var(as.numeric(data.P$entry))
+# avg.yld <- mean(data.P$yld, na.rm = TRUE)
+# max.yld <- quantile(data.P$yld,0.75, na.rm=TRUE) + (IQR(data.P$yld, na.rm=TRUE) * 1.5 )
+# min.yld <- quantile(data.P$yld,0.25, na.rm=TRUE) - (IQR(data.P$yld, na.rm=TRUE) * 1.5 )
+```
+
+## Combine 2-Years
+
+```{r combine.Years, echo=FALSE}
+## Unique Current Year Codes:
+C.C<-as.character(unique(data.C$code))
+## 2-Years Combined:
+data<-rbind((data.C),(data.P))
+```
+
+# Mixed Model Analyses: {.tabset .tabset-fade}
+
+**YIELD = G + E + Rep(E)**
+
+* RANDOM = + Pass(Rep(E)) + Rng(Rep(E)) + G(E)
+
+```{r 2.year.model, echo=FALSE}
+model<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=data, REML=TRUE)
+
+options(scipen=6)
+LSM.Code<-ls_means(model, which="code")
+paged_table(LSM.Code)
+```
