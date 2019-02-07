@@ -1,0 +1,250 @@
+---
+title: "**Single Location Export**"
+author: '`r params$author`'
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float:
+      collapsed: true
+params:
+  author:
+    label: "Analysis Conducted By:"
+    value: Ryan Budnik
+    input: select
+    choices: [Ryan Budnik, Graydon Marzen, Jim Rouse, Ryan Frasch, Shawn Bryant]
+  data:
+    label: "Yearly Dataset:"
+    value: 18CC.csv
+    input: select
+    choices: [18CC.csv]
+  book.name:
+    label: "Book Name:"
+    value: CF811
+    input: select
+    choices: [CF811,CF812,CF813,CF814,CF815,CF821,CF822,CF823,CF824,CF825,CF831,CF832,CF833,                  CF834,CF835]
+  exp:
+    label: "Experiment:"
+    value: C81A
+    input: select
+    choices: [C81A,C81B,C82A,C82B,C83A,C83B]
+  list:
+    label: "Entry List (EL):"
+    value: CEL18.csv
+    input: select
+    choices: [CEL18.csv]
+  storage:
+    label: "Cold Storage (CS):"
+    value: CCS18.csv
+    input: select
+    choices: [CCS18.csv]
+  year:
+    label: "Year"
+    value: 2018
+    input: select
+    choices: [2016, 2017, 2018]
+---
+
+# Overview:
+
+The following report renders the complete **District_Corn_Web** pre-formatted Excel tables, with the yearly (`r params$year`) cleaned data for Internet publication purposes.
+
+Un-used locations must be physically commented out to remove them from tables.
+
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
+library(dplyr)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(predictmeans)
+library(shiny)
+library(shinythemes)
+library(emmeans)
+library(sjstats)
+library(rJava)
+library(XLConnect)
+```
+
+# Global Parameters:
+
+```{r Global_Parameters, echo=FALSE, comment=NA, message=FALSE}
+## Global Parameters:
+  ## Converison Factor:
+CCF<-8.067
+  ## Yearly Price Per Bushel Average:
+PPB<-3.25
+```
+
+# Entry List (EL)
+
+```{r Entry_List_Data, echo=FALSE, comment=NA, message=FALSE}
+## Entry List Data Import::
+EL<-read.csv(c(params$list),header=T)
+
+## Select Test:
+data.EL<-filter(EL, book.name==c(params$exp))
+
+## Remove "private" duplicated lines:
+data.EL<-data.EL[!data.EL$private == "Yes", ]
+
+## Select specific columns:
+data.EL<-data.EL%>%select("company", "hybrid", "pedid", "code", "entry")
+```
+
+# Cold Storage (CS)
+
+```{r Cold_Storage_Data, echo=FALSE, comment=NA, message=FALSE}
+## Import Cold Storage Data:
+CS<-read.csv(c(params$storage),header=T)
+
+## Subset Cold Storage using EL PedID:
+data.CS<-subset(CS, pedid %in% data.EL$pedid)
+## Select specific columns of interest:
+data.CS<-data.CS%>%select("pedid", "seedtrt", "traitpkg", "herbtech")
+```
+
+# Combine EL & CS
+
+```{r CS_EL_COMBO, echo=FALSE, comment=NA, message=FALSE}
+## Combine Cold Storage & Entry Lists
+data.Combo<-left_join(data.EL, data.CS)
+
+## Set "Entry" as Factors:
+data.Combo$entry<-factor(data.Combo$entry)
+```
+
+# District Data:
+
+```{r District_Data_Import, echo=FALSE, comment=NA, message=FALSE}
+## ALLYearly District Data:
+district.all<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+
+## Add Yield Values::
+district.all<-district.all%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+
+## Subset Test District of Interest:
+data.dis<-filter(district.all, exp==c(params$exp))
+```
+
+
+# Single Location Data:
+
+```{r North_Single_Data, echo=FALSE, comment=NA, message=FALSE}
+## Subset single location of interest:
+data.single<-filter(data.dis, book.name==c(params$book.name) & exp==c(params$exp))
+```
+
+# Single Location Factors
+
+```{r Set_Single_Loc_Factors, echo=FALSE, comment=NA, message=FALSE}
+## Set single location data factors:
+data.single$book.name<-factor(data.single$book.name)
+data.single$exp<-factor(data.single$exp)
+data.single$entry<-factor(data.single$entry)
+data.single$ped.id<-factor(data.single$ped.id)
+data.single$code<-factor(data.single$code)
+data.single$rng<-factor(data.single$rng)
+data.single$pass<-factor(data.single$pass)
+data.single$rep<-factor(data.single$rep)
+```
+
+# Single Location Models
+
+``` {r North_Models, echo=FALSE, comment=NA, message=FALSE}
+## Mixed model::
+model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=data.single, REML=TRUE)
+```
+
+# Single Location LS-Means (LSMs)
+
+```{r North.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
+## Single Location LSMs:
+data.LSM1<-as.data.frame(emmeans(model1, spec="entry"))
+data.LSM1<-data.LSM1%>%select(entry, emmean)
+names(data.LSM1)[2]<-c("ls.yld")
+```
+
+
+# Yield Percent of Mean
+
+```{r Percent_of__Means, echo=FALSE, comment=NA, message=FALSE}
+## Calculate mean of LSMs
+ls.Mean<-mean(data.LSM1$ls.yld)
+
+## Create new column with percent of yield mean
+data.LSM1<-data.LSM1%>%mutate(percent.yield = ((ls.yld/ls.Mean)*100))
+```
+
+# Combine IDs with LSMs & Percent Yields
+
+```{r Combine_ID_LSM, echo=FALSE, comment=NA, message=FALSE}
+## Set "Entry" as Factors:
+data.LSM1$entry<-factor(data.LSM1$entry)
+
+## Combine LSMs & % Ylds with Entry ID:
+Combo<-left_join(data.Combo, data.LSM1)
+```
+
+# Add Rankings
+
+```{r Yield_Rankings, echo=FALSE, comment=NA, message=FALSE}
+Combo$yld.rank<-as.numeric(rank(-Combo$ls.yld))
+```
+
+# Moisture Model & LSMs:
+
+```{r Moisture, echo=FALSE, comment=NA, message=FALSE}
+## Mixed model for generating LS Means for MOISTURE:
+model.moist<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=data.single, REML=TRUE)
+data.moist<-as.data.frame(emmeans(model.moist, spec="entry"))
+data.moist<-data.moist%>%select(entry, emmean)
+names(data.moist)[2]<-c("moist")
+
+## Combine with Main Table
+Combo<-left_join(Combo, data.moist)
+```
+
+# Lodging Models & LSMs:
+
+```{r Lodging, echo=FALSE, comment=NA, message=FALSE}
+## Root Lodging
+model.rtldg<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=data.single, REML=TRUE)
+LSM.rtldg<-as.data.frame(emmeans(model.rtldg, spec="entry"))
+LSM.rtldg<-LSM.rtldg%>%select(entry, emmean)
+names(LSM.rtldg)[2]<-c("rtldg")
+
+## Stalk Lodging
+model.skldg<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=data.single, REML=TRUE)
+LSM.skldg<-as.data.frame(emmeans(model.skldg, spec="entry"))
+LSM.skldg<-LSM.skldg%>%select(entry, emmean)
+names(LSM.skldg)[2]<-c("skldg")
+
+## Combine Lodging
+LDG<-left_join(LSM.rtldg, LSM.skldg)
+
+## Combine with Main Table
+Combo<-left_join(Combo, LDG)
+```
+
+# AGV Calculations
+
+```{r AGV, echo=FALSE, comment=NA, message=FALSE}
+## AGV Calculations:
+AGV.data<-Combo
+AGV.data$yld<-as.numeric(AGV.data$yld)
+AGV.data$moist<-as.numeric(AGV.data$moist)
+AGV.data<-AGV.data%>%mutate(wetyield=((yld*84.5)/(100-moist)))
+AGV.data<-AGV.data%>%mutate(moistureshrink=(1.183*(moist-15.5)))
+AGV.data<-AGV.data%>%mutate(totalshrink=(moistureshrink+0.5))
+AGV.data<-AGV.data%>%mutate(dryyield=(((100-totalshrink)/100)*wetyield))
+AGV.data<-AGV.data%>%mutate(grossvalue=(dryyield*PPB))
+AGV.data<-AGV.data%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
+AGV.data<-AGV.data%>%mutate(AGV=(grossvalue-dryingcost))
+AGV.data<-AGV.data[,c(3,10)]
+
+## Combine with Main Table
+Final<-left_join(Combo, AGV.data)
+```
