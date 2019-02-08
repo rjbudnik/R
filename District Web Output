@@ -875,46 +875,35 @@ SF.LSMs<-cbind(S.F.LSM2, S.F.LSM3, S.F.LSM4, S.F.LSM5)
 # E & W Yield Data
 
 ```{r NE.NW.Data, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
-## NORTH
-## Excluding Location 3, LOCATION DROPPED!
-NEast<-c((paste("CF", c(YR), "11", sep="")), (paste("CF", c(YR), "12", sep="")))
-NWest<-c((paste("CF", c(YR), "14", sep="")), (paste("CF", c(YR), "15", sep="")))
-## CENTRAL
-## Excluding Location 1, LOCATION DROPPED!
-CEast<-c((paste("CF", c(YR), "22", sep="")), (paste("CF", c(YR), "23", sep="")))
-CWest<-c((paste("CF", c(YR), "23", sep="")), (paste("CF", c(YR), "24", sep="")), (paste("CF", c(YR), "25", sep="")))
-## SOUTH
-## Excluding Location 1, LOCATION DROPPED!
-SEast<-c((paste("CF", c(YR), "32", sep="")), (paste("CF", c(YR), "33", sep="")))
-SWest<-c((paste("CF", c(YR), "33", sep="")), (paste("CF", c(YR), "34", sep="")), (paste("CF", c(YR), "35", sep="")))
+# E & W Yield Data
 
-
+```{r NE.NW.Data, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
 ## NORTH
 ## Excluding Location 3, LOCATION DROPPED!
 ## North Early:
-NE.East<-filter(N_Early, book.name==NEast)
-NE.West<-filter(N_Early, book.name==NWest)
+NE.East<-filter(N_Early, book.name==c(paste("CF", c(YR), "11", sep="")) | book.name==c(paste("CF", c(YR), "12", sep="")))
+NE.West<-filter(N_Early, book.name==c(paste("CF", c(YR), "14", sep="")) | book.name==c(paste("CF", c(YR), "15", sep="")))
 ## North Full:
-NF.East<-filter(N_Full, book.name==NEast)
-NF.West<-filter(N_Full, book.name==NWest)
+NF.East<-filter(N_Full, book.name==c(paste("CF", c(YR), "11", sep="")) | book.name==c(paste("CF", c(YR), "12", sep="")))
+NF.West<-filter(N_Full, book.name==c(paste("CF", c(YR), "11", sep="")) | book.name==c(paste("CF", c(YR), "12", sep="")))
 
 ## CENTRAL
 ## Excluding Location 1, LOCATION DROPPED!
 ## Central Early:
-CE.East<-filter(C_Early, book.name==CEast)
-CE.West<-filter(C_Early, book.name==CWest)
+CE.East<-filter(C_Early, book.name==c(paste("CF", c(YR), "22", sep="")) | book.name==c(paste("CF", c(YR), "23", sep="")))
+CE.West<-filter(C_Early, book.name==c(paste("CF", c(YR), "23", sep="")) | book.name==c(paste("CF", c(YR), "24", sep="")) | book.name==c(paste("CF", c(YR), "25", sep="")))
 ## Central Full:
-CF.East<-filter(C_Full, book.name==CEast)
-CF.West<-filter(C_Full, book.name==CWest)
+CF.East<-filter(C_Full, book.name==c(paste("CF", c(YR), "22", sep="")) | book.name==c(paste("CF", c(YR), "23", sep="")))
+CF.West<-filter(C_Full, book.name==c(paste("CF", c(YR), "23", sep="")) | book.name==c(paste("CF", c(YR), "24", sep="")) | book.name==c(paste("CF", c(YR), "25", sep="")))
 
 ## SOUTH
 ## Excluding Location 1, LOCATION DROPPED!
 ## South Early:
-SE.East<-filter(S_Early, book.name==SEast)
-SE.West<-filter(S_Early, book.name==SWest)
+SE.East<-filter(S_Early, book.name==c(paste("CF", c(YR), "32", sep="")) | book.name==c(paste("CF", c(YR), "33", sep="")))
+SE.West<-filter(S_Early, book.name==c(paste("CF", c(YR), "33", sep="")) | book.name==c(paste("CF", c(YR), "34", sep="")) | book.name==c(paste("CF", c(YR), "35", sep="")))
 ## South Full:
-SF.East<-filter(S_Full, book.name==SEast)
-SF.West<-filter(S_Full, book.name==SWest)
+SF.East<-filter(S_Full, book.name==c(paste("CF", c(YR), "32", sep="")) | book.name==c(paste("CF", c(YR), "33", sep="")))
+SF.West<-filter(S_Full, book.name==c(paste("CF", c(YR), "33", sep="")) | book.name==c(paste("CF", c(YR), "34", sep="")) | book.name==c(paste("CF", c(YR), "35", sep="")))
 ```
 
 ## E & W Arithmetic Means
