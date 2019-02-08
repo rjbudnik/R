@@ -105,6 +105,7 @@ data.C$rep<-factor(data.C$rep)
 data.C$entry<-factor(data.C$entry)
 data.C$pass<-factor(data.C$pass)
 data.C$rng<-factor(data.C$rng)
+data.C$code<-factor(data.C$code)
 
 ###Variance, Mean & IQRS:
 # Entry.Variance<-var(as.numeric(data.C$entry))
@@ -138,6 +139,7 @@ data.P$rep<-factor(data.P$rep)
 data.P$entry<-factor(data.P$entry)
 data.P$pass<-factor(data.P$pass)
 data.P$rng<-factor(data.P$rng)
+data.P$code<-factor(data.P$code)
 
 # ###Variance, Mean & IQRS:
 # Entry.Variance<-var(as.numeric(data.P$entry))
@@ -149,9 +151,7 @@ data.P$rng<-factor(data.P$rng)
 ## Combine 2-Years
 
 ```{r combine.Years, echo=FALSE}
-## Unique Current Year Codes:
-C.C<-as.character(unique(data.C$code))
-## 2-Years Combined:
+## Combine 2-Year datasets:
 data<-rbind((data.C),(data.P))
 ```
 
@@ -162,9 +162,125 @@ data<-rbind((data.C),(data.P))
 * RANDOM = + Pass(Rep(E)) + Rng(Rep(E)) + G(E)
 
 ```{r 2.year.model, echo=FALSE}
+## Linear Mixed Model by 2-Year code
 model<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=data, REML=TRUE)
 
-options(scipen=6)
-LSM.Code<-ls_means(model, which="code")
-paged_table(LSM.Code)
+## LSMs by code
+LSM.Code<-as.data.frame(emmeans(model, spec="code"))
+LSM.Code<-LSM.Code%>%select(code, emmean)
+names(LSM.Code)[2]<-c("ls.yld")
+
+## Subset codes that appear in previous year:
+# data.LSM1<-subset(LSM.Code, code %in% data.C$code)
+# data.LSM2<-subset(data.LSM1, code %in% data.P$code)
 ```
+
+## ANOVA Tables
+
+A small *P-value*, and a large *F-statistic* constitute grounds for null hypothesis rejection.
+
+ANOVA uses the *F-statistic* to determine whether the variability between group means is larger than the variability of the observations within the groups. If that ratio is sufficiently large, you can conclude that not all the means are equal. A low *p-value* suggests that your sample provides enough evidence that you can reject the null hypothesis for the entire population.
+
+* The **null hypothesis** states that the model with no independent variables fits the data as well as your model.
+
+* The **alternative hypothesis** says that your model fits the data better than the intercept-only model.
+
+
+**Type III** Analysis of Variance Table with Satterthwaite's method:
+
+```{r modelanova2, echo = FALSE}
+options(scipen=3)
+paged_table(anova(model))
+```
+
+## Random-Effects Table
+
+```{r model.step.random, echo=FALSE, message=FALSE}
+options(scipen=6)
+paged_table(ranova(model))
+```
+
+
+## CV, RMSE & R²
+
+**Coefficient of Vairance (CV):**
+
+The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. 
+
+* **SMALLER IS BETTER!** (i.e. The model with the smaller CV has predicted values that are closer to the actual values.)
+
+
+**Root Mean Square Error(RMSE):**
+
+*RMSE is an absolute measure of fit.*
+
+The standard deviation of the residuals. RMSE physically measures how spread out these residuals are from the line of best fit. The RMSE is a measure of the average deviation of the estimates from the observed values.
+
+* **SMALLER IS BETTER!** (i.e. lower values of RMSE indicate better fit.)
+
+
+**R-squared (R²):**
+
+*R² is a relative measure of fit.*
+
+R² is the proportional improvement in prediction from the regression model, compared to the mean model. R² indicates the goodness of fit of the model. The fraction of the total sum of squares that is explained by the regression. Scaled from 0 to 1.
+
+* **LARGER IS BETTER!** (i.e. values closer to 1 indicate better fit.)
+
+```{r model1.cv.rmse, comment=NA, echo = FALSE, message=FALSE}
+## CV from "LSDer" package:
+mod1.cv<-LSDer::CVer(model)
+## RMSE
+mod1.rmse<-sqrt(mean(residuals(model)^2))
+## R-squared
+mod1.R2<-r.squaredLR(model)
+
+## New Data Table (CV, RMSE, & R2)
+CV.RMSE.R2.Table1<-data.frame("CV" = c(mod1.cv), "RMSE" = c(mod1.rmse), "R²" = c(mod1.R2))
+paged_table(CV.RMSE.R2.Table1)
+```
+
+## Fisher's LSD
+
+**Fisher's Least Significant Differnce (LSD):**
+
+Least significant difference is used to compare means of different treatments that have an equal number of replications.
+
+* **The yields must be greater than the LSD value between any two treatments to be considered significant.**
+
+``` {r model1.predict.25, comment=NA, echo = FALSE, fig.width=10, fig.height=6.5}
+## Average LSD calculation from "predictmeans" package:
+pre1<-predictmeans(model, "code", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+## Select Avg. LSD Value from object
+LSDpre1<-pre1[["LSD"]][["Aveg.LSD"]]
+
+## New LSD Table
+LSD.Table1<-data.frame("."="Average LSD at 75% Confidence Level =", "VALUE" = as.factor(c(LSDpre1)))
+paged_table(LSD.Table1)
+
+## MPlot
+pre1.1<-predictmeans(model, "code", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=TRUE, newwd=FALSE)
+```
+
+```{r model1.lsdplot, echo=FALSE, fig.width=10, fig.height=6.5}
+## LSD PPlot
+pre1.2<-predictmeans(model, "code", pairwise=TRUE, level=0.25, pplot=TRUE, mplot=FALSE, newwd=FALSE)
+```
+
+
+# Outlier Detection: {.tabset .tabset-fade}
+
+## Normal Q-Q Plot
+
+QQ plot (or quantile-quantile plot) draws the correlation between a given sample and the normal distribution. A 45-degree reference line is also plotted. QQ plots are used to visually check the normality of the data.
+
+```{r qq, echo = FALSE, fig.width=9, warning = FALSE}
+qq<-qqnorm(resid(model), pch=23, bg="black")
+qqline(resid(model), col="red", lwd=c(2))
+text(qq, rownames(data), cex=0.8, col= "blue4", pos=4, offset = 0.5)
+text(qq, label=(data$code), cex=0.8, col= "red4", pos=4, offset = 1.6)
+```
+
+1. Data Points = Residuals for linear mixed model.
+2. <span style="color:blue">Blue</span> Labels = **Row** number.
+3. <span style="color:red">Red</span> Labels = **Entry** number.
