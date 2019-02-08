@@ -199,18 +199,23 @@ SF<-filter(district.all, exp==paste("C", c(YR), "3B", sep=""))
 
 # Single Location Data:
 
-## North (1)
+## North (1) Early (A)
 
-```{r North_Single_Data, echo=FALSE, comment=NA, message=FALSE}
-## NORTH:
+```{r North_Early_Single_Data, echo=FALSE, comment=NA, message=FALSE}
+## NORTH EARLY:
 ## Location 3 NOT Included:
-## North Early Locations::
 NE.F1<-filter(district.all, book.name==paste("CF", c(YR), "11", sep="") & exp==paste("C", c(YR), "1A", sep=""))
 NE.F2<-filter(district.all, book.name==paste("CF", c(YR), "12", sep="") & exp==paste("C", c(YR), "1A", sep=""))
 # NE.F3<-filter(district.all, book.name==paste("CF", c(YR), "13", sep="") & exp==paste("C", c(YR), "1A", sep=""))
 NE.F4<-filter(district.all, book.name==paste("CF", c(YR), "14", sep="") & exp==paste("C", c(YR), "1A", sep=""))
 NE.F5<-filter(district.all, book.name==paste("CF", c(YR), "15", sep="") & exp==paste("C", c(YR), "1A", sep=""))
-### North Full Locations::
+```
+
+## North (1) Full (B)
+
+```{r North_Full_Single_Data, echo=FALSE, comment=NA, message=FALSE}
+## NORTH FULL:
+## Location 3 NOT Included:
 NF.F1<-filter(district.all, book.name==paste("CF", c(YR), "11", sep="") & exp==paste("C", c(YR), "1B", sep=""))
 NF.F2<-filter(district.all, book.name==paste("CF", c(YR), "12", sep="") & exp==paste("C", c(YR), "1B", sep=""))
 # NF.F3<-filter(district.all, book.name==paste("CF", c(YR), "13", sep="") & exp==paste("C", c(YR), "1B", sep=""))
@@ -218,18 +223,23 @@ NF.F4<-filter(district.all, book.name==paste("CF", c(YR), "14", sep="") & exp==p
 NF.F5<-filter(district.all, book.name==paste("CF", c(YR), "15", sep="") & exp==paste("C", c(YR), "1B", sep=""))
 ```
 
-## Central (2)
+## Central (2) Early (A)
 
-```{r Central_Single_Data, echo=FALSE, comment=NA, message=FALSE}
-## CENTRAL:
+```{r Central_Early_Single_Data, echo=FALSE, comment=NA, message=FALSE}
+## CENTRAL EARLY:
 ## Location 1 NOT Included:
-## Central Early Locations::
 # CE.F1<-filter(district.all, book.name==paste("CF", c(YR), "21", sep="") & exp==paste("C", c(YR), "2A", sep=""))
 CE.F2<-filter(district.all, book.name==paste("CF", c(YR), "22", sep="") & exp==paste("C", c(YR), "2A", sep=""))
 CE.F3<-filter(district.all, book.name==paste("CF", c(YR), "23", sep="") & exp==paste("C", c(YR), "2A", sep=""))
 CE.F4<-filter(district.all, book.name==paste("CF", c(YR), "24", sep="") & exp==paste("C", c(YR), "2A", sep=""))
 CE.F5<-filter(district.all, book.name==paste("CF", c(YR), "25", sep="") & exp==paste("C", c(YR), "2A", sep=""))
-### Central Full Locations::
+```
+
+## Central (2) Full (B)
+
+```{r Central_Full_Single_Data, echo=FALSE, comment=NA, message=FALSE}
+## CENTRAL FULL:
+## Location 1 NOT Included:
 # CF.F1<-filter(district.all, book.name==paste("CF", c(YR), "21", sep="") & exp==paste("C", c(YR), "2B", sep=""))
 CF.F2<-filter(district.all, book.name==paste("CF", c(YR), "22", sep="") & exp==paste("C", c(YR), "2B", sep=""))
 CF.F3<-filter(district.all, book.name==paste("CF", c(YR), "23", sep="") & exp==paste("C", c(YR), "2B", sep=""))
@@ -237,18 +247,23 @@ CF.F4<-filter(district.all, book.name==paste("CF", c(YR), "24", sep="") & exp==p
 CF.F5<-filter(district.all, book.name==paste("CF", c(YR), "25", sep="") & exp==paste("C", c(YR), "2B", sep=""))
 ```
 
-## South (3)
+## South (3) Early (A)
 
-```{r South_Single_Data, echo=FALSE, comment=NA, message=FALSE}
-## SOUTH:
+```{r South_Early_Single_Data, echo=FALSE, comment=NA, message=FALSE}
+## SOUTH EARLY:
 ## Location 1 NOT Included:
-## South Early Locations::
 # SE.F1<-filter(district.all, book.name==paste("CF", c(YR), "31", sep="") & exp==paste("C", c(YR), "3A", sep=""))
 SE.F2<-filter(district.all, book.name==paste("CF", c(YR), "32", sep="") & exp==paste("C", c(YR), "3A", sep=""))
 SE.F3<-filter(district.all, book.name==paste("CF", c(YR), "33", sep="") & exp==paste("C", c(YR), "3A", sep=""))
 SE.F4<-filter(district.all, book.name==paste("CF", c(YR), "34", sep="") & exp==paste("C", c(YR), "3A", sep=""))
 SE.F5<-filter(district.all, book.name==paste("CF", c(YR), "35", sep="") & exp==paste("C", c(YR), "3A", sep=""))
-### South Full Locations::
+```
+
+## South (3) Full (B)
+
+```{r South_Full_Single_Data, echo=FALSE, comment=NA, message=FALSE}
+## SOUTH FULL:
+## Location 1 NOT Included:
 # SF.F1<-filter(district.all, book.name==paste("CF", c(YR), "31", sep="") & exp==paste("C", c(YR), "3B", sep=""))
 SF.F2<-filter(district.all, book.name==paste("CF", c(YR), "32", sep="") & exp==paste("C", c(YR), "3B", sep=""))
 SF.F3<-filter(district.all, book.name==paste("CF", c(YR), "33", sep="") & exp==paste("C", c(YR), "3B", sep=""))
@@ -519,18 +534,23 @@ SF.F5$rep<-factor(SF.F5$rep)
 
 # Single Location Models
 
-## North (1)
+## North (1) Early (A)
 
-``` {r North_Models, echo=FALSE, comment=NA, message=FALSE}
-## NORTH
+``` {r North_Early_Models, echo=FALSE, comment=NA, message=FALSE}
+## NORTH EARLY
 ## Location 3 NOT Included:
-## North Early:
 NE.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F1, REML=TRUE)
 NE.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F2, REML=TRUE)
 # NE.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F3, REML=TRUE)
 NE.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F4, REML=TRUE)
 NE.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F5, REML=TRUE)
-## North Full:
+```
+
+## North (1) Full (B)
+
+``` {r North_Full_Models, echo=FALSE, comment=NA, message=FALSE}
+## NORTH FULL
+## Location 3 NOT Included:
 NF.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F1, REML=TRUE)
 NF.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F2, REML=TRUE)
 # NF.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F3, REML=TRUE)
@@ -538,18 +558,23 @@ NF.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F4
 NF.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F5, REML=TRUE)
 ```
 
-## Central (2)
+## Central (2) Early (A)
 
-```{r Central_Models, echo=FALSE, comment=NA, message=FALSE}
-## CENTRAL
+```{r Central_Early_Models, echo=FALSE, comment=NA, message=FALSE}
+## CENTRAL EARLY
 ## Location 1 NOT Included:
-## Central Early:
 # CE.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F1, REML=TRUE)
 CE.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F2, REML=TRUE)
 CE.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F3, REML=TRUE)
 CE.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F4, REML=TRUE)
 CE.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F5, REML=TRUE)
-## Central Full:
+```
+
+## Central (2) Full (B)
+
+```{r Central_Full_Models, echo=FALSE, comment=NA, message=FALSE}
+## CENTRAL FULL
+## Location 1 NOT Included:
 # CF.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F1, REML=TRUE)
 CF.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F2, REML=TRUE)
 CF.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F3, REML=TRUE)
@@ -557,18 +582,23 @@ CF.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F4
 CF.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F5, REML=TRUE)
 ```
 
-## South (3)
+## South (3) Early (A)
 
 ```{r South_Models, echo=FALSE, comment=NA, message=FALSE}
-## SOUTH
+## SOUTH EARLY
 ## Location 1 NOT Included:
-## South Early:
 # SE.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F1, REML=TRUE)
 SE.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F2, REML=TRUE)
 SE.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F3, REML=TRUE)
 SE.model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F4, REML=TRUE)
 SE.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F5, REML=TRUE)
-## South Full:
+```
+
+## South (3) Full (B)
+
+```{r South_Full_Models, echo=FALSE, comment=NA, message=FALSE}
+## SOUTH FULL
+## Location 1 NOT Included:
 # SF.model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F1, REML=TRUE)
 SF.model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F2, REML=TRUE)
 SF.model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F3, REML=TRUE)
@@ -577,14 +607,14 @@ SF.model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F5
 ```
 
 
+
 # Single Location LS-Means (LSMs)
 
-## North (1)
+## North (1) Early (A)
 
 ```{r North.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
-## NORTH
+## NORTH EARLY
 ## Location 3 NOT Included:
-## North Early:
 N.E.LSM1<-as.data.frame(emmeans(NE.model1, spec="entry"))
 N.E.LSM1<-N.E.LSM1%>%select(entry, emmean)
 names(N.E.LSM1)[2]<-c("F1")
@@ -600,7 +630,13 @@ names(N.E.LSM4)[2]<-c("F4")
 N.E.LSM5<-as.data.frame(emmeans(NE.model5, spec="entry"))
 N.E.LSM5<-N.E.LSM5%>%select(entry, emmean)
 names(N.E.LSM5)[2]<-c("F5")
-## North Full:
+```
+
+## North (1) Full (B)
+
+```{r North.Full.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
+## NORTH FULL
+## Location 3 NOT Included:
 N.F.LSM1<-as.data.frame(emmeans(NF.model1, spec="entry"))
 N.F.LSM1<-N.F.LSM1%>%select(entry, emmean)
 names(N.F.LSM1)[2]<-c("F1")
@@ -618,12 +654,11 @@ N.F.LSM5<-N.F.LSM5%>%select(entry, emmean)
 names(N.F.LSM5)[2]<-c("F5")
 ```
 
-## Central (2)
+## Central (2) Early (A)
 
-```{r Central.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
-## CENTRAL
+```{r Central. Early.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
+## CENTRAL EARLY
 ## Location 1 NOT Included:
-## Central Early:
 # C.E.LSM1<-as.data.frame(emmeans(CE.model1, spec="entry"))
 # C.E.LSM1<-C.E.LSM1%>%select(entry, emmean)
 # names(C.E.LSM1)[2]<-c("F1")
@@ -639,7 +674,13 @@ names(C.E.LSM4)[2]<-c("F4")
 C.E.LSM5<-as.data.frame(emmeans(CE.model5, spec="entry"))
 C.E.LSM5<-C.E.LSM5%>%select(entry, emmean)
 names(C.E.LSM5)[2]<-c("F5")
-## Central Full:
+```
+
+## Central (2) Full (B)
+
+```{r Central.Full.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
+## CENTRAL FULL
+## Location 1 NOT Included:
 # C.F.LSM1<-as.data.frame(emmeans(CF.model1, spec="entry"))
 # C.F.LSM1<-C.F.LSM1%>%select(entry, emmean)
 # names(C.F.LSM1)[2]<-c("F1")
@@ -657,12 +698,11 @@ C.F.LSM5<-C.F.LSM5%>%select(entry, emmean)
 names(C.F.LSM5)[2]<-c("F5")
 ```
 
-## South (3)
+## South (3) Early (A)
 
-```{r South.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
-## SOUTH
+```{r South.Early.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
+## SOUTH EARLY
 ## Location 1 NOT Included:
-## South Early:
 # S.E.LSM1<-as.data.frame(emmeans(SE.model1, spec="entry"))
 # S.E.LSM1<-S.E.LSM1%>%select(entry, emmean)
 # names(S.E.LSM1)[2]<-c("F1")
@@ -678,7 +718,13 @@ names(S.E.LSM4)[2]<-c("F4")
 S.E.LSM5<-as.data.frame(emmeans(SE.model5, spec="entry"))
 S.E.LSM5<-S.E.LSM5%>%select(entry, emmean)
 names(S.E.LSM5)[2]<-c("F5")
-## South Full:
+```
+
+## South (3) Full (B)
+
+```{r South.Full.Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
+## SOUTH FULL
+## Location 1 NOT Included:
 # S.F.LSM1<-as.data.frame(emmeans(SF.model1, spec="entry"))
 # S.F.LSM1<-S.F.LSM1%>%select(entry, emmean)
 # names(S.F.LSM1)[2]<-c("F1")
@@ -956,145 +1002,187 @@ SF.35$yld.rank<-as.numeric(rank(-SF.35$F5))
 
 # Moisture Model & LSMs:
 
-## North (1)
+## North (1) Early (A)
 
-```{r North_Moisture, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+```{r North_Early_Moisture, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
 ## Mixed model for generating LS Means for MOISTURE:
-## NORTH
-## North Early
+## NORTH EARLY
+### Field 11
 NE.model.moist1<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F1, REML=TRUE)
 NE.moist.LSM1<-as.data.frame(emmeans(NE.model.moist1, spec="entry"))
 NE.moist.LSM1<-NE.moist.LSM1%>%select(entry, emmean)
 names(NE.moist.LSM1)[2]<-c("moist")
-
+### Field 12
 NE.model.moist2<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F2, REML=TRUE)
 NE.moist.LSM2<-as.data.frame(emmeans(NE.model.moist2, spec="entry"))
 NE.moist.LSM2<-NE.moist.LSM2%>%select(entry, emmean)
 names(NE.moist.LSM2)[2]<-c("moist")
-
+### Field 13
 # NE.model.moist3<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F3, REML=TRUE)
 # NE.moist.LSM3<-as.data.frame(emmeans(NE.model.moist3, spec="entry"))
 # NE.moist.LSM3<-NE.moist.LSM3%>%select(entry, emmean)
 # names(NE.moist.LSM3)[2]<-c("moist")
-
+### Field 14
 NE.model.moist4<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F4, REML=TRUE)
 NE.moist.LSM4<-as.data.frame(emmeans(NE.model.moist4, spec="entry"))
 NE.moist.LSM4<-NE.moist.LSM4%>%select(entry, emmean)
 names(NE.moist.LSM4)[2]<-c("moist")
-
+### Field 15
 NE.model.moist5<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F5, REML=TRUE)
 NE.moist.LSM5<-as.data.frame(emmeans(NE.model.moist5, spec="entry"))
 NE.moist.LSM5<-NE.moist.LSM5%>%select(entry, emmean)
 names(NE.moist.LSM5)[2]<-c("moist")
+```
 
-## North Full
+## North (1) Full (B)
+
+```{r North_Full_Moisture, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## NORTH FULL
+### Field 11
 NF.model.moist1<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F1, REML=TRUE)
 NF.moist.LSM1<-as.data.frame(emmeans(NF.model.moist1, spec="entry"))
 NF.moist.LSM1<-NF.moist.LSM1%>%select(entry, emmean)
 names(NF.moist.LSM1)[2]<-c("moist")
-
+### Field 12
 NF.model.moist2<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F2, REML=TRUE)
 NF.moist.LSM2<-as.data.frame(emmeans(NF.model.moist2, spec="entry"))
 NF.moist.LSM2<-NF.moist.LSM2%>%select(entry, emmean)
 names(NF.moist.LSM2)[2]<-c("moist")
-
+### Field 13
 # NF.model.moist3<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F3, REML=TRUE)
 # NF.moist.LSM3<-as.data.frame(emmeans(NF.model.moist3, spec="entry"))
 # NF.moist.LSM3<-NF.moist.LSM3%>%select(entry, emmean)
 # names(NF.moist.LSM3)[2]<-c("moist")
-
+### Field 14
 NF.model.moist4<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F4, REML=TRUE)
 NF.moist.LSM4<-as.data.frame(emmeans(NF.model.moist4, spec="entry"))
 NF.moist.LSM4<-NF.moist.LSM4%>%select(entry, emmean)
 names(NF.moist.LSM4)[2]<-c("moist")
-
+### Field 15
 NF.model.moist5<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F5, REML=TRUE)
 NF.moist.LSM5<-as.data.frame(emmeans(NF.model.moist5, spec="entry"))
 NF.moist.LSM5<-NF.moist.LSM5%>%select(entry, emmean)
 names(NF.moist.LSM5)[2]<-c("moist")
 ```
 
-## Central (2)
+## Central (2) Early (A)
 
-```{r Central_Moisture, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
-## CENTRAL
-## Central Early
+```{r Central_Early_Moisture, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## CENTRAL EARLY
+### Field 21
 # CE.model.moist1<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F1, REML=TRUE)
 # CE.moist.LSM1<-as.data.frame(emmeans(CE.model.moist1, spec="entry"))
 # CE.moist.LSM1<-CE.moist.LSM1%>%select(entry, emmean)
 # names(CE.moist.LSM1)[2]<-c("moist")
-
+### Field 22
 CE.model.moist2<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F2, REML=TRUE)
 CE.moist.LSM2<-as.data.frame(emmeans(CE.model.moist2, spec="entry"))
 CE.moist.LSM2<-CE.moist.LSM2%>%select(entry, emmean)
 names(CE.moist.LSM2)[2]<-c("moist")
-
+### Field 23
 CE.model.moist3<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F3, REML=TRUE)
 CE.moist.LSM3<-as.data.frame(emmeans(CE.model.moist3, spec="entry"))
 CE.moist.LSM3<-CE.moist.LSM3%>%select(entry, emmean)
 names(CE.moist.LSM3)[2]<-c("moist")
-
+### Field 24
 CE.model.moist4<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F4, REML=TRUE)
 CE.moist.LSM4<-as.data.frame(emmeans(CE.model.moist4, spec="entry"))
 CE.moist.LSM4<-CE.moist.LSM4%>%select(entry, emmean)
 names(CE.moist.LSM4)[2]<-c("moist")
-
+### Field 25
 CE.model.moist5<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F5, REML=TRUE)
 CE.moist.LSM5<-as.data.frame(emmeans(CE.model.moist5, spec="entry"))
 CE.moist.LSM5<-CE.moist.LSM5%>%select(entry, emmean)
 names(CE.moist.LSM5)[2]<-c("moist")
+```
 
-## Central Full
+## Central (2) Full (B)
+
+```{r Central_Full_Moisture, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## CENTRAL FULL
+### Field 21
 # CF.model.moist1<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F1, REML=TRUE)
 # CF.moist.LSM1<-as.data.frame(emmeans(CF.model.moist1, spec="entry"))
 # CF.moist.LSM1<-CF.moist.LSM1%>%select(entry, emmean)
 # names(CF.moist.LSM1)[2]<-c("moist")
-
+### Field 22
 CF.model.moist2<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F2, REML=TRUE)
 CF.moist.LSM2<-as.data.frame(emmeans(CF.model.moist2, spec="entry"))
 CF.moist.LSM2<-CF.moist.LSM2%>%select(entry, emmean)
 names(CF.moist.LSM2)[2]<-c("moist")
-
+### Field 23
 CF.model.moist3<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F3, REML=TRUE)
 CF.moist.LSM3<-as.data.frame(emmeans(CF.model.moist3, spec="entry"))
 CF.moist.LSM3<-CF.moist.LSM3%>%select(entry, emmean)
 names(CF.moist.LSM3)[2]<-c("moist")
-
+### Field 24
 CF.model.moist4<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F4, REML=TRUE)
 CF.moist.LSM4<-as.data.frame(emmeans(CF.model.moist4, spec="entry"))
 CF.moist.LSM4<-CF.moist.LSM4%>%select(entry, emmean)
 names(CF.moist.LSM4)[2]<-c("moist")
-
+### Field 225
 CF.model.moist5<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F5, REML=TRUE)
 CF.moist.LSM5<-as.data.frame(emmeans(CF.model.moist5, spec="entry"))
 CF.moist.LSM5<-CF.moist.LSM5%>%select(entry, emmean)
 names(CF.moist.LSM5)[2]<-c("moist")
 ```
 
+## South (3) Early (A)
 
-```{r South_Moisture, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
-## SOUTH
-## South Early
+```{r South_Early_Moisture, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## SOUTH EARLY
+### Field 31
 # SE.model.moist1<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F1, REML=TRUE)
 # SE.moist.LSM1<-as.data.frame(emmeans(SE.model.moist1, spec="entry"))
 # SE.moist.LSM1<-SE.moist.LSM1%>%select(entry, emmean)
 # names(SE.moist.LSM1)[2]<-c("moist")
-
+### Field 32
 SE.model.moist2<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F2, REML=TRUE)
 SE.moist.LSM2<-as.data.frame(emmeans(SE.model.moist2, spec="entry"))
 SE.moist.LSM2<-SE.moist.LSM2%>%select(entry, emmean)
 names(SE.moist.LSM2)[2]<-c("moist")
-
+### Field 33
 SE.model.moist3<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F3, REML=TRUE)
 SE.moist.LSM3<-as.data.frame(emmeans(SE.model.moist3, spec="entry"))
 SE.moist.LSM3<-SE.moist.LSM3%>%select(entry, emmean)
 names(SE.moist.LSM3)[2]<-c("moist")
-
+### Field 34
 SE.model.moist4<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F4, REML=TRUE)
 SE.moist.LSM4<-as.data.frame(emmeans(SE.model.moist4, spec="entry"))
 SE.moist.LSM4<-SE.moist.LSM4%>%select(entry, emmean)
 names(SE.moist.LSM4)[2]<-c("moist")
+### Field 35
+SE.model.moist5<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F5, REML=TRUE)
+SE.moist.LSM5<-as.data.frame(emmeans(SE.model.moist5, spec="entry"))
+SE.moist.LSM5<-SE.moist.LSM5%>%select(entry, emmean)
+names(SE.moist.LSM5)[2]<-c("moist")
+```
 
+## South (3) Full (B)
+
+```{r South_Full_Moisture, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## SOUTH FULL
+### Field 31
+# SE.model.moist1<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F1, REML=TRUE)
+# SE.moist.LSM1<-as.data.frame(emmeans(SE.model.moist1, spec="entry"))
+# SE.moist.LSM1<-SE.moist.LSM1%>%select(entry, emmean)
+# names(SE.moist.LSM1)[2]<-c("moist")
+### Field 32
+SE.model.moist2<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F2, REML=TRUE)
+SE.moist.LSM2<-as.data.frame(emmeans(SE.model.moist2, spec="entry"))
+SE.moist.LSM2<-SE.moist.LSM2%>%select(entry, emmean)
+names(SE.moist.LSM2)[2]<-c("moist")
+### Field 33
+SE.model.moist3<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F3, REML=TRUE)
+SE.moist.LSM3<-as.data.frame(emmeans(SE.model.moist3, spec="entry"))
+SE.moist.LSM3<-SE.moist.LSM3%>%select(entry, emmean)
+names(SE.moist.LSM3)[2]<-c("moist")
+### Field 34
+SE.model.moist4<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F4, REML=TRUE)
+SE.moist.LSM4<-as.data.frame(emmeans(SE.model.moist4, spec="entry"))
+SE.moist.LSM4<-SE.moist.LSM4%>%select(entry, emmean)
+names(SE.moist.LSM4)[2]<-c("moist")
+### Field 35
 SE.model.moist5<-lmer(moist~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F5, REML=TRUE)
 SE.moist.LSM5<-as.data.frame(emmeans(SE.model.moist5, spec="entry"))
 SE.moist.LSM5<-SE.moist.LSM5%>%select(entry, emmean)
@@ -1127,7 +1215,10 @@ SF.moist.LSM5<-SF.moist.LSM5%>%select(entry, emmean)
 names(SF.moist.LSM5)[2]<-c("moist")
 ```
 
+
 ## Add to Main Table
+
+### North (1)
 
 ```{r Combine_Moisture, echo=FALSE, comment=NA, message=FALSE}
 ## Combine with Main Table
@@ -1144,7 +1235,11 @@ NF.12<-left_join(NF.12, NF.moist.LSM2)
 # NF.13<-left_join(NF.13, NF.moist.LSM3)
 NF.14<-left_join(NF.14, NF.moist.LSM4)
 NF.15<-left_join(NF.15, NF.moist.LSM5)
+```
 
+### Central (2)
+
+```{r Combine_Moisture, echo=FALSE, comment=NA, message=FALSE}
 ## CENTRAL
 ## Central Early
 # CE.21<-left_join(CE.21, CE.moist.LSM1)
@@ -1158,7 +1253,11 @@ CF.22<-left_join(CF.22, CF.moist.LSM2)
 CF.23<-left_join(CF.23, CF.moist.LSM3)
 CF.24<-left_join(CF.24, CF.moist.LSM4)
 CF.25<-left_join(CF.25, CF.moist.LSM5)
+```
 
+### South (3)
+
+```{r Combine_Moisture, echo=FALSE, comment=NA, message=FALSE}
 ## SOUTH
 ## South Early
 # SE.31<-left_join(SE.31, SE.moist.LSM1)
@@ -1178,172 +1277,214 @@ SF.35<-left_join(SF.35, SF.moist.LSM5)
 
 ## Root LDG
 
-### North (1)
+### North (1) Early (A)
 
-```{r North_Root_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+```{r North_Early_Root_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
 ## Root Lodging
-## NORTH
-## North Early
+## NORTH EARLY
+### Field 11
 NE.model.rtldg1<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F1, REML=TRUE)
 NE.rtldg.LSM1<-as.data.frame(emmeans(NE.model.rtldg1, spec="entry"))
 NE.rtldg.LSM1<-NE.rtldg.LSM1%>%select(entry, emmean)
 names(NE.rtldg.LSM1)[2]<-c("rtldg")
-
+### Field 12
 NE.model.rtldg2<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F2, REML=TRUE)
 NE.rtldg.LSM2<-as.data.frame(emmeans(NE.model.rtldg2, spec="entry"))
 NE.rtldg.LSM2<-NE.rtldg.LSM2%>%select(entry, emmean)
 names(NE.rtldg.LSM2)[2]<-c("rtldg")
-
+### Field 13
 # NE.model.rtldg3<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F3, REML=TRUE)
 # NE.rtldg.LSM3<-as.data.frame(emmeans(NE.model.rtldg3, spec="entry"))
 # NE.rtldg.LSM3<-NE.rtldg.LSM3%>%select(entry, emmean)
 # names(NE.rtldg.LSM3)[2]<-c("rtldg")
-
+### Field 14
 NE.model.rtldg4<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F4, REML=TRUE)
 NE.rtldg.LSM4<-as.data.frame(emmeans(NE.model.rtldg4, spec="entry"))
 NE.rtldg.LSM4<-NE.rtldg.LSM4%>%select(entry, emmean)
 names(NE.rtldg.LSM4)[2]<-c("rtldg")
-
+### Field 15
 NE.model.rtldg5<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F5, REML=TRUE)
 NE.rtldg.LSM5<-as.data.frame(emmeans(NE.model.rtldg5, spec="entry"))
 NE.rtldg.LSM5<-NE.rtldg.LSM5%>%select(entry, emmean)
 names(NE.rtldg.LSM5)[2]<-c("rtldg")
+```
 
-## North Full
+### North (1) Full (B)
+
+```{r North_Full_Root_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## NORTH FULL
+### Field 11
 NF.model.rtldg1<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F1, REML=TRUE)
 NF.rtldg.LSM1<-as.data.frame(emmeans(NF.model.rtldg1, spec="entry"))
 NF.rtldg.LSM1<-NF.rtldg.LSM1%>%select(entry, emmean)
 names(NF.rtldg.LSM1)[2]<-c("rtldg")
-
+### Field 12
 NF.model.rtldg2<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F2, REML=TRUE)
 NF.rtldg.LSM2<-as.data.frame(emmeans(NF.model.rtldg2, spec="entry"))
 NF.rtldg.LSM2<-NF.rtldg.LSM2%>%select(entry, emmean)
 names(NF.rtldg.LSM2)[2]<-c("rtldg")
-
+### Field 13
 # NF.model.rtldg3<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F3, REML=TRUE)
 # NF.rtldg.LSM3<-as.data.frame(emmeans(NF.model.rtldg3, spec="entry"))
 # NF.rtldg.LSM3<-NF.rtldg.LSM3%>%select(entry, emmean)
 # names(NF.rtldg.LSM3)[2]<-c("rtldg")
-
+### Field 14
 NF.model.rtldg4<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F4, REML=TRUE)
 NF.rtldg.LSM4<-as.data.frame(emmeans(NF.model.rtldg4, spec="entry"))
 NF.rtldg.LSM4<-NF.rtldg.LSM4%>%select(entry, emmean)
 names(NF.rtldg.LSM4)[2]<-c("rtldg")
-
+### Field 15
 NF.model.rtldg5<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F5, REML=TRUE)
 NF.rtldg.LSM5<-as.data.frame(emmeans(NF.model.rtldg5, spec="entry"))
 NF.rtldg.LSM5<-NF.rtldg.LSM5%>%select(entry, emmean)
 names(NF.rtldg.LSM5)[2]<-c("rtldg")
 ```
 
-### Central (2)
+### Central (2) Early (A)
 
-```{r Central_Root_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
-## CENTRAL
-## Central Early
+```{r Central_Early_Root_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## CENTRAL EARLY
+### Field 21
 # CE.model.rtldg1<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F1, REML=TRUE)
 # CE.rtldg.LSM1<-as.data.frame(emmeans(CE.model.rtldg1, spec="entry"))
 # CE.rtldg.LSM1<-CE.rtldg.LSM1%>%select(entry, emmean)
 # names(CE.rtldg.LSM1)[2]<-c("rtldg")
-
+### Field 22
 CE.model.rtldg2<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F2, REML=TRUE)
 CE.rtldg.LSM2<-as.data.frame(emmeans(CE.model.rtldg2, spec="entry"))
 CE.rtldg.LSM2<-CE.rtldg.LSM2%>%select(entry, emmean)
 names(CE.rtldg.LSM2)[2]<-c("rtldg")
-
+### Field 23
 CE.model.rtldg3<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F3, REML=TRUE)
 CE.rtldg.LSM3<-as.data.frame(emmeans(CE.model.rtldg3, spec="entry"))
 CE.rtldg.LSM3<-CE.rtldg.LSM3%>%select(entry, emmean)
 names(CE.rtldg.LSM3)[2]<-c("rtldg")
-
+### Field 24
 CE.model.rtldg4<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F4, REML=TRUE)
 CE.rtldg.LSM4<-as.data.frame(emmeans(CE.model.rtldg4, spec="entry"))
 CE.rtldg.LSM4<-CE.rtldg.LSM4%>%select(entry, emmean)
 names(CE.rtldg.LSM4)[2]<-c("rtldg")
-
+### Field 25
 CE.model.rtldg5<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F5, REML=TRUE)
 CE.rtldg.LSM5<-as.data.frame(emmeans(CE.model.rtldg5, spec="entry"))
 CE.rtldg.LSM5<-CE.rtldg.LSM5%>%select(entry, emmean)
 names(CE.rtldg.LSM5)[2]<-c("rtldg")
+```
 
-## Central Full
+### Central (2) Full (B)
+
+```{r Central_Full_Root_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## CENTRAL FULL
+### Field 21
 # CF.model.rtldg1<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F1, REML=TRUE)
 # CF.rtldg.LSM1<-as.data.frame(emmeans(CF.model.rtldg1, spec="entry"))
 # CF.rtldg.LSM1<-CF.rtldg.LSM1%>%select(entry, emmean)
 # names(CF.rtldg.LSM1)[2]<-c("rtldg")
-
+### Field 22
 CF.model.rtldg2<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F2, REML=TRUE)
 CF.rtldg.LSM2<-as.data.frame(emmeans(CF.model.rtldg2, spec="entry"))
 CF.rtldg.LSM2<-CF.rtldg.LSM2%>%select(entry, emmean)
 names(CF.rtldg.LSM2)[2]<-c("rtldg")
-
+### Field 23
 CF.model.rtldg3<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F3, REML=TRUE)
 CF.rtldg.LSM3<-as.data.frame(emmeans(CF.model.rtldg3, spec="entry"))
 CF.rtldg.LSM3<-CF.rtldg.LSM3%>%select(entry, emmean)
 names(CF.rtldg.LSM3)[2]<-c("rtldg")
-
+### Field 24
 CF.model.rtldg4<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F4, REML=TRUE)
 CF.rtldg.LSM4<-as.data.frame(emmeans(CF.model.rtldg4, spec="entry"))
 CF.rtldg.LSM4<-CF.rtldg.LSM4%>%select(entry, emmean)
 names(CF.rtldg.LSM4)[2]<-c("rtldg")
-
+### Field 25
 CF.model.rtldg5<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F5, REML=TRUE)
 CF.rtldg.LSM5<-as.data.frame(emmeans(CF.model.rtldg5, spec="entry"))
 CF.rtldg.LSM5<-CF.rtldg.LSM5%>%select(entry, emmean)
 names(CF.rtldg.LSM5)[2]<-c("rtldg")
 ```
 
-### South (3)
+### South (3) Early (A)
 
-```{r South_Root_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
-## SOUTH
-## South Early
+```{r South_Early_Root_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## SOUTH EARLY
+### Field 31
 # SE.model.rtldg1<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F1, REML=TRUE)
 # SE.rtldg.LSM1<-as.data.frame(emmeans(SE.model.rtldg1, spec="entry"))
 # SE.rtldg.LSM1<-SE.rtldg.LSM1%>%select(entry, emmean)
 # names(SE.rtldg.LSM1)[2]<-c("rtldg")
-
+### Field 32
 SE.model.rtldg2<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F2, REML=TRUE)
 SE.rtldg.LSM2<-as.data.frame(emmeans(SE.model.rtldg2, spec="entry"))
 SE.rtldg.LSM2<-SE.rtldg.LSM2%>%select(entry, emmean)
 names(SE.rtldg.LSM2)[2]<-c("rtldg")
-
+### Field 33
 SE.model.rtldg3<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F3, REML=TRUE)
 SE.rtldg.LSM3<-as.data.frame(emmeans(SE.model.rtldg3, spec="entry"))
 SE.rtldg.LSM3<-SE.rtldg.LSM3%>%select(entry, emmean)
 names(SE.rtldg.LSM3)[2]<-c("rtldg")
-
+### Field 34
 SE.model.rtldg4<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F4, REML=TRUE)
 SE.rtldg.LSM4<-as.data.frame(emmeans(SE.model.rtldg4, spec="entry"))
 SE.rtldg.LSM4<-SE.rtldg.LSM4%>%select(entry, emmean)
 names(SE.rtldg.LSM4)[2]<-c("rtldg")
-
+### Field 35
 SE.model.rtldg5<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F5, REML=TRUE)
 SE.rtldg.LSM5<-as.data.frame(emmeans(SE.model.rtldg5, spec="entry"))
 SE.rtldg.LSM5<-SE.rtldg.LSM5%>%select(entry, emmean)
 names(SE.rtldg.LSM5)[2]<-c("rtldg")
 
 ## South Full
+### Field 31
 # SF.model.rtldg1<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F1, REML=TRUE)
 # SF.rtldg.LSM1<-as.data.frame(emmeans(SF.model.rtldg1, spec="entry"))
 # SF.rtldg.LSM1<-SF.rtldg.LSM1%>%select(entry, emmean)
 # names(SF.rtldg.LSM1)[2]<-c("rtldg")
-
+### Field 32
 SF.model.rtldg2<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F2, REML=TRUE)
 SF.rtldg.LSM2<-as.data.frame(emmeans(SF.model.rtldg2, spec="entry"))
 SF.rtldg.LSM2<-SF.rtldg.LSM2%>%select(entry, emmean)
 names(SF.rtldg.LSM2)[2]<-c("rtldg")
-
+### Field 33
 SF.model.rtldg3<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F3, REML=TRUE)
 SF.rtldg.LSM3<-as.data.frame(emmeans(SF.model.rtldg3, spec="entry"))
 SF.rtldg.LSM3<-SF.rtldg.LSM3%>%select(entry, emmean)
 names(SF.rtldg.LSM3)[2]<-c("rtldg")
-
+### Field 34
 SF.model.rtldg4<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F4, REML=TRUE)
 SF.rtldg.LSM4<-as.data.frame(emmeans(SF.model.rtldg4, spec="entry"))
 SF.rtldg.LSM4<-SF.rtldg.LSM4%>%select(entry, emmean)
 names(SF.rtldg.LSM4)[2]<-c("rtldg")
+### Field 35
+SF.model.rtldg5<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F5, REML=TRUE)
+SF.rtldg.LSM5<-as.data.frame(emmeans(SF.model.rtldg5, spec="entry"))
+SF.rtldg.LSM5<-SF.rtldg.LSM5%>%select(entry, emmean)
+names(SF.rtldg.LSM5)[2]<-c("rtldg")
+```
 
+### South (3) Full (B)
+
+```{r South_Full_Root_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## SOUTH FULL
+### Field 31
+# SF.model.rtldg1<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F1, REML=TRUE)
+# SF.rtldg.LSM1<-as.data.frame(emmeans(SF.model.rtldg1, spec="entry"))
+# SF.rtldg.LSM1<-SF.rtldg.LSM1%>%select(entry, emmean)
+# names(SF.rtldg.LSM1)[2]<-c("rtldg")
+### Field 32
+SF.model.rtldg2<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F2, REML=TRUE)
+SF.rtldg.LSM2<-as.data.frame(emmeans(SF.model.rtldg2, spec="entry"))
+SF.rtldg.LSM2<-SF.rtldg.LSM2%>%select(entry, emmean)
+names(SF.rtldg.LSM2)[2]<-c("rtldg")
+### Field 33
+SF.model.rtldg3<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F3, REML=TRUE)
+SF.rtldg.LSM3<-as.data.frame(emmeans(SF.model.rtldg3, spec="entry"))
+SF.rtldg.LSM3<-SF.rtldg.LSM3%>%select(entry, emmean)
+names(SF.rtldg.LSM3)[2]<-c("rtldg")
+### Field 34
+SF.model.rtldg4<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F4, REML=TRUE)
+SF.rtldg.LSM4<-as.data.frame(emmeans(SF.model.rtldg4, spec="entry"))
+SF.rtldg.LSM4<-SF.rtldg.LSM4%>%select(entry, emmean)
+names(SF.rtldg.LSM4)[2]<-c("rtldg")
+### Field 35
 SF.model.rtldg5<-lmer(rtldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F5, REML=TRUE)
 SF.rtldg.LSM5<-as.data.frame(emmeans(SF.model.rtldg5, spec="entry"))
 SF.rtldg.LSM5<-SF.rtldg.LSM5%>%select(entry, emmean)
@@ -1352,177 +1493,193 @@ names(SF.rtldg.LSM5)[2]<-c("rtldg")
 
 ## Stalk LDG
 
-### North (1)
+### North (1) Early (A)
 
-```{r North_Stalk_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+```{r North_Ealry_Stalk_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
 ## Stalk Lodging
-## NORTH
-## North Early
+## NORTH EARLY
+### Field 11
 NE.model.skldg1<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F1, REML=TRUE)
 NE.skldg.LSM1<-as.data.frame(emmeans(NE.model.skldg1, spec="entry"))
 NE.skldg.LSM1<-NE.skldg.LSM1%>%select(entry, emmean)
 names(NE.skldg.LSM1)[2]<-c("skldg")
-
+### Field 12
 NE.model.skldg2<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F2, REML=TRUE)
 NE.skldg.LSM2<-as.data.frame(emmeans(NE.model.skldg2, spec="entry"))
 NE.skldg.LSM2<-NE.skldg.LSM2%>%select(entry, emmean)
 names(NE.skldg.LSM2)[2]<-c("skldg")
-
+### Field 13
 # NE.model.skldg3<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F3, REML=TRUE)
 # NE.skldg.LSM3<-as.data.frame(emmeans(NE.model.skldg3, spec="entry"))
 # NE.skldg.LSM3<-NE.skldg.LSM3%>%select(entry, emmean)
 # names(NE.skldg.LSM3)[2]<-c("skldg")
-
+### Field 14
 NE.model.skldg4<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F4, REML=TRUE)
 NE.skldg.LSM4<-as.data.frame(emmeans(NE.model.skldg4, spec="entry"))
 NE.skldg.LSM4<-NE.skldg.LSM4%>%select(entry, emmean)
 names(NE.skldg.LSM4)[2]<-c("skldg")
-
+### Field 15
 NE.model.skldg5<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NE.F5, REML=TRUE)
 NE.skldg.LSM5<-as.data.frame(emmeans(NE.model.skldg5, spec="entry"))
 NE.skldg.LSM5<-NE.skldg.LSM5%>%select(entry, emmean)
 names(NE.skldg.LSM5)[2]<-c("skldg")
+```
 
-## North Full
+### North (1) Full (B)
+
+```{r North_Full_Stalk_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## NORTH FULL
+### Field 11
 NF.model.skldg1<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F1, REML=TRUE)
 NF.skldg.LSM1<-as.data.frame(emmeans(NF.model.skldg1, spec="entry"))
 NF.skldg.LSM1<-NF.skldg.LSM1%>%select(entry, emmean)
 names(NF.skldg.LSM1)[2]<-c("skldg")
-
+### Field 12
 NF.model.skldg2<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F2, REML=TRUE)
 NF.skldg.LSM2<-as.data.frame(emmeans(NF.model.skldg2, spec="entry"))
 NF.skldg.LSM2<-NF.skldg.LSM2%>%select(entry, emmean)
 names(NF.skldg.LSM2)[2]<-c("skldg")
-
+### Field 13
 # NF.model.skldg3<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F3, REML=TRUE)
 # NF.skldg.LSM3<-as.data.frame(emmeans(NF.model.skldg3, spec="entry"))
 # NF.skldg.LSM3<-NF.skldg.LSM3%>%select(entry, emmean)
 # names(NF.skldg.LSM3)[2]<-c("skldg")
-
+### Field 14
 NF.model.skldg4<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F4, REML=TRUE)
 NF.skldg.LSM4<-as.data.frame(emmeans(NF.model.skldg4, spec="entry"))
 NF.skldg.LSM4<-NF.skldg.LSM4%>%select(entry, emmean)
 names(NF.skldg.LSM4)[2]<-c("skldg")
-
+### Field 15
 NF.model.skldg5<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=NF.F5, REML=TRUE)
 NF.skldg.LSM5<-as.data.frame(emmeans(NF.model.skldg5, spec="entry"))
 NF.skldg.LSM5<-NF.skldg.LSM5%>%select(entry, emmean)
 names(NF.skldg.LSM5)[2]<-c("skldg")
 ```
 
-### Central (2)
+### Central (2) Early (A)
 
-```{r Central_Stalk_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
-## CENTRAL
-## Central Early
+```{r Central_Early_Stalk_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## CENTRAL EARLY
+### Field 21
 # CE.model.skldg1<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F1, REML=TRUE)
 # CE.skldg.LSM1<-as.data.frame(emmeans(CE.model.skldg1, spec="entry"))
 # CE.skldg.LSM1<-CE.skldg.LSM1%>%select(entry, emmean)
 # names(CE.skldg.LSM1)[2]<-c("skldg")
-
+### Field 22
 CE.model.skldg2<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F2, REML=TRUE)
 CE.skldg.LSM2<-as.data.frame(emmeans(CE.model.skldg2, spec="entry"))
 CE.skldg.LSM2<-CE.skldg.LSM2%>%select(entry, emmean)
 names(CE.skldg.LSM2)[2]<-c("skldg")
-
+### Field 23
 CE.model.skldg3<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F3, REML=TRUE)
 CE.skldg.LSM3<-as.data.frame(emmeans(CE.model.skldg3, spec="entry"))
 CE.skldg.LSM3<-CE.skldg.LSM3%>%select(entry, emmean)
 names(CE.skldg.LSM3)[2]<-c("skldg")
-
+### Field 24
 CE.model.skldg4<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F4, REML=TRUE)
 CE.skldg.LSM4<-as.data.frame(emmeans(CE.model.skldg4, spec="entry"))
 CE.skldg.LSM4<-CE.skldg.LSM4%>%select(entry, emmean)
 names(CE.skldg.LSM4)[2]<-c("skldg")
-
+### Field 25
 CE.model.skldg5<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CE.F5, REML=TRUE)
 CE.skldg.LSM5<-as.data.frame(emmeans(CE.model.skldg5, spec="entry"))
 CE.skldg.LSM5<-CE.skldg.LSM5%>%select(entry, emmean)
 names(CE.skldg.LSM5)[2]<-c("skldg")
+```
 
-## Central Full
+### Central (2) Full (B)
+
+```{r Central_Full_Stalk_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## CENTRAL FULL
+### Field 21
 # CF.model.skldg1<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F1, REML=TRUE)
 # CF.skldg.LSM1<-as.data.frame(emmeans(CF.model.skldg1, spec="entry"))
 # CF.skldg.LSM1<-CF.skldg.LSM1%>%select(entry, emmean)
 # names(CF.skldg.LSM1)[2]<-c("skldg")
-
+### Field 22
 CF.model.skldg2<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F2, REML=TRUE)
 CF.skldg.LSM2<-as.data.frame(emmeans(CF.model.skldg2, spec="entry"))
 CF.skldg.LSM2<-CF.skldg.LSM2%>%select(entry, emmean)
 names(CF.skldg.LSM2)[2]<-c("skldg")
-
+### Field 23
 CF.model.skldg3<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F3, REML=TRUE)
 CF.skldg.LSM3<-as.data.frame(emmeans(CF.model.skldg3, spec="entry"))
 CF.skldg.LSM3<-CF.skldg.LSM3%>%select(entry, emmean)
 names(CF.skldg.LSM3)[2]<-c("skldg")
-
+### Field 24
 CF.model.skldg4<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F4, REML=TRUE)
 CF.skldg.LSM4<-as.data.frame(emmeans(CF.model.skldg4, spec="entry"))
 CF.skldg.LSM4<-CF.skldg.LSM4%>%select(entry, emmean)
 names(CF.skldg.LSM4)[2]<-c("skldg")
-
+### Field 25
 CF.model.skldg5<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=CF.F5, REML=TRUE)
 CF.skldg.LSM5<-as.data.frame(emmeans(CF.model.skldg5, spec="entry"))
 CF.skldg.LSM5<-CF.skldg.LSM5%>%select(entry, emmean)
 names(CF.skldg.LSM5)[2]<-c("skldg")
 ```
 
-### South (3)
+### South (3) Early (A)
 
-```{r South_Stalk_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
-## SOUTH
-## South
+```{r South_Early_Stalk_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## SOUTH EARLY
+### Field 31
 # SE.model.skldg1<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F1, REML=TRUE)
 # SE.skldg.LSM1<-as.data.frame(emmeans(SE.model.skldg1, spec="entry"))
 # SE.skldg.LSM1<-SE.skldg.LSM1%>%select(entry, emmean)
 # names(SE.skldg.LSM1)[2]<-c("skldg")
-
+### Field 32
 SE.model.skldg2<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F2, REML=TRUE)
 SE.skldg.LSM2<-as.data.frame(emmeans(SE.model.skldg2, spec="entry"))
 SE.skldg.LSM2<-SE.skldg.LSM2%>%select(entry, emmean)
 names(SE.skldg.LSM2)[2]<-c("skldg")
-
+### Field 33
 SE.model.skldg3<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F3, REML=TRUE)
 SE.skldg.LSM3<-as.data.frame(emmeans(SE.model.skldg3, spec="entry"))
 SE.skldg.LSM3<-SE.skldg.LSM3%>%select(entry, emmean)
 names(SE.skldg.LSM3)[2]<-c("skldg")
-
+### Field 34
 SE.model.skldg4<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F4, REML=TRUE)
 SE.skldg.LSM4<-as.data.frame(emmeans(SE.model.skldg4, spec="entry"))
 SE.skldg.LSM4<-SE.skldg.LSM4%>%select(entry, emmean)
 names(SE.skldg.LSM4)[2]<-c("skldg")
-
+### Field 35
 SE.model.skldg5<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SE.F5, REML=TRUE)
 SE.skldg.LSM5<-as.data.frame(emmeans(SE.model.skldg5, spec="entry"))
 SE.skldg.LSM5<-SE.skldg.LSM5%>%select(entry, emmean)
 names(SE.skldg.LSM5)[2]<-c("skldg")
+```
 
-## South Full
+### South (3) Full (B)
+
+```{r South_Full_Stalk_Lodging, echo=FALSE, comment=NA, message=FALSE, warning=FALSE}
+## SOUTH FULL
+### Field 31
 # SF.model.skldg1<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F1, REML=TRUE)
 # SF.skldg.LSM1<-as.data.frame(emmeans(SF.model.skldg1, spec="entry"))
 # SF.skldg.LSM1<-SF.skldg.LSM1%>%select(entry, emmean)
 # names(SF.skldg.LSM1)[2]<-c("skldg")
-
+### Field 32
 SF.model.skldg2<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F2, REML=TRUE)
 SF.skldg.LSM2<-as.data.frame(emmeans(SF.model.skldg2, spec="entry"))
 SF.skldg.LSM2<-SF.skldg.LSM2%>%select(entry, emmean)
 names(SF.skldg.LSM2)[2]<-c("skldg")
-
+### Field 33
 SF.model.skldg3<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F3, REML=TRUE)
 SF.skldg.LSM3<-as.data.frame(emmeans(SF.model.skldg3, spec="entry"))
 SF.skldg.LSM3<-SF.skldg.LSM3%>%select(entry, emmean)
 names(SF.skldg.LSM3)[2]<-c("skldg")
-
+### Field 34
 SF.model.skldg4<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F4, REML=TRUE)
 SF.skldg.LSM4<-as.data.frame(emmeans(SF.model.skldg4, spec="entry"))
 SF.skldg.LSM4<-SF.skldg.LSM4%>%select(entry, emmean)
 names(SF.skldg.LSM4)[2]<-c("skldg")
-
+### Field 35
 SF.model.skldg5<-lmer(skldg~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=SF.F5, REML=TRUE)
 SF.skldg.LSM5<-as.data.frame(emmeans(SF.model.skldg5, spec="entry"))
 SF.skldg.LSM5<-SF.skldg.LSM5%>%select(entry, emmean)
 names(SF.skldg.LSM5)[2]<-c("skldg")
 ```
+
 
 ## Add to Main Table
 
@@ -1669,12 +1826,12 @@ SF.35<-left_join(SF.35, ldg.SF35)
 
 # AGV Calculations
 
-## North (1)
+## North (1) Early (A)
 
-```{r North_AGV, echo=FALSE, comment=NA, message=FALSE}
+```{r North_Early_AGV, echo=FALSE, comment=NA, message=FALSE}
 ## AGV Calculations:
-## NORTH
-## North Early
+## NORTH EARLY
+### Field 11
 NE.AGV.F1<-NE.11
 NE.AGV.F1$yld<-as.numeric(NE.AGV.F1$yld)
 NE.AGV.F1$moist<-as.numeric(NE.AGV.F1$moist)
@@ -1686,7 +1843,7 @@ NE.AGV.F1<-NE.AGV.F1%>%mutate(grossvalue=(dryyield*PPB))
 NE.AGV.F1<-NE.AGV.F1%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 NE.AGV.F1<-NE.AGV.F1%>%mutate(AGV=(grossvalue-dryingcost))
 NE.AGV.F1<-NE.AGV.F1[,c(5,23)]
-
+### Field 12
 NE.AGV.F2<-NE.12
 NE.AGV.F2$yld<-as.numeric(NE.AGV.F2$yld)
 NE.AGV.F2$moist<-as.numeric(NE.AGV.F2$moist)
@@ -1698,7 +1855,7 @@ NE.AGV.F2<-NE.AGV.F2%>%mutate(grossvalue=(dryyield*PPB))
 NE.AGV.F2<-NE.AGV.F2%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 NE.AGV.F2<-NE.AGV.F2%>%mutate(AGV=(grossvalue-dryingcost))
 NE.AGV.F2<-NE.AGV.F2[,c(5,23)]
-
+### Field 13
 # NE.AGV.F3<-NE.13
 # NE.AGV.F3$yld<-as.numeric(NE.AGV.F3$yld)
 # NE.AGV.F3$moist<-as.numeric(NE.AGV.F3$moist)
@@ -1710,7 +1867,7 @@ NE.AGV.F2<-NE.AGV.F2[,c(5,23)]
 # NE.AGV.F3<-NE.AGV.F3%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 # NE.AGV.F3<-NE.AGV.F3%>%mutate(AGV=(grossvalue-dryingcost))
 # NE.AGV.F3<-NE.AGV.F3[,c(5,23)]
-
+### Field 14
 NE.AGV.F4<-NE.14
 NE.AGV.F4$yld<-as.numeric(NE.AGV.F4$yld)
 NE.AGV.F4$moist<-as.numeric(NE.AGV.F4$moist)
@@ -1722,7 +1879,7 @@ NE.AGV.F4<-NE.AGV.F4%>%mutate(grossvalue=(dryyield*PPB))
 NE.AGV.F4<-NE.AGV.F4%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 NE.AGV.F4<-NE.AGV.F4%>%mutate(AGV=(grossvalue-dryingcost))
 NE.AGV.F4<-NE.AGV.F4[,c(5,23)]
-
+### Field 15
 NE.AGV.F5<-NE.15
 NE.AGV.F5$yld<-as.numeric(NE.AGV.F5$yld)
 NE.AGV.F5$moist<-as.numeric(NE.AGV.F5$moist)
@@ -1734,8 +1891,13 @@ NE.AGV.F5<-NE.AGV.F5%>%mutate(grossvalue=(dryyield*PPB))
 NE.AGV.F5<-NE.AGV.F5%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 NE.AGV.F5<-NE.AGV.F5%>%mutate(AGV=(grossvalue-dryingcost))
 NE.AGV.F5<-NE.AGV.F5[,c(5,23)]
+```
 
-## North Full
+## North (1) Full (B)
+
+```{r North_Full_AGV, echo=FALSE, comment=NA, message=FALSE}
+## NORTH FULL
+### Field 1
 NF.AGV.F1<-NF.11
 NF.AGV.F1$yld<-as.numeric(NF.AGV.F1$yld)
 NF.AGV.F1$moist<-as.numeric(NF.AGV.F1$moist)
@@ -1747,7 +1909,7 @@ NF.AGV.F1<-NF.AGV.F1%>%mutate(grossvalue=(dryyield*PPB))
 NF.AGV.F1<-NF.AGV.F1%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 NF.AGV.F1<-NF.AGV.F1%>%mutate(AGV=(grossvalue-dryingcost))
 NF.AGV.F1<-NF.AGV.F1[,c(5,23)]
-
+### Field 12
 NF.AGV.F2<-NF.12
 NF.AGV.F2$yld<-as.numeric(NF.AGV.F2$yld)
 NF.AGV.F2$moist<-as.numeric(NF.AGV.F2$moist)
@@ -1759,7 +1921,7 @@ NF.AGV.F2<-NF.AGV.F2%>%mutate(grossvalue=(dryyield*PPB))
 NF.AGV.F2<-NF.AGV.F2%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 NF.AGV.F2<-NF.AGV.F2%>%mutate(AGV=(grossvalue-dryingcost))
 NF.AGV.F2<-NF.AGV.F2[,c(5,23)]
-
+### Field 13
 # NF.AGV.F3<-NF.13
 # NF.AGV.F3$yld<-as.numeric(NF.AGV.F3$yld)
 # NF.AGV.F3$moist<-as.numeric(NF.AGV.F3$moist)
@@ -1771,7 +1933,7 @@ NF.AGV.F2<-NF.AGV.F2[,c(5,23)]
 # NF.AGV.F3<-NF.AGV.F3%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 # NF.AGV.F3<-NF.AGV.F3%>%mutate(AGV=(grossvalue-dryingcost))
 # NF.AGV.F3<-NF.AGV.F3[,c(5,23)]
-
+### Field 14
 NF.AGV.F4<-NF.14
 NF.AGV.F4$yld<-as.numeric(NF.AGV.F4$yld)
 NF.AGV.F4$moist<-as.numeric(NF.AGV.F4$moist)
@@ -1783,7 +1945,7 @@ NF.AGV.F4<-NF.AGV.F4%>%mutate(grossvalue=(dryyield*PPB))
 NF.AGV.F4<-NF.AGV.F4%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 NF.AGV.F4<-NF.AGV.F4%>%mutate(AGV=(grossvalue-dryingcost))
 NF.AGV.F4<-NF.AGV.F4[,c(5,23)]
-
+### Field 15
 NF.AGV.F5<-NF.15
 NF.AGV.F5$yld<-as.numeric(NF.AGV.F5$yld)
 NF.AGV.F5$moist<-as.numeric(NF.AGV.F5$moist)
@@ -1797,11 +1959,12 @@ NF.AGV.F5<-NF.AGV.F5%>%mutate(AGV=(grossvalue-dryingcost))
 NF.AGV.F5<-NF.AGV.F5[,c(5,23)]
 ```
 
-## Central (2)
 
-```{r Central_AGV, echo=FALSE, comment=NA, message=FALSE}
-## CENTRAL
-## Central Early
+## Central (2) Early (A)
+
+```{r Central_Early_AGV, echo=FALSE, comment=NA, message=FALSE}
+## CENTRAL EARLY
+### Field 21
 # CE.AGV.F1<-CE.21
 # CE.AGV.F1$yld<-as.numeric(CE.AGV.F1$yld)
 # CE.AGV.F1$moist<-as.numeric(CE.AGV.F1$moist)
@@ -1813,7 +1976,7 @@ NF.AGV.F5<-NF.AGV.F5[,c(5,23)]
 # CE.AGV.F1<-CE.AGV.F1%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 # CE.AGV.F1<-CE.AGV.F1%>%mutate(AGV=(grossvalue-dryingcost))
 # CE.AGV.F1<-CE.AGV.F1[,c(5,23)]
-
+### Field 22
 CE.AGV.F2<-CE.22
 CE.AGV.F2$yld<-as.numeric(CE.AGV.F2$yld)
 CE.AGV.F2$moist<-as.numeric(CE.AGV.F2$moist)
@@ -1825,7 +1988,7 @@ CE.AGV.F2<-CE.AGV.F2%>%mutate(grossvalue=(dryyield*PPB))
 CE.AGV.F2<-CE.AGV.F2%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 CE.AGV.F2<-CE.AGV.F2%>%mutate(AGV=(grossvalue-dryingcost))
 CE.AGV.F2<-CE.AGV.F2[,c(5,23)]
-
+### Field 23
 CE.AGV.F3<-CE.23
 CE.AGV.F3$yld<-as.numeric(CE.AGV.F3$yld)
 CE.AGV.F3$moist<-as.numeric(CE.AGV.F3$moist)
@@ -1837,7 +2000,7 @@ CE.AGV.F3<-CE.AGV.F3%>%mutate(grossvalue=(dryyield*PPB))
 CE.AGV.F3<-CE.AGV.F3%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 CE.AGV.F3<-CE.AGV.F3%>%mutate(AGV=(grossvalue-dryingcost))
 CE.AGV.F3<-CE.AGV.F3[,c(5,23)]
-
+### Field 24
 CE.AGV.F4<-CE.24
 CE.AGV.F4$yld<-as.numeric(CE.AGV.F4$yld)
 CE.AGV.F4$moist<-as.numeric(CE.AGV.F4$moist)
@@ -1849,7 +2012,7 @@ CE.AGV.F4<-CE.AGV.F4%>%mutate(grossvalue=(dryyield*PPB))
 CE.AGV.F4<-CE.AGV.F4%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 CE.AGV.F4<-CE.AGV.F4%>%mutate(AGV=(grossvalue-dryingcost))
 CE.AGV.F4<-CE.AGV.F4[,c(5,23)]
-
+### Field 25
 CE.AGV.F5<-CE.25
 CE.AGV.F5$yld<-as.numeric(CE.AGV.F5$yld)
 CE.AGV.F5$moist<-as.numeric(CE.AGV.F5$moist)
@@ -1861,8 +2024,12 @@ CE.AGV.F5<-CE.AGV.F5%>%mutate(grossvalue=(dryyield*PPB))
 CE.AGV.F5<-CE.AGV.F5%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 CE.AGV.F5<-CE.AGV.F5%>%mutate(AGV=(grossvalue-dryingcost))
 CE.AGV.F5<-CE.AGV.F5[,c(5,23)]
+```
 
-## Cental Full
+## Central (2) Full (B)
+
+```{r Central_Full_AGV, echo=FALSE, comment=NA, message=FALSE}
+## CENTRAL FULL
 # CF.AGV.F1<-CF.21
 # CF.AGV.F1$yld<-as.numeric(CF.AGV.F1$yld)
 # CF.AGV.F1$moist<-as.numeric(CF.AGV.F1$moist)
@@ -1874,7 +2041,7 @@ CE.AGV.F5<-CE.AGV.F5[,c(5,23)]
 # CF.AGV.F1<-CF.AGV.F1%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 # CF.AGV.F1<-CF.AGV.F1%>%mutate(AGV=(grossvalue-dryingcost))
 # CF.AGV.F1<-CF.AGV.F1[,c(5,23)]
-
+### Field 22
 CF.AGV.F2<-CF.22
 CF.AGV.F2$yld<-as.numeric(CF.AGV.F2$yld)
 CF.AGV.F2$moist<-as.numeric(CF.AGV.F2$moist)
@@ -1886,7 +2053,7 @@ CF.AGV.F2<-CF.AGV.F2%>%mutate(grossvalue=(dryyield*PPB))
 CF.AGV.F2<-CF.AGV.F2%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 CF.AGV.F2<-CF.AGV.F2%>%mutate(AGV=(grossvalue-dryingcost))
 CF.AGV.F2<-CF.AGV.F2[,c(5,23)]
-
+### Field 23
 CF.AGV.F3<-CF.23
 CF.AGV.F3$yld<-as.numeric(CF.AGV.F3$yld)
 CF.AGV.F3$moist<-as.numeric(CF.AGV.F3$moist)
@@ -1898,7 +2065,7 @@ CF.AGV.F3<-CF.AGV.F3%>%mutate(grossvalue=(dryyield*PPB))
 CF.AGV.F3<-CF.AGV.F3%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 CF.AGV.F3<-CF.AGV.F3%>%mutate(AGV=(grossvalue-dryingcost))
 CF.AGV.F3<-CF.AGV.F3[,c(5,23)]
-
+### Field 24
 CF.AGV.F4<-CF.24
 CF.AGV.F4$yld<-as.numeric(CF.AGV.F4$yld)
 CF.AGV.F4$moist<-as.numeric(CF.AGV.F4$moist)
@@ -1910,7 +2077,7 @@ CF.AGV.F4<-CF.AGV.F4%>%mutate(grossvalue=(dryyield*PPB))
 CF.AGV.F4<-CF.AGV.F4%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 CF.AGV.F4<-CF.AGV.F4%>%mutate(AGV=(grossvalue-dryingcost))
 CF.AGV.F4<-CF.AGV.F4[,c(5,23)]
-
+### Field 25
 CF.AGV.F5<-CF.25
 CF.AGV.F5$yld<-as.numeric(CF.AGV.F5$yld)
 CF.AGV.F5$moist<-as.numeric(CF.AGV.F5$moist)
@@ -1924,11 +2091,12 @@ CF.AGV.F5<-CF.AGV.F5%>%mutate(AGV=(grossvalue-dryingcost))
 CF.AGV.F5<-CF.AGV.F5[,c(5,23)]
 ```
 
-## South (3)
 
-```{r South_AGV, echo=FALSE, comment=NA, message=FALSE}
-## SOUTH
-## South Early
+## South (3) Early (A)
+
+```{r South_Early_AGV, echo=FALSE, comment=NA, message=FALSE}
+## SOUTH EARLY
+### Field 31
 # SE.AGV.F1<-SE.31
 # SE.AGV.F1$yld<-as.numeric(SE.AGV.F1$yld)
 # SE.AGV.F1$moist<-as.numeric(SE.AGV.F1$moist)
@@ -1940,7 +2108,7 @@ CF.AGV.F5<-CF.AGV.F5[,c(5,23)]
 # SE.AGV.F1<-SE.AGV.F1%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 # SE.AGV.F1<-SE.AGV.F1%>%mutate(AGV=(grossvalue-dryingcost))
 # SE.AGV.F1<-SE.AGV.F1[,c(5,23)]
-
+### Field 32
 SE.AGV.F2<-SE.32
 SE.AGV.F2$yld<-as.numeric(SE.AGV.F2$yld)
 SE.AGV.F2$moist<-as.numeric(SE.AGV.F2$moist)
@@ -1952,7 +2120,7 @@ SE.AGV.F2<-SE.AGV.F2%>%mutate(grossvalue=(dryyield*PPB))
 SE.AGV.F2<-SE.AGV.F2%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 SE.AGV.F2<-SE.AGV.F2%>%mutate(AGV=(grossvalue-dryingcost))
 SE.AGV.F2<-SE.AGV.F2[,c(5,23)]
-
+### Field 33
 SE.AGV.F3<-SE.33
 SE.AGV.F3$yld<-as.numeric(SE.AGV.F3$yld)
 SE.AGV.F3$moist<-as.numeric(SE.AGV.F3$moist)
@@ -1964,7 +2132,7 @@ SE.AGV.F3<-SE.AGV.F3%>%mutate(grossvalue=(dryyield*PPB))
 SE.AGV.F3<-SE.AGV.F3%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 SE.AGV.F3<-SE.AGV.F3%>%mutate(AGV=(grossvalue-dryingcost))
 SE.AGV.F3<-SE.AGV.F3[,c(5,23)]
-
+### Field 34
 SE.AGV.F4<-SE.34
 SE.AGV.F4$yld<-as.numeric(SE.AGV.F4$yld)
 SE.AGV.F4$moist<-as.numeric(SE.AGV.F4$moist)
@@ -1976,7 +2144,7 @@ SE.AGV.F4<-SE.AGV.F4%>%mutate(grossvalue=(dryyield*PPB))
 SE.AGV.F4<-SE.AGV.F4%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 SE.AGV.F4<-SE.AGV.F4%>%mutate(AGV=(grossvalue-dryingcost))
 SE.AGV.F4<-SE.AGV.F4[,c(5,23)]
-
+### Field 35
 SE.AGV.F5<-SE.35
 SE.AGV.F5$yld<-as.numeric(SE.AGV.F5$yld)
 SE.AGV.F5$moist<-as.numeric(SE.AGV.F5$moist)
@@ -1988,8 +2156,13 @@ SE.AGV.F5<-SE.AGV.F5%>%mutate(grossvalue=(dryyield*PPB))
 SE.AGV.F5<-SE.AGV.F5%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 SE.AGV.F5<-SE.AGV.F5%>%mutate(AGV=(grossvalue-dryingcost))
 SE.AGV.F5<-SE.AGV.F5[,c(5,23)]
+```
 
-## South Full
+## South (3) Full (B)
+
+```{r South_Full_AGV, echo=FALSE, comment=NA, message=FALSE}
+## SOUTH FULL
+### Field 31
 # SF.AGV.F1<-SF.31
 # SF.AGV.F1$yld<-as.numeric(SF.AGV.F1$yld)
 # SF.AGV.F1$moist<-as.numeric(SF.AGV.F1$moist)
@@ -2001,7 +2174,7 @@ SE.AGV.F5<-SE.AGV.F5[,c(5,23)]
 # SF.AGV.F1<-SF.AGV.F1%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 # SF.AGV.F1<-SF.AGV.F1%>%mutate(AGV=(grossvalue-dryingcost))
 # SF.AGV.F1<-SF.AGV.F1[,c(5,23)]
-
+### Field 32
 SF.AGV.F2<-SF.32
 SF.AGV.F2$yld<-as.numeric(SF.AGV.F2$yld)
 SF.AGV.F2$moist<-as.numeric(SF.AGV.F2$moist)
@@ -2013,7 +2186,7 @@ SF.AGV.F2<-SF.AGV.F2%>%mutate(grossvalue=(dryyield*PPB))
 SF.AGV.F2<-SF.AGV.F2%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 SF.AGV.F2<-SF.AGV.F2%>%mutate(AGV=(grossvalue-dryingcost))
 SF.AGV.F2<-SF.AGV.F2[,c(5,23)]
-
+### Field 33
 SF.AGV.F3<-SF.33
 SF.AGV.F3$yld<-as.numeric(SF.AGV.F3$yld)
 SF.AGV.F3$moist<-as.numeric(SF.AGV.F3$moist)
@@ -2025,7 +2198,7 @@ SF.AGV.F3<-SF.AGV.F3%>%mutate(grossvalue=(dryyield*PPB))
 SF.AGV.F3<-SF.AGV.F3%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 SF.AGV.F3<-SF.AGV.F3%>%mutate(AGV=(grossvalue-dryingcost))
 SF.AGV.F3<-SF.AGV.F3[,c(5,23)]
-
+### Field 34
 SF.AGV.F4<-SF.34
 SF.AGV.F4$yld<-as.numeric(SF.AGV.F4$yld)
 SF.AGV.F4$moist<-as.numeric(SF.AGV.F4$moist)
@@ -2037,7 +2210,7 @@ SF.AGV.F4<-SF.AGV.F4%>%mutate(grossvalue=(dryyield*PPB))
 SF.AGV.F4<-SF.AGV.F4%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 SF.AGV.F4<-SF.AGV.F4%>%mutate(AGV=(grossvalue-dryingcost))
 SF.AGV.F4<-SF.AGV.F4[,c(5,23)]
-
+### Field 35
 SF.AGV.F5<-SF.35
 SF.AGV.F5$yld<-as.numeric(SF.AGV.F5$yld)
 SF.AGV.F5$moist<-as.numeric(SF.AGV.F5$moist)
@@ -2050,6 +2223,7 @@ SF.AGV.F5<-SF.AGV.F5%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
 SF.AGV.F5<-SF.AGV.F5%>%mutate(AGV=(grossvalue-dryingcost))
 SF.AGV.F5<-SF.AGV.F5[,c(5,23)]
 ```
+
 
 ## Add to Main Table
 
