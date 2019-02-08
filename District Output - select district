@@ -1,0 +1,480 @@
+---
+title: "**District Export**"
+author: '`r params$author`'
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float:
+      collapsed: true
+params:
+  author:
+    label: "Analysis Conducted By:"
+    value: Ryan Budnik
+    input: select
+    choices: [Ryan Budnik, Graydon Marzen, Jim Rouse, Ryan Frasch, Shawn Bryant]
+  data:
+    label: "Input dataset:"
+    value: 18CC.csv
+    input: select
+    choices: [18CC.csv]
+  exp:
+    label: "Experiment:"
+    value: C81A
+    input: select
+    choices: [C81A,	C81B,	C82A, C82B,	C83A,	C83B]
+  tab:
+    label: "Excel Worksheet:"
+    value: C1A
+    input: select
+    choices: [C1A,	C1B,	C2A, C2B,	C3A,	C3B]
+  list:
+    label: "Entry List:"
+    value: CEL18.csv
+    input: select
+    choices: [CEL18.csv]
+  storage:
+    label: "Cold Storage:"
+    value: CCS18.csv
+    input: select
+    choices: [CCS18.csv]
+  year:
+    label: "Year"
+    value: 2018
+    input: select
+    choices: [2018, 2017, 2016]
+---
+
+# Overview:
+
+The following report renders the complete **District_Corn_Web** pre-formatted Excel tables, with the yearly (`r params$year`) cleaned data for Internet publication purposes.
+
+Un-used locations must be physically commented out to remove them from tables.
+
+```{r libs, include = FALSE}
+library(rmarkdown)
+library(knitr)
+library(dplyr)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(predictmeans)
+library(shiny)
+library(shinythemes)
+library(emmeans)
+library(sjstats)
+library(rJava)
+library(XLConnect)
+```
+
+# Global Parameters:
+
+```{r Global_Parameters, echo=FALSE, comment=NA, message=FALSE}
+## Global Parameters:
+  ## Year Code:
+YR<-8 
+  ## District Code [1,2, or 3]:
+DS<-1
+  ## Converison Factor:
+CCF<-8.067
+  ## Yearly Price Per Bushel Average:
+PPB<-3.25
+```
+
+# Functions:
+
+```{r Functions, echo=FALSE, comment=NA, message=FALSE}
+## CV Function:
+CV<-function(model){
+  if(class(model)=="merMod"|class(model)=="merModLmerTest"|class(model)=="lmerMod"|class(model)=="lmerModLmerTest"){
+    GM<-mean(model@frame[,1])
+    MS<-sigma(model)**2
+return(paste(round(100*sqrt(MS)/GM,3)))
+  }
+  else(stop("model not of class merMod or merModLmerTest"))
+}
+```
+
+# District Data:
+
+```{r District_Data_Import, echo=FALSE, comment=NA, message=FALSE}
+## ALLYearly District Data:
+district.all<-read.csv(c(params$data),header=T,na.strings=c("", " ", "NA"))
+## Add Yield Values::
+district.all<-district.all%>%mutate(yld = (wt*CCF*(100-moist)/84.5))
+
+## Select District of Interest:
+data.dis<-filter(district.all, exp==c(params$exp))
+```
+
+## North Early (1A)
+
+```{r North_Early, echo=FALSE, comment=NA, message=FALSE}
+## North Early
+data.dis$book.name<-factor(data.dis$book.name)
+data.dis$exp<-factor(data.dis$exp)
+data.dis$plot<-factor(data.dis$plot)
+data.dis$rep<-factor(data.dis$rep)
+data.dis$entry<-factor(data.dis$entry)
+data.dis$pass<-factor(data.dis$pass)
+data.dis$rng<-factor(data.dis$rng)
+
+## Mixed model for generating LS Means for YIELD:
+model.yld<-lmer(yld~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data.dis, REML=TRUE)
+LSM.yld<-as.data.frame(emmeans(model.yld, spec="entry"))
+LSM.yld<-LSM.yld%>%select(entry, emmean)
+names(LSM.yld)[2]<-c("yld")
+
+## Mixed model for generating LS Means for MOISTURE:
+model.moist<-lmer(moist~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data.dis, REML=TRUE)
+LSM.moist<-as.data.frame(emmeans(model.moist, spec="entry"))
+LSM.moist<-LSM.moist%>%select(emmean)
+names(LSM.moist)[1]<-c("moist")
+
+District<-cbind(LSM.yld, LSM.moist)
+District$yld<-as.numeric(District$yld)
+District$moist<-as.numeric(District$moist)
+District<-District%>%mutate(wetyield=((yld*84.5)/(100-moist)))
+District<-District%>%mutate(moistureshrink=(1.183*(moist-15.5)))
+District<-District%>%mutate(totalshrink=(moistureshrink+0.5))
+District<-District%>%mutate(dryyield=(((100-totalshrink)/100)*wetyield))
+District<-District%>%mutate(grossvalue=(dryyield*PPB))
+District<-District%>%mutate(dryingcost=(wetyield*(moist-15.5)*.06))
+District<-District%>%mutate(AGV=(grossvalue-dryingcost))
+District<-District[,c(1,2,3,10)]
+```
+
+
+# Entry List (EL)
+
+```{r Entry_List_Data, echo=FALSE, comment=NA, message=FALSE}
+## Entry List Data Import::
+EL<-read.csv(c(params$list),header=T)
+
+## EL District Select
+disL<-filter(EL, book.name==c(params$exp))
+disL<-disL[!disL$private == "Yes", ]
+disL<-disL%>%select("company", "hybrid", "pedid", "code", "entry")
+```
+
+# Cold Storage (CS)
+
+```{r Cold_Storage_Data, echo=FALSE, comment=NA, message=FALSE}
+## Import Cold Storage Data:
+CS<-read.csv(c(params$storage),header=T)
+
+## Subset Cold Storage District of Interest:
+dis.CS<-subset(CS, pedid %in% disL$pedid)
+dis.CS<-dis.CS%>%select("pedid", "seedtrt", "traitpkg", "herbtech")
+```
+
+# Combine EL & CS
+
+```{r CS_EL_COMBO, echo=FALSE, comment=NA, message=FALSE}
+## Combine Cold Storage & Entry Lists
+dis.Combo<-left_join(disL, dis.CS)
+
+## Set "entry" back to Factor
+dis.Combo$entry<-factor(dis.Combo$entry)
+```
+
+# Combine with District Moistures & LSMS
+
+```{r Moist_LSM_and_CSEL_COMBO, echo=FALSE, comment=NA, message=FALSE}
+## Merge with District LSM and Moists
+dis.Combo<-left_join(dis.Combo, District)
+```
+
+
+# Single Location Data:
+
+```{r Single_Location_Data, echo=FALSE, comment=NA, message=FALSE}
+## Select Single Location Data
+F1<-filter(district.all, book.name==paste("CF", c(YR), c(DS), "1", sep="") & exp==c(params$exp))
+F2<-filter(district.all, book.name==paste("CF", c(YR), c(DS), "2", sep="") & exp==c(params$exp))
+# F3<-filter(district.all, book.name==paste("CF", c(YR), c(DS), "3", sep="") & exp==c(params$exp))
+F4<-filter(district.all, book.name==paste("CF", c(YR), c(DS), "4", sep="") & exp==c(params$exp))
+F5<-filter(district.all, book.name==paste("CF", c(YR), c(DS), "5", sep="") & exp==c(params$exp))
+```
+
+## Single Location Factors
+
+```{r Set_Single_Loc_Factors, echo=FALSE, comment=NA, message=FALSE}
+## Set Single Location Data Factors
+F1$book.name<-factor(F1$book.name)
+F1$exp<-factor(F1$exp)
+F1$entry<-factor(F1$entry)
+F1$rng<-factor(F1$rng)
+F1$pass<-factor(F1$pass)
+F1$rep<-factor(F1$rep)
+F2$book.name<-factor(F2$book.name)
+F2$exp<-factor(F2$exp)
+F2$entry<-factor(F2$entry)
+F2$rng<-factor(F2$rng)
+F2$pass<-factor(F2$pass)
+F2$rep<-factor(F2$rep)
+# F3$book.name<-factor(F3$book.name)
+# F3$exp<-factor(F3$exp)
+# F3$entry<-factor(F3$entry)
+# F3$rng<-factor(F3$rng)
+# F3$pass<-factor(F3$pass)
+# F3$rep<-factor(F3$rep)
+F4$book.name<-factor(F4$book.name)
+F4$exp<-factor(F4$exp)
+F4$entry<-factor(F4$entry)
+F4$rng<-factor(F4$rng)
+F4$pass<-factor(F4$pass)
+F4$rep<-factor(F4$rep)
+F5$book.name<-factor(F5$book.name)
+F5$exp<-factor(F5$exp)
+F5$entry<-factor(F5$entry)
+F5$rng<-factor(F5$rng)
+F5$pass<-factor(F5$pass)
+F5$rep<-factor(F5$rep)
+```
+
+## Single Location Models
+
+**USER MUST SELECT WHICH LOCATIONS WERE DROPPED!!**
+
+``` {r Single_Location_Models, echo=FALSE, comment=NA, message=FALSE}
+## Early:
+model1<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=F1, REML=TRUE)
+model2<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=F2, REML=TRUE)
+# model3<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=F3, REML=TRUE)
+model4<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=F4, REML=TRUE)
+model5<-lmer(yld~entry + (1 | rep) + (1|rep:pass) + (1 | rep:rng), data=F5, REML=TRUE)
+```
+
+## Single Location LS-Means (LSMs)
+
+```{r Single_Location_LSMs, echo=FALSE, comment=NA, message=FALSE}
+## Generate Single Location LSMs
+LSM1<-as.data.frame(emmeans(model1, spec="entry"))
+LSM1<-LSM1%>%select(entry, emmean)
+names(LSM1)[2]<-c("F1")
+LSM2<-as.data.frame(emmeans(model2, spec="entry"))
+LSM2<-LSM2%>%select(emmean)
+names(LSM2)[1]<-c("F2")
+# LSM3<-as.data.frame(emmeans(model3, spec="entry"))
+# LSM3<-LSM3%>%select(emmean)
+# names(LSM3)[1]<-c("F3")
+LSM4<-as.data.frame(emmeans(model4, spec="entry"))
+LSM4<-LSM4%>%select(emmean)
+names(LSM4)[1]<-c("F4")
+LSM5<-as.data.frame(emmeans(model5, spec="entry"))
+LSM5<-LSM5%>%select(emmean)
+names(LSM5)[1]<-c("F5")
+```
+
+### Combine Single Location LSMs
+
+```{r Single_Location_LSMs_COMBO, echo=FALSE, comment=NA, message=FALSE}
+## Location 3 NOT Included::
+LSMs<-cbind(LSM1, LSM2, LSM4, LSM5)
+
+## Set Factor
+LSMs$entry<-factor(LSMs$entry)
+```
+
+
+# E & W Yield Data
+
+```{r NNW.Data, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
+## Subset East and West Datasets
+East<-filter(data.dis, book.name==c(paste("CF", c(YR), c(DS), "1", sep="")) | book.name==c(paste("CF", c(YR), c(DS), "2", sep="")))
+West<-filter(data.dis, book.name==c(paste("CF", c(YR), c(DS), "4", sep="")) | book.name==c(paste("CF", c(YR), c(DS), "5", sep="")))
+
+## Location 3 Removed
+## c(paste("CF", c(YR), c(DS), "3", sep=""))
+```
+
+## East & West Arithmetic Means
+
+```{r EW.Means, comment=NA, echo=FALSE, message=FALSE}
+## Arithmetic Means
+## East
+East$entry<-factor(East$entry)
+M.East<-data.frame(aggregate(yld~entry, data=East, function(x) c(mean(x))))
+names(M.East)[2]<-c("Eyld")
+## West
+West$entry<-factor(West$entry)
+M.West<-data.frame(aggregate(yld~entry, data=West, function(x) c(mean(x))))
+names(M.West)[2]<-c("Wyld")
+```
+
+## Merge E & W
+
+```{r MergeW, comment=NA, echo=FALSE, message=FALSE}
+## Merge East and West
+M.Split<-left_join(M.East, M.West)
+```
+
+# Lodging Models & LSMs
+
+```{r Lodging, comment=NA, echo=FALSE, message=FALSE}
+## Lodging models and LSMs
+## Root
+model.rtldg<-lmer(rtldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data.dis, REML=TRUE)
+LSM.rtldg<-as.data.frame(emmeans(model.rtldg, spec="entry"))
+LSM.rtldg<-LSM.rtldg%>%select(entry, emmean)
+names(LSM.rtldg)[2]<-c("rtldg")
+## Stalk
+model.skldg<-lmer(skldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=data.dis, REML=TRUE)
+LSM.skldg<-as.data.frame(emmeans(model.skldg, spec="entry"))
+LSM.skldg<-LSM.skldg%>%select(entry, emmean)
+names(LSM.skldg)[2]<-c("skldg")
+
+## Merge
+ldg<-left_join(LSM.rtldg, LSM.skldg)
+```
+
+
+# District Merge & Rank
+
+```{r District.Merge.Rank, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
+## Add blank columns for excluded locations:
+## North = Exclude Location 3
+LSMs<-data.frame(append(LSMs, list(F3= ""), after =  3))
+## OR 
+## Central & South = Exclude Location 1
+# LSMs<-data.frame(append(LSMs, list(F1= ""), after =  1))
+
+## Combine EL/CS & LSMs:
+Combo<-left_join(dis.Combo, LSMs)
+
+
+## Combine COMBO directly above with E/W Split Yields:
+## NORTH
+Combo<-left_join(Combo, M.Split)
+
+## Combine COMBO directly above with E/W Split Yields:
+## NORTH
+Combo<-left_join(Combo, ldg)
+
+## ADD Rankings:
+Combo$yld.rank<-as.numeric(rank(-Combo$yld))
+```
+
+## Re-Arrange & Sort
+
+```{r Rearrange.Sort, comment=NA, echo=FALSE, message=FALSE}
+## Re-arrange
+Combo<-Combo[,c(1,2,7,8,9,21,17,18,10,19,20,11,12,13,14,15,16)]
+
+## Sort By Rank:
+Combo<-Combo[order(Combo$yld.rank),]
+```
+
+
+# District Summary Stats Tables
+
+```{r District.Stats.Table, echo=FALSE}
+## North Early
+## District Yield
+Combo.Mean<-mean(Combo$yld)
+Combo.Min<-min(Combo$yld)
+Combo.Max<-max(Combo$yld)
+Combo.CV<-CV(model.yld)
+Combo.lsd<-predictmeans(model.yld, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+Combo.LSD<-Combo.lsd[["LSD"]][["Aveg.LSD"]]
+## Moisture
+Moist.Mean<-mean(Combo$moist)
+Moist.Min<-min(Combo$moist)
+Moist.Max<-max(Combo$moist)
+Moist.lsd<-predictmeans(model.moist, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+Moist.LSD<-Moist.lsd[["LSD"]][["Aveg.LSD"]]
+## AGV
+AGV.Mean<-mean(Combo$AGV)
+AGV.Min<-min(Combo$AGV)
+AGV.Max<-max(Combo$AGV)
+## Root LDG
+rtldg.Mean<-mean(Combo$rtldg)
+rtldg.Min<-min(Combo$rtldg)
+rtldg.Max<-max(Combo$rtldg)
+rtldg.lsd<-predictmeans(model.rtldg, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+rtldg.LSD<-rtldg.lsd[["LSD"]][["Aveg.LSD"]]
+## Stalk LDG
+skldg.Mean<-mean(Combo$skldg)
+skldg.Min<-min(Combo$skldg)
+skldg.Max<-max(Combo$skldg)
+skldg.lsd<-predictmeans(model.skldg, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+skldg.LSD<-skldg.lsd[["LSD"]][["Aveg.LSD"]]
+## Single Location Yields
+## Location 1
+F1.Mean<-mean(LSM1$F1)
+F1.Min<-min(LSM1$F1)
+F1.Max<-max(LSM1$F1)
+F1.CV<-CV(model1)
+F1.lsd<-predictmeans(model1, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+F1.LSD<-F1.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 2
+F2.Mean<-mean(LSM2$F2)
+F2.Min<-min(LSM2$F2)
+F2.Max<-max(LSM2$F2)
+F2.CV<-CV(model2)
+F2.lsd<-predictmeans(model2, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+F2.LSD<-F2.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 3
+# F3.Mean<-mean(LSM3$F3)
+# F3.Min<-min(LSM3$F3)
+# F3.Max<-max(LSM3$F3)
+# F3.CV<-CV(model3)
+# F3.lsd<-predictmeans(model3, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+# F3.LSD<-F3.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+F4.Mean<-mean(LSM4$F4)
+F4.Min<-min(LSM4$F4)
+F4.Max<-max(LSM4$F4)
+F4.CV<-CV(model4)
+F4.lsd<-predictmeans(model4, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+F4.LSD<-F4.lsd[["LSD"]][["Aveg.LSD"]]
+## Location 4
+F5.Mean<-mean(LSM5$F5)
+F5.Min<-min(LSM5$F5)
+F5.Max<-max(LSM5$F5)
+F5.CV<-CV(model5)
+F5.lsd<-predictmeans(model5, "entry", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
+F5.LSD<-F5.lsd[["LSD"]][["Aveg.LSD"]]
+
+## COMBO Stats Table:
+Combo.Stats<- data.frame("Value" = c("Experiment Mean",	"Minimum Mean",	"Maximum Mean",	"LSD(0.25)", 	"Coefficient of Variability") ,"yldM" = as.numeric(c(Combo.Mean, Combo.Min, Combo.Max, Combo.LSD, Combo.CV)), "moistM" = as.numeric(c(Moist.Mean, Moist.Min, Moist.Max, Moist.LSD, "")), "rtldgM" = as.numeric(c(rtldg.Mean, rtldg.Min, rtldg.Max, rtldg.LSD, "")), "skldgM" = as.numeric(c(skldg.Mean, skldg.Min, skldg.Max, skldg.LSD, "")), "AGVM" = as.numeric(c(AGV.Mean, AGV.Min, AGV.Max, "", "")), "F1M" = as.numeric(c(F1.Mean, F1.Min, F1.Max, F1.LSD, F1.CV)), "F2M" = as.numeric(c(F2.Mean, F2.Min, F2.Max, F2.LSD, F2.CV)), "F4M" = as.numeric(c(F4.Mean, F4.Min, F4.Max, F4.LSD, F4.CV)), "F5M" = as.numeric(c(F5.Mean, F5.Min, F5.Max, F5.LSD, F5.CV)))
+## Round Digits:
+Combo.Stats$moistM<-as.numeric(Combo.Stats$moistM)
+Combo.Stats$AGVM<-as.numeric(Combo.Stats$AGVM)
+Combo.Stats%>%mutate_if(is.numeric, round, digits=2)
+
+## Add Blank Columns:
+Combo.Stats<-data.frame(append(Combo.Stats, list(hybrid= ""), after =  1))
+Combo.Stats<-data.frame(append(Combo.Stats, list(pkg= ""), after =  2))
+Combo.Stats<-data.frame(append(Combo.Stats, list(herb= ""), after =  3))
+Combo.Stats<-data.frame(append(Combo.Stats, list(dist.rank= ""), after =  5))
+Combo.Stats<-data.frame(append(Combo.Stats, list(nw.yld= ""), after =  6))
+Combo.Stats<-data.frame(append(Combo.Stats, list(ne.yld= ""), after =  7))
+Combo.Stats<-data.frame(append(Combo.Stats, list(F3M= ""), after =  14))
+```
+
+
+# EXPORT!
+
+```{r Export.to.Formattedxcel, comment=NA, echo=FALSE, message=FALSE}
+## Load Excel File
+wb<-loadWorkbook("District_Corn_Web.xlsx", create=FALSE)
+setStyleAction(wb,XLC$"STYLE_ACTION.NONE")
+
+## Write to designated worksheets
+writeWorksheet(wb, Combo, c(params$tab), startRow=5, startCol=1, header=FALSE)
+writeWorksheet(wb, Combo.Stats, c(params$tab), startRow=50, startCol=1, header=FALSE)
+
+## Summary Stats "startRow" Help:
+## N_Early = 50
+## N_Full = 51
+## C_Early = 58
+## C_Full = 58
+## S_Early = 50
+## S_Full = 42
+
+## Save Excel file:
+saveWorkbook(wb)
+```
