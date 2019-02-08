@@ -986,21 +986,25 @@ model.N_Early.rtldg<-lmer(rtldg~entry + book.name + rep:book.name + (1|pass:book
 LSM.N_Early.rtldg<-as.data.frame(emmeans(model.N_Early.rtldg, spec="entry"))
 LSM.N_Early.rtldg<-LSM.N_Early.rtldg%>%select(entry, emmean)
 names(LSM.N_Early.rtldg)[2]<-c("NE.rtldg")
+LSM.N_Early.rtldg$NE.rtldg[LSM.N_Early.rtldg$NE.rtldg<0] <- 0
 ## North Early - Stalk
 model.N_Early.skldg<-lmer(skldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=N_Early, REML=TRUE)
 LSM.N_Early.skldg<-as.data.frame(emmeans(model.N_Early.skldg, spec="entry"))
 LSM.N_Early.skldg<-LSM.N_Early.skldg%>%select(entry, emmean)
 names(LSM.N_Early.skldg)[2]<-c("NE.skldg")
+LSM.N_Early.skldg$NE.skldg[LSM.N_Early.skldg$NE.skldg<0] <- 0
 ## North Full - Root
 model.N_Full.rtldg<-lmer(rtldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=N_Full, REML=TRUE)
 LSM.N_Full.rtldg<-as.data.frame(emmeans(model.N_Full.rtldg, spec="entry"))
 LSM.N_Full.rtldg<-LSM.N_Full.rtldg%>%select(entry, emmean)
 names(LSM.N_Full.rtldg)[2]<-c("NF.rtldg")
+LSM.N_Full.rtldg$NF.rtldg[LSM.N_Full.rtldg$NF.rtldg<0] <- 0
 ## North Full - Stalk
 model.N_Full.skldg<-lmer(skldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=N_Full, REML=TRUE)
 LSM.N_Full.skldg<-as.data.frame(emmeans(model.N_Full.skldg, spec="entry"))
 LSM.N_Full.skldg<-LSM.N_Full.skldg%>%select(entry, emmean)
 names(LSM.N_Full.skldg)[2]<-c("NF.skldg")
+LSM.N_Full.skldg$NF.skldg[LSM.N_Full.skldg$NF.skldg<0] <- 0
 
 ## CENTRAL
 ## Central Early - Root
@@ -1008,21 +1012,25 @@ model.C_Early.rtldg<-lmer(rtldg~entry + book.name + rep:book.name + (1|pass:book
 LSM.C_Early.rtldg<-as.data.frame(emmeans(model.C_Early.rtldg, spec="entry"))
 LSM.C_Early.rtldg<-LSM.C_Early.rtldg%>%select(entry, emmean)
 names(LSM.C_Early.rtldg)[2]<-c("CE.rtldg")
+LSM.C_Early.rtldg$CE.rtldg[LSM.C_Early.rtldg$CE.rtldg<0] <- 0
 ## Central Early - Stalk
 model.C_Early.skldg<-lmer(skldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=C_Early, REML=TRUE)
 LSM.C_Early.skldg<-as.data.frame(emmeans(model.C_Early.skldg, spec="entry"))
 LSM.C_Early.skldg<-LSM.C_Early.skldg%>%select(entry, emmean)
 names(LSM.C_Early.skldg)[2]<-c("CE.skldg")
+LSM.C_Early.skldg$CE.skldg[LSM.C_Early.skldg$CE.skldg<0] <- 0
 ## Central Full - Root
 model.C_Full.rtldg<-lmer(rtldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=C_Full, REML=TRUE)
 LSM.C_Full.rtldg<-as.data.frame(emmeans(model.C_Full.rtldg, spec="entry"))
 LSM.C_Full.rtldg<-LSM.C_Full.rtldg%>%select(entry, emmean)
 names(LSM.C_Full.rtldg)[2]<-c("CF.rtldg")
+LSM.C_Full.rtldg$CF.rtldg[LSM.C_Full.rtldg$CF.rtldg<0] <- 0
 ## Central Full - Stalk
 model.C_Full.skldg<-lmer(skldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=C_Full, REML=TRUE)
 LSM.C_Full.skldg<-as.data.frame(emmeans(model.C_Full.skldg, spec="entry"))
 LSM.C_Full.skldg<-LSM.C_Full.skldg%>%select(entry, emmean)
 names(LSM.C_Full.skldg)[2]<-c("CF.skldg")
+LSM.C_Full.skldg$CF.skldg[LSM.C_Full.skldg$CF.skldg<0] <- 0
 
 ## SOUTH
 ## South Early - Root
@@ -1030,21 +1038,25 @@ model.S_Early.rtldg<-lmer(rtldg~entry + book.name + rep:book.name + (1|pass:book
 LSM.S_Early.rtldg<-as.data.frame(emmeans(model.S_Early.rtldg, spec="entry"))
 LSM.S_Early.rtldg<-LSM.S_Early.rtldg%>%select(entry, emmean)
 names(LSM.S_Early.rtldg)[2]<-c("SE.rtldg")
+LSM.S_Early.rtldg$sE.rtldg[LSM.S_Early.rtldg$SE.rtldg<0] <- 0
 ## South Early - Stalk
 model.S_Early.skldg<-lmer(skldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=S_Early, REML=TRUE)
 LSM.S_Early.skldg<-as.data.frame(emmeans(model.S_Early.skldg, spec="entry"))
 LSM.S_Early.skldg<-LSM.S_Early.skldg%>%select(entry, emmean)
 names(LSM.S_Early.skldg)[2]<-c("SE.skldg")
+LSM.S_Early.skldg$SE.skldg[LSM.S_Early.skldg$SE.skldg<0] <- 0
 ## South Full - Root
 model.S_Full.rtldg<-lmer(rtldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=S_Full, REML=TRUE)
 LSM.S_Full.rtldg<-as.data.frame(emmeans(model.S_Full.rtldg, spec="entry"))
 LSM.S_Full.rtldg<-LSM.S_Full.rtldg%>%select(entry, emmean)
 names(LSM.S_Full.rtldg)[2]<-c("SF.rtldg")
+LSM.S_Full.rtldg$SF.rtldg[LSM.S_Full.rtldg$SF.rtldg<0] <- 0
 ## South Full - Stalk
 model.S_Full.skldg<-lmer(skldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=S_Full, REML=TRUE)
 LSM.S_Full.skldg<-as.data.frame(emmeans(model.S_Full.skldg, spec="entry"))
 LSM.S_Full.skldg<-LSM.S_Full.skldg%>%select(entry, emmean)
 names(LSM.S_Full.skldg)[2]<-c("SF.skldg")
+LSM.S_Full.skldg$SF.skldg[LSM.S_Full.skldg$SF.skldg<0] <- 0
 
 ## Arithmetic Means::
 # ## NORTH
