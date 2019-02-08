@@ -1038,7 +1038,7 @@ model.S_Early.rtldg<-lmer(rtldg~entry + book.name + rep:book.name + (1|pass:book
 LSM.S_Early.rtldg<-as.data.frame(emmeans(model.S_Early.rtldg, spec="entry"))
 LSM.S_Early.rtldg<-LSM.S_Early.rtldg%>%select(entry, emmean)
 names(LSM.S_Early.rtldg)[2]<-c("SE.rtldg")
-LSM.S_Early.rtldg$sE.rtldg[LSM.S_Early.rtldg$SE.rtldg<0] <- 0
+LSM.S_Early.rtldg$SE.rtldg[LSM.S_Early.rtldg$SE.rtldg<0] <- 0
 ## South Early - Stalk
 model.S_Early.skldg<-lmer(skldg~entry + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|entry:book.name), data=S_Early, REML=TRUE)
 LSM.S_Early.skldg<-as.data.frame(emmeans(model.S_Early.skldg, spec="entry"))
