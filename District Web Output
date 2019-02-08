@@ -875,9 +875,6 @@ SF.LSMs<-cbind(S.F.LSM2, S.F.LSM3, S.F.LSM4, S.F.LSM5)
 # E & W Yield Data
 
 ```{r NE.NW.Data, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
-# E & W Yield Data
-
-```{r NE.NW.Data, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
 ## NORTH
 ## Excluding Location 3, LOCATION DROPPED!
 ## North Early:
