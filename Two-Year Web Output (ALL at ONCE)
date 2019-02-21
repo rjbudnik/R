@@ -710,33 +710,6 @@ SF.West<-filter(S_Full, book.name==c(paste("CF", c(YR), "33", sep="")) | book.na
 ```
 
 
-# Data Visualization: {.tabset .tabset-fade}
-
-## Summary
-
-```{r summary, echo = FALSE, cols.print=15, warning=FALSE}
-data.small<-data%>%select("code","wt","moist","yld")
-described<-describe(data.small, skew=FALSE, ranges=TRUE)
-paged_table(described, options(scipen=999, digits=4))
-```
-
-## Histograms
-
-```{r histo.yld, echo = FALSE, fig.width=10, fig.height=6.5}
-histo<-hist(data$yld, breaks=seq(0,350, l=150), col="purple", main="Distribution of Yield", xlab="Yield")
-```
-
-## Barplots
-
-``` {r bar.yld, echo = FALSE, fig.width=10, fig.height=7}
-barplot(data$yld, names.arg=data$code, ylim=c(0,300), main="Distribution of Yield", ylab="Yield", xlab="Code", cex.names=.5)
-```
-
-## Boxplot
-
-``` {r boxplot, comments=NA, echo = FALSE, fig.width=10, fig.height=7, message=FALSE}
-Boxplot(data$yld~data$code,id=TRUE, main="2018 Yield Across Entries", xlab="Code", ylab="Yld", las=2)
-```
 
 
 # Mixed Model Analyses: {.tabset .tabset-fade}
