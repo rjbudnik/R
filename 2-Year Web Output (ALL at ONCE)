@@ -361,18 +361,6 @@ CF.ymodel<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + 
 SE.ymodel<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=SE, REML=TRUE)
 ## South Full
 SF.ymodel<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=SF, REML=TRUE)
-
-
-## Subset codes that appear in previous year:
-# I don't think this first line is needed, only the "data.LSM" line
-    # data.LSM1<-subset(NE.Combo, code %in% C.N_Early$code)
-# Use these!
-NE.2yr<-subset(NE.Combo, code %in% P.N_Early$code)
-NF.2yr<-subset(NF.Combo, code %in% P.N_Full$code)
-CE.2yr<-subset(CE.Combo, code %in% P.C_Early$code)
-CF.2yr<-subset(CF.Combo, code %in% P.C_Full$code)
-SE.2yr<-subset(SE.Combo, code %in% P.S_Early$code)
-SF.2yr<-subset(SF.Combo, code %in% P.S_Full$code)
 ```
 
 ## Yield LSMs
@@ -678,176 +666,545 @@ SF.Combo<-left_join(SF.Combo,SF.combo)
 ```
 
 
-# E & W Yield Data
+# E & W Year's Data
 
-```{r NE.NW.Data, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
+## Previous
+
+```{r P.NE.NW.Data, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
+## NORTH
+## NO Locations dropped.
+## North Early:
+NE.East.P<-filter(N_Early, book.name==c(paste("CF", c(PYR), "11", sep="")) | book.name==c(paste("CF", c(PYR), "12", sep="")) | book.name==c(paste("CF", c(PYR), "13", sep="")))
+NE.West.P<-filter(N_Early, book.name==c(paste("CF", c(PYR), "13", sep="")) | book.name==c(paste("CF", c(PYR), "14", sep="")) | book.name==c(paste("CF", c(PYR), "15", sep="")))
+## North Full:
+NF.East.P<-filter(N_Full, book.name==c(paste("CF", c(PYR), "11", sep="")) | book.name==c(paste("CF", c(PYR), "12", sep="")) | book.name==c(paste("CF", c(PYR), "13", sep="")))
+NF.West.P<-filter(N_Full, book.name==c(paste("CF", c(PYR), "13", sep="")) | book.name==c(paste("CF", c(PYR), "11", sep="")) | book.name==c(paste("CF", c(PYR), "12", sep="")))
+
+## CENTRAL
+## NO Locations dropped.
+## Central Early:
+CE.East.P<-filter(C_Early, book.name==c(paste("CF", c(PYR), "21", sep="")) | book.name==c(paste("CF", c(PYR), "22", sep="")) | book.name==c(paste("CF", c(PYR), "23", sep="")))
+CE.West.P<-filter(C_Early, book.name==c(paste("CF", c(PYR), "23", sep="")) | book.name==c(paste("CF", c(PYR), "24", sep="")) | book.name==c(paste("CF", c(PYR), "25", sep="")))
+## Central Full:
+CF.East.P<-filter(C_Full, book.name==c(paste("CF", c(PYR), "21", sep="")) | book.name==c(paste("CF", c(PYR), "22", sep="")) | book.name==c(paste("CF", c(PYR), "23", sep="")))
+CF.West.P<-filter(C_Full, book.name==c(paste("CF", c(PYR), "23", sep="")) | book.name==c(paste("CF", c(PYR), "24", sep="")) | book.name==c(paste("CF", c(PYR), "25", sep="")))
+
+## SOUTH
+## NO Locations dropped.
+## South Early:
+SE.East.P<-filter(S_Early, book.name==c(paste("CF", c(PYR), "31", sep="")) | book.name==c(paste("CF", c(PYR), "32", sep="")) | book.name==c(paste("CF", c(PYR), "33", sep="")))
+SE.West.P<-filter(S_Early, book.name==c(paste("CF", c(PYR), "33", sep="")) | book.name==c(paste("CF", c(PYR), "34", sep="")) | book.name==c(paste("CF", c(PYR), "35", sep="")))
+## South Full:
+SF.East.P<-filter(S_Full, book.name==c(paste("CF", c(PYR), "31", sep="")) | book.name==c(paste("CF", c(PYR), "32", sep="")) | book.name==c(paste("CF", c(PYR), "33", sep="")))
+SF.West.P<-filter(S_Full, book.name==c(paste("CF", c(PYR), "33", sep="")) | book.name==c(paste("CF", c(PYR), "34", sep="")) | book.name==c(paste("CF", c(PYR), "35", sep="")))
+```
+
+## Current
+
+```{r C.NE.NW.Data, comment=NA, echo=FALSE, message=FALSE, warning=FALSE}
 ## NORTH
 ## Excluding Location 3, LOCATION DROPPED!
 ## North Early:
-NE.East<-filter(N_Early, book.name==c(paste("CF", c(YR), "11", sep="")) | book.name==c(paste("CF", c(YR), "12", sep="")))
-NE.West<-filter(N_Early, book.name==c(paste("CF", c(YR), "14", sep="")) | book.name==c(paste("CF", c(YR), "15", sep="")))
+NE.East.C<-filter(N_Early, book.name==c(paste("CF", c(YR), "11", sep="")) | book.name==c(paste("CF", c(YR), "12", sep="")))
+NE.West.C<-filter(N_Early, book.name==c(paste("CF", c(YR), "14", sep="")) | book.name==c(paste("CF", c(YR), "15", sep="")))
 ## North Full:
-NF.East<-filter(N_Full, book.name==c(paste("CF", c(YR), "11", sep="")) | book.name==c(paste("CF", c(YR), "12", sep="")))
-NF.West<-filter(N_Full, book.name==c(paste("CF", c(YR), "11", sep="")) | book.name==c(paste("CF", c(YR), "12", sep="")))
+NF.East.C<-filter(N_Full, book.name==c(paste("CF", c(YR), "11", sep="")) | book.name==c(paste("CF", c(YR), "12", sep="")))
+NF.West.C<-filter(N_Full, book.name==c(paste("CF", c(YR), "11", sep="")) | book.name==c(paste("CF", c(YR), "12", sep="")))
 
 ## CENTRAL
 ## Excluding Location 1, LOCATION DROPPED!
 ## Central Early:
-CE.East<-filter(C_Early, book.name==c(paste("CF", c(YR), "22", sep="")) | book.name==c(paste("CF", c(YR), "23", sep="")))
-CE.West<-filter(C_Early, book.name==c(paste("CF", c(YR), "23", sep="")) | book.name==c(paste("CF", c(YR), "24", sep="")) | book.name==c(paste("CF", c(YR), "25", sep="")))
+CE.East.C<-filter(C_Early, book.name==c(paste("CF", c(YR), "22", sep="")) | book.name==c(paste("CF", c(YR), "23", sep="")))
+CE.West.C<-filter(C_Early, book.name==c(paste("CF", c(YR), "23", sep="")) | book.name==c(paste("CF", c(YR), "24", sep="")) | book.name==c(paste("CF", c(YR), "25", sep="")))
 ## Central Full:
-CF.East<-filter(C_Full, book.name==c(paste("CF", c(YR), "22", sep="")) | book.name==c(paste("CF", c(YR), "23", sep="")))
-CF.West<-filter(C_Full, book.name==c(paste("CF", c(YR), "23", sep="")) | book.name==c(paste("CF", c(YR), "24", sep="")) | book.name==c(paste("CF", c(YR), "25", sep="")))
+CF.East.C<-filter(C_Full, book.name==c(paste("CF", c(YR), "22", sep="")) | book.name==c(paste("CF", c(YR), "23", sep="")))
+CF.West.C<-filter(C_Full, book.name==c(paste("CF", c(YR), "23", sep="")) | book.name==c(paste("CF", c(YR), "24", sep="")) | book.name==c(paste("CF", c(YR), "25", sep="")))
 
 ## SOUTH
 ## Excluding Location 1, LOCATION DROPPED!
 ## South Early:
-SE.East<-filter(S_Early, book.name==c(paste("CF", c(YR), "32", sep="")) | book.name==c(paste("CF", c(YR), "33", sep="")))
-SE.West<-filter(S_Early, book.name==c(paste("CF", c(YR), "33", sep="")) | book.name==c(paste("CF", c(YR), "34", sep="")) | book.name==c(paste("CF", c(YR), "35", sep="")))
+SE.East.C<-filter(S_Early, book.name==c(paste("CF", c(YR), "32", sep="")) | book.name==c(paste("CF", c(YR), "33", sep="")))
+SE.West.C<-filter(S_Early, book.name==c(paste("CF", c(YR), "33", sep="")) | book.name==c(paste("CF", c(YR), "34", sep="")) | book.name==c(paste("CF", c(YR), "35", sep="")))
 ## South Full:
-SF.East<-filter(S_Full, book.name==c(paste("CF", c(YR), "32", sep="")) | book.name==c(paste("CF", c(YR), "33", sep="")))
-SF.West<-filter(S_Full, book.name==c(paste("CF", c(YR), "33", sep="")) | book.name==c(paste("CF", c(YR), "34", sep="")) | book.name==c(paste("CF", c(YR), "35", sep="")))
+SF.East.C<-filter(S_Full, book.name==c(paste("CF", c(YR), "32", sep="")) | book.name==c(paste("CF", c(YR), "33", sep="")))
+SF.West.C<-filter(S_Full, book.name==c(paste("CF", c(YR), "33", sep="")) | book.name==c(paste("CF", c(YR), "34", sep="")) | book.name==c(paste("CF", c(YR), "35", sep="")))
+```
+
+# Seperate Columns of Interest
+
+## Current Year:
+
+```{r current.columns.of.interest.ew, echo=FALSE}
+## NORTH
+NE.East.C<-NE.East.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+NE.West.C<-NE.West.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+NF.East.C<-NF.East.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+NF.West.C<-NF.West.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+
+## CENTRAL
+CE.East.C<-CE.East.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+CE.West.C<-CE.West.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+CF.East.C<-CF.East.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+CF.West.C<-CF.West.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+
+## SOUTH
+SE.East.C<-SE.East.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+SE.West.C<-SE.West.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+SF.East.C<-SF.East.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+SF.West.C<-SF.West.C%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+```
+
+## Previous Year:
+
+```{r previous.columns.of.interest.ew, echo=FALSE}
+## NORTH
+NE.East.P<-NE.East.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+NE.West.P<-NE.West.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+NF.East.P<-NF.East.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+NF.West.P<-NF.West.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+
+## CENTRAL
+CE.East.P<-CE.East.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+CE.West.P<-CE.West.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+CF.East.P<-CF.East.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+CF.West.P<-CF.West.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+
+## SOUTH
+SE.East.P<-SE.East.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+SE.West.P<-SE.West.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+SF.East.P<-SF.East.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
+SF.West.P<-SF.West.P%>%select("book.name","exp","rep","entry","plot","pass","rng","wt","moist","rtldg","skldg","ped.id","code","yld")
 ```
 
 
+# Set Factors
 
+## Current Year:
 
-# Mixed Model Analyses: {.tabset .tabset-fade}
+```{r set.current.factors.ew, echo=FALSE}
+## NORTH
+## EARLY
+## North Early - East (Current Yr)::
+NE.East.C$book.name<-factor(NE.East.C$book.name)
+NE.East.C$exp<-factor(NE.East.C$exp)
+NE.East.C$plot<-factor(NE.East.C$plot)
+NE.East.C$rep<-factor(NE.East.C$rep)
+NE.East.C$entry<-factor(NE.East.C$entry)
+NE.East.C$pass<-factor(NE.East.C$pass)
+NE.East.C$rng<-factor(NE.East.C$rng)
+NE.East.C$code<-factor(NE.East.C$code)
+NE.East.C$ped.id<-factor(NE.East.C$ped.id)
+## North Early - West (Current Yr)::
+NE.West.C$book.name<-factor(NE.West.C$book.name)
+NE.West.C$exp<-factor(NE.West.C$exp)
+NE.West.C$plot<-factor(NE.West.C$plot)
+NE.West.C$rep<-factor(NE.West.C$rep)
+NE.West.C$entry<-factor(NE.West.C$entry)
+NE.West.C$pass<-factor(NE.West.C$pass)
+NE.West.C$rng<-factor(NE.West.C$rng)
+NE.West.C$code<-factor(NE.West.C$code)
+NE.West.C$ped.id<-factor(NE.West.C$ped.id)
 
-**YIELD = G + E + Rep(E)**
+## FULL
+## North Full - East (Current Yr)::
+NF.East.C$book.name<-factor(NF.East.C$book.name)
+NF.East.C$exp<-factor(NF.East.C$exp)
+NF.East.C$plot<-factor(NF.East.C$plot)
+NF.East.C$rep<-factor(NF.East.C$rep)
+NF.East.C$entry<-factor(NF.East.C$entry)
+NF.East.C$pass<-factor(NF.East.C$pass)
+NF.East.C$rng<-factor(NF.East.C$rng)
+NF.East.C$code<-factor(NF.East.C$code)
+NF.East.C$ped.id<-factor(NF.East.C$ped.id)
+## North Full - West (Current Yr)::
+NF.West.C$book.name<-factor(NF.West.C$book.name)
+NF.West.C$exp<-factor(NF.West.C$exp)
+NF.West.C$plot<-factor(NF.West.C$plot)
+NF.West.C$rep<-factor(NF.West.C$rep)
+NF.West.C$entry<-factor(NF.West.C$entry)
+NF.West.C$pass<-factor(NF.West.C$pass)
+NF.West.C$rng<-factor(NF.West.C$rng)
+NF.West.C$code<-factor(NF.West.C$code)
+NF.West.C$ped.id<-factor(NF.West.C$ped.id)
 
-* RANDOM = + Pass(Rep(E)) + Rng(Rep(E)) + G(E)
+## CENTRAL
+## EARLY
+## Central Early - East (Current Yr)::
+CE.East.C$book.name<-factor(CE.East.C$book.name)
+CE.East.C$exp<-factor(CE.East.C$exp)
+CE.East.C$plot<-factor(CE.East.C$plot)
+CE.East.C$rep<-factor(CE.East.C$rep)
+CE.East.C$entry<-factor(CE.East.C$entry)
+CE.East.C$pass<-factor(CE.East.C$pass)
+CE.East.C$rng<-factor(CE.East.C$rng)
+CE.East.C$code<-factor(CE.East.C$code)
+CE.East.C$ped.id<-factor(CE.East.C$ped.id)
+## Central Early - West (Current Yr)::
+CE.West.C$book.name<-factor(CE.West.C$book.name)
+CE.West.C$exp<-factor(CE.West.C$exp)
+CE.West.C$plot<-factor(CE.West.C$plot)
+CE.West.C$rep<-factor(CE.West.C$rep)
+CE.West.C$entry<-factor(CE.West.C$entry)
+CE.West.C$pass<-factor(CE.West.C$pass)
+CE.West.C$rng<-factor(CE.West.C$rng)
+CE.West.C$code<-factor(CE.West.C$code)
+CE.West.C$ped.id<-factor(CE.West.C$ped.id)
 
-```{r 2.year.model, comment=NA, echo=FALSE, message=FALSE}
-## Linear Mixed Model by 2-Year code
-model<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=data, REML=TRUE)
+## FULL
+## Central Full - East (Current Yr)::
+CF.East.C$book.name<-factor(CF.East.C$book.name)
+CF.East.C$exp<-factor(CF.East.C$exp)
+CF.East.C$plot<-factor(CF.East.C$plot)
+CF.East.C$rep<-factor(CF.East.C$rep)
+CF.East.C$entry<-factor(CF.East.C$entry)
+CF.East.C$pass<-factor(CF.East.C$pass)
+CF.East.C$rng<-factor(CF.East.C$rng)
+CF.East.C$code<-factor(CF.East.C$code)
+CF.East.C$ped.id<-factor(CF.East.C$ped.id)
+## Central Full - West (Current Yr)::
+CF.West.C$book.name<-factor(CF.West.C$book.name)
+CF.West.C$exp<-factor(CF.West.C$exp)
+CF.West.C$plot<-factor(CF.West.C$plot)
+CF.West.C$rep<-factor(CF.West.C$rep)
+CF.West.C$entry<-factor(CF.West.C$entry)
+CF.West.C$pass<-factor(CF.West.C$pass)
+CF.West.C$rng<-factor(CF.West.C$rng)
+CF.West.C$code<-factor(CF.West.C$code)
+CF.West.C$ped.id<-factor(CF.West.C$ped.id)
 
-## Subset codes that appear in previous year:
-# data.LSM1<-subset(LSM.Code, code %in% data.C$code)
-# data.LSM2<-subset(data.LSM1, code %in% data.P$code)
+## SOUTH
+## EARLY
+## South Early - East (Current Yr)::
+SE.East.C$book.name<-factor(SE.East.C$book.name)
+SE.East.C$exp<-factor(SE.East.C$exp)
+SE.East.C$plot<-factor(SE.East.C$plot)
+SE.East.C$rep<-factor(SE.East.C$rep)
+SE.East.C$entry<-factor(SE.East.C$entry)
+SE.East.C$pass<-factor(SE.East.C$pass)
+SE.East.C$rng<-factor(SE.East.C$rng)
+SE.East.C$code<-factor(SE.East.C$code)
+SE.East.C$ped.id<-factor(SE.East.C$ped.id)
+## South Early - West (Current Yr)::
+SE.West.C$book.name<-factor(SE.West.C$book.name)
+SE.West.C$exp<-factor(SE.West.C$exp)
+SE.West.C$plot<-factor(SE.West.C$plot)
+SE.West.C$rep<-factor(SE.West.C$rep)
+SE.West.C$entry<-factor(SE.West.C$entry)
+SE.West.C$pass<-factor(SE.West.C$pass)
+SE.West.C$rng<-factor(SE.West.C$rng)
+SE.West.C$code<-factor(SE.West.C$code)
+SE.West.C$ped.id<-factor(SE.West.C$ped.id)
+
+## FULL
+## South Full - East (Current Yr)::
+SF.East.C$book.name<-factor(SF.East.C$book.name)
+SF.East.C$exp<-factor(SF.East.C$exp)
+SF.East.C$plot<-factor(SF.East.C$plot)
+SF.East.C$rep<-factor(SF.East.C$rep)
+SF.East.C$entry<-factor(SF.East.C$entry)
+SF.East.C$pass<-factor(SF.East.C$pass)
+SF.East.C$rng<-factor(SF.East.C$rng)
+SF.East.C$code<-factor(SF.East.C$code)
+SF.East.C$ped.id<-factor(SF.East.C$ped.id)
+## South Full - West (Current Yr)::
+SF.West.C$book.name<-factor(SF.West.C$book.name)
+SF.West.C$exp<-factor(SF.West.C$exp)
+SF.West.C$plot<-factor(SF.West.C$plot)
+SF.West.C$rep<-factor(SF.West.C$rep)
+SF.West.C$entry<-factor(SF.West.C$entry)
+SF.West.C$pass<-factor(SF.West.C$pass)
+SF.West.C$rng<-factor(SF.West.C$rng)
+SF.West.C$code<-factor(SF.West.C$code)
+SF.West.C$ped.id<-factor(SF.West.C$ped.id)
 ```
 
-## Least Square (LS) Means
+## Previous Year:
 
-+ Observed Means: Regular arithmetic means that can be computed by hand directly on your data without reference to any statistical model.
+```{r set.previous.factors.ew, echo=FALSE}
+## NORTH
+## EARLY
+## North Early - East (Current Yr)::
+NE.East.P$book.name<-factor(NE.East.P$book.name)
+NE.East.P$exp<-factor(NE.East.P$exp)
+NE.East.P$plot<-factor(NE.East.P$plot)
+NE.East.P$rep<-factor(NE.East.P$rep)
+NE.East.P$entry<-factor(NE.East.P$entry)
+NE.East.P$pass<-factor(NE.East.P$pass)
+NE.East.P$rng<-factor(NE.East.P$rng)
+NE.East.P$code<-factor(NE.East.P$code)
+NE.East.P$ped.id<-factor(NE.East.P$ped.id)
+## North Early - West (Current Yr)::
+NE.West.P$book.name<-factor(NE.West.P$book.name)
+NE.West.P$exp<-factor(NE.West.P$exp)
+NE.West.P$plot<-factor(NE.West.P$plot)
+NE.West.P$rep<-factor(NE.West.P$rep)
+NE.West.P$entry<-factor(NE.West.P$entry)
+NE.West.P$pass<-factor(NE.West.P$pass)
+NE.West.P$rng<-factor(NE.West.P$rng)
+NE.West.P$code<-factor(NE.West.P$code)
+NE.West.P$ped.id<-factor(NE.West.P$ped.id)
 
-+ **Least Squares Means (LS Means):** Means that are computed based on a linear model such as ANOVA.
+## FULL
+## North Full - East (Current Yr)::
+NF.East.P$book.name<-factor(NF.East.P$book.name)
+NF.East.P$exp<-factor(NF.East.P$exp)
+NF.East.P$plot<-factor(NF.East.P$plot)
+NF.East.P$rep<-factor(NF.East.P$rep)
+NF.East.P$entry<-factor(NF.East.P$entry)
+NF.East.P$pass<-factor(NF.East.P$pass)
+NF.East.P$rng<-factor(NF.East.P$rng)
+NF.East.P$code<-factor(NF.East.P$code)
+NF.East.P$ped.id<-factor(NF.East.P$ped.id)
+## North Full - West (Current Yr)::
+NF.West.P$book.name<-factor(NF.West.P$book.name)
+NF.West.P$exp<-factor(NF.West.P$exp)
+NF.West.P$plot<-factor(NF.West.P$plot)
+NF.West.P$rep<-factor(NF.West.P$rep)
+NF.West.P$entry<-factor(NF.West.P$entry)
+NF.West.P$pass<-factor(NF.West.P$pass)
+NF.West.P$rng<-factor(NF.West.P$rng)
+NF.West.P$code<-factor(NF.West.P$code)
+NF.West.P$ped.id<-factor(NF.West.P$ped.id)
 
-```{r lsm.by.entry, comment=NA, echo=FALSE, cols.print=8, rows.print=15, message=FALSE}
+## CENTRAL
+## EARLY
+## Central Early - East (Current Yr)::
+CE.East.P$book.name<-factor(CE.East.P$book.name)
+CE.East.P$exp<-factor(CE.East.P$exp)
+CE.East.P$plot<-factor(CE.East.P$plot)
+CE.East.P$rep<-factor(CE.East.P$rep)
+CE.East.P$entry<-factor(CE.East.P$entry)
+CE.East.P$pass<-factor(CE.East.P$pass)
+CE.East.P$rng<-factor(CE.East.P$rng)
+CE.East.P$code<-factor(CE.East.P$code)
+CE.East.P$ped.id<-factor(CE.East.P$ped.id)
+## Central Early - West (Current Yr)::
+CE.West.P$book.name<-factor(CE.West.P$book.name)
+CE.West.P$exp<-factor(CE.West.P$exp)
+CE.West.P$plot<-factor(CE.West.P$plot)
+CE.West.P$rep<-factor(CE.West.P$rep)
+CE.West.P$entry<-factor(CE.West.P$entry)
+CE.West.P$pass<-factor(CE.West.P$pass)
+CE.West.P$rng<-factor(CE.West.P$rng)
+CE.West.P$code<-factor(CE.West.P$code)
+CE.West.P$ped.id<-factor(CE.West.P$ped.id)
+
+## FULL
+## Central Full - East (Current Yr)::
+CF.East.P$book.name<-factor(CF.East.P$book.name)
+CF.East.P$exp<-factor(CF.East.P$exp)
+CF.East.P$plot<-factor(CF.East.P$plot)
+CF.East.P$rep<-factor(CF.East.P$rep)
+CF.East.P$entry<-factor(CF.East.P$entry)
+CF.East.P$pass<-factor(CF.East.P$pass)
+CF.East.P$rng<-factor(CF.East.P$rng)
+CF.East.P$code<-factor(CF.East.P$code)
+CF.East.P$ped.id<-factor(CF.East.P$ped.id)
+## Central Full - West (Current Yr)::
+CF.West.P$book.name<-factor(CF.West.P$book.name)
+CF.West.P$exp<-factor(CF.West.P$exp)
+CF.West.P$plot<-factor(CF.West.P$plot)
+CF.West.P$rep<-factor(CF.West.P$rep)
+CF.West.P$entry<-factor(CF.West.P$entry)
+CF.West.P$pass<-factor(CF.West.P$pass)
+CF.West.P$rng<-factor(CF.West.P$rng)
+CF.West.P$code<-factor(CF.West.P$code)
+CF.West.P$ped.id<-factor(CF.West.P$ped.id)
+
+## SOUTH
+## EARLY
+## South Early - East (Current Yr)::
+SE.East.P$book.name<-factor(SE.East.P$book.name)
+SE.East.P$exp<-factor(SE.East.P$exp)
+SE.East.P$plot<-factor(SE.East.P$plot)
+SE.East.P$rep<-factor(SE.East.P$rep)
+SE.East.P$entry<-factor(SE.East.P$entry)
+SE.East.P$pass<-factor(SE.East.P$pass)
+SE.East.P$rng<-factor(SE.East.P$rng)
+SE.East.P$code<-factor(SE.East.P$code)
+SE.East.P$ped.id<-factor(SE.East.P$ped.id)
+## South Early - West (Current Yr)::
+SE.West.P$book.name<-factor(SE.West.P$book.name)
+SE.West.P$exp<-factor(SE.West.P$exp)
+SE.West.P$plot<-factor(SE.West.P$plot)
+SE.West.P$rep<-factor(SE.West.P$rep)
+SE.West.P$entry<-factor(SE.West.P$entry)
+SE.West.P$pass<-factor(SE.West.P$pass)
+SE.West.P$rng<-factor(SE.West.P$rng)
+SE.West.P$code<-factor(SE.West.P$code)
+SE.West.P$ped.id<-factor(SE.West.P$ped.id)
+
+## FULL
+## South Full - East (Current Yr)::
+SF.East.P$book.name<-factor(SF.East.P$book.name)
+SF.East.P$exp<-factor(SF.East.P$exp)
+SF.East.P$plot<-factor(SF.East.P$plot)
+SF.East.P$rep<-factor(SF.East.P$rep)
+SF.East.P$entry<-factor(SF.East.P$entry)
+SF.East.P$pass<-factor(SF.East.P$pass)
+SF.East.P$rng<-factor(SF.East.P$rng)
+SF.East.P$code<-factor(SF.East.P$code)
+SF.East.P$ped.id<-factor(SF.East.P$ped.id)
+## South Full - West (Current Yr)::
+SF.West.P$book.name<-factor(SF.West.P$book.name)
+SF.West.P$exp<-factor(SF.West.P$exp)
+SF.West.P$plot<-factor(SF.West.P$plot)
+SF.West.P$rep<-factor(SF.West.P$rep)
+SF.West.P$entry<-factor(SF.West.P$entry)
+SF.West.P$pass<-factor(SF.West.P$pass)
+SF.West.P$rng<-factor(SF.West.P$rng)
+SF.West.P$code<-factor(SF.West.P$code)
+SF.West.P$ped.id<-factor(SF.West.P$ped.id)
+```
+
+
+# Combine E & W 2-Years
+
+```{r combine.Years, echo=FALSE}
+## Combine 2-Year datasets:
+## NORTH
+NE.e<-rbind((NE.East.C),(NE.East.P))
+NE.w<-rbind((NE.West.C),(NE.West.P))
+NF.e<-rbind((NF.East.C),(NF.East.P))
+NF.w<-rbind((NF.West.C),(NF.West.P))
+
+## CENTRAL
+CE.e<-rbind((CE.East.C),(CE.East.P))
+CE.w<-rbind((CE.West.C),(CE.West.P))
+CF.e<-rbind((CF.East.C),(CF.East.P))
+CF.w<-rbind((CF.West.C),(CF.West.P))
+
+## SOUTH
+SE.e<-rbind((SE.East.C),(SE.East.P))
+SE.w<-rbind((SE.West.C),(SE.West.P))
+SF.e<-rbind((SF.East.C),(SF.East.P))
+SF.w<-rbind((SF.West.C),(SF.West.P))
+```
+
+
+# E & W Yield - Mixed Models: 
+
+```{r yield.2.year.models.ew, comment=NA, echo=FALSE, message=FALSE}
+## Yield Linear Mixed Model by 2-Year Code
+## NORTH
+## North Early
+NE.ymodele<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=NE.e, REML=TRUE)
+NE.ymodelw<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=NE.w, REML=TRUE)
+
+## North Full
+NF.ymodele<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=NF.e, REML=TRUE)
+NF.ymodelw<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=NF.w, REML=TRUE)
+
+
+## CENTRAL
+## Central Early
+CE.ymodele<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=CE.e, REML=TRUE)
+CE.ymodelw<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=CE.w, REML=TRUE)
+
+## Central Full
+CF.ymodele<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=CF.e, REML=TRUE)
+CF.ymodelw<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=CF.w, REML=TRUE)
+
+
+## SOUTH
+## South Early
+SE.ymodele<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=SE.e, REML=TRUE)
+SE.ymodelw<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=SE.w, REML=TRUE)
+
+## South Full
+SF.ymodele<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=SF.e, REML=TRUE)
+SF.ymodelw<-lmer(yld~code + book.name + rep:book.name + (1|pass:book.name:rep) + (1|rng:book.name:rep) + (1|code:book.name), data=SF.w, REML=TRUE)
+```
+
+
+## E & W Yield LSMs
+
+```{r yield.LSMs.ew, comment=NA, echo=FALSE, cols.print=8, rows.print=15, message=FALSE}
+options(scipen=6)
+
 ## LSMs by code
-options(scipen=6)
-LSM.Code<-as.data.frame(emmeans(model, spec="code"))
-LSM.Code<-LSM.Code%>%select(code, emmean)
-names(LSM.Code)[2]<-c("ls.yld")
+## NORTH
+### North Early
+### EAST
+NE.LSMye<-as.data.frame(emmeans(NE.ymodele, spec="code"))
+NE.LSMye<-NE.LSMye%>%select(code, emmean)
+names(NE.LSMye)[2]<-c("ls.yld")
+### WEST
+NE.LSMyw<-as.data.frame(emmeans(NE.ymodelw, spec="code"))
+NE.LSMyw<-NE.LSMyw%>%select(code, emmean)
+names(NE.LSMyw)[2]<-c("ls.yld")
 
-## Print Nicely
-paged_table(LSM.Code)
-```
+### North Full
+### EAST
+NF.LSMye<-as.data.frame(emmeans(NF.ymodele, spec="code"))
+NF.LSMye<-NF.LSMye%>%select(code, emmean)
+names(NF.LSMye)[2]<-c("ls.yld")
+### WEST
+NF.LSMyw<-as.data.frame(emmeans(NF.ymodelw, spec="code"))
+NF.LSMyw<-NF.LSMyw%>%select(code, emmean)
+names(NF.LSMyw)[2]<-c("ls.yld")
 
-### Average & Variance
+## CENTRAL
+### Central Early
+### EAST
+CE.LSMye<-as.data.frame(emmeans(CE.ymodele, spec="code"))
+CE.LSMye<-CE.LSMye%>%select(code, emmean)
+names(CE.LSMye)[2]<-c("ls.yld")
+### WEST
+CE.LSMyw<-as.data.frame(emmeans(CE.ymodelw, spec="code"))
+CE.LSMyw<-CE.LSMyw%>%select(code, emmean)
+names(CE.LSMyw)[2]<-c("ls.yld")
 
-```{r lsm.avg.var, comment=NA, echo=FALSE, message=FALSE}
-## Average and Variance of LSMeans
-lsm.entry<-mean(LSM.Code$ls.yld)
-lsv.entry<-var(LSM.Code$ls.yld)
-
-## New Table
-Avg.Var.Table<-data.frame("Source"=c("Entry"), "Average" = c(lsm.entry), "Variance" = c(lsv.entry))
-
-## Print Nicely
-paged_table(Avg.Var.Table)
-```
-
-## ANOVA Tables
-
-A small *P-value*, and a large *F-statistic* constitute grounds for null hypothesis rejection.
-
-ANOVA uses the *F-statistic* to determine whether the variability between group means is larger than the variability of the observations within the groups. If that ratio is sufficiently large, you can conclude that not all the means are equal. A low *p-value* suggests that your sample provides enough evidence that you can reject the null hypothesis for the entire population.
-
-* The **null hypothesis** states that the model with no independent variables fits the data as well as your model.
-
-* The **alternative hypothesis** says that your model fits the data better than the intercept-only model.
-
-
-**Type III** Analysis of Variance Table with Satterthwaite's method:
-
-```{r modelanova2, echo = FALSE}
-options(scipen=3)
-paged_table(anova(model))
-```
-
-
-## Random-Effects Table
-
-```{r model.step.random, echo=FALSE, message=FALSE}
-options(scipen=6)
-paged_table(ranova(model))
-```
+### Central Full
+### EAST
+CF.LSMye<-as.data.frame(emmeans(CF.ymodele, spec="code"))
+CF.LSMye<-CF.LSMye%>%select(code, emmean)
+names(CF.LSMye)[2]<-c("ls.yld")
+### WEST
+CF.LSMyw<-as.data.frame(emmeans(CF.ymodelw, spec="code"))
+CF.LSMyw<-CF.LSMyw%>%select(code, emmean)
+names(CF.LSMyw)[2]<-c("ls.yld")
 
 
-## CV, RMSE & R²
+## SOUTH
+### South Early
+### EAST
+SE.LSMye<-as.data.frame(emmeans(SE.ymodele, spec="code"))
+SE.LSMye<-SE.LSMye%>%select(code, emmean)
+names(SE.LSMye)[2]<-c("ls.yld")
+### WEST
+SE.LSMyw<-as.data.frame(emmeans(SE.ymodelw, spec="code"))
+SE.LSMyw<-SE.LSMyw%>%select(code, emmean)
+names(SE.LSMyw)[2]<-c("ls.yld")
 
-**Coefficient of Vairance (CV):**
-
-The lower the CV, the smaller the residuals relative to the predicted value.  This is suggestive of a good model fit. 
-
-* **SMALLER IS BETTER!** (i.e. The model with the smaller CV has predicted values that are closer to the actual values.)
-
-
-**Root Mean Square Error(RMSE):**
-
-*RMSE is an absolute measure of fit.*
-
-The standard deviation of the residuals. RMSE physically measures how spread out these residuals are from the line of best fit. The RMSE is a measure of the average deviation of the estimates from the observed values.
-
-* **SMALLER IS BETTER!** (i.e. lower values of RMSE indicate better fit.)
-
-
-**R-squared (R²):**
-
-*R² is a relative measure of fit.*
-
-R² is the proportional improvement in prediction from the regression model, compared to the mean model. R² indicates the goodness of fit of the model. The fraction of the total sum of squares that is explained by the regression. Scaled from 0 to 1.
-
-* **LARGER IS BETTER!** (i.e. values closer to 1 indicate better fit.)
-
-```{r model1.cv.rmse, comment=NA, echo = FALSE, message=FALSE}
-## CV from "LSDer" package:
-mod1.cv<-LSDer::CVer(model)
-## RMSE
-mod1.rmse<-sqrt(mean(residuals(model)^2))
-## R-squared
-mod1.R2<-r.squaredLR(model)
-
-## New Data Table (CV, RMSE, & R2)
-CV.RMSE.R2.Table1<-data.frame("CV" = c(mod1.cv), "RMSE" = c(mod1.rmse), "R²" = c(mod1.R2))
-paged_table(CV.RMSE.R2.Table1)
+### South Full
+### EAST
+SF.LSMye<-as.data.frame(emmeans(SF.ymodele, spec="code"))
+SF.LSMye<-SF.LSMye%>%select(code, emmean)
+names(SF.LSMye)[2]<-c("ls.yld")
+### WEST
+SF.LSMyw<-as.data.frame(emmeans(SF.ymodelw, spec="code"))
+SF.LSMyw<-SF.LSMyw%>%select(code, emmean)
+names(SF.LSMyw)[2]<-c("ls.yld")
 ```
 
 
-## Fisher's LSD
 
-**Fisher's Least Significant Differnce (LSD):**
 
-Least significant difference is used to compare means of different treatments that have an equal number of replications.
 
-* **The yields must be greater than the LSD value between any two treatments to be considered significant.**
+# Subset only 2 Year Matches
 
-``` {r model1.predict.25, comment=NA, echo = FALSE, fig.width=10, fig.height=6.5}
-## Average LSD calculation from "predictmeans" package:
-pre1<-predictmeans(model, "code", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=FALSE, newwd=FALSE)
-## Select Avg. LSD Value from object
-LSDpre1<-pre1[["LSD"]][["Aveg.LSD"]]
-
-## New LSD Table
-LSD.Table1<-data.frame("."="Average LSD at 75% Confidence Level =", "VALUE" = as.factor(c(LSDpre1)))
-paged_table(LSD.Table1)
-
-## MPlot
-pre1.1<-predictmeans(model, "code", pairwise=TRUE, level=0.25, pplot=FALSE, mplot=TRUE, newwd=FALSE)
+```{r subset.only.2.year.matches, echo=FALSE}
+## Subset codes that appear in previous year:
+# I don't think this first line is needed, only the "data.LSM" line
+    # data.LSM1<-subset(NE.Combo, code %in% C.N_Early$code)
+# Use these!
+NE.2yr<-subset(NE.Combo, code %in% P.N_Early$code)
+NF.2yr<-subset(NF.Combo, code %in% P.N_Full$code)
+CE.2yr<-subset(CE.Combo, code %in% P.C_Early$code)
+CF.2yr<-subset(CF.Combo, code %in% P.C_Full$code)
+SE.2yr<-subset(SE.Combo, code %in% P.S_Early$code)
+SF.2yr<-subset(SF.Combo, code %in% P.S_Full$code)
 ```
 
-```{r model1.lsdplot, echo=FALSE, fig.width=10, fig.height=6.5}
-## LSD PPlot
-pre1.2<-predictmeans(model, "code", pairwise=TRUE, level=0.25, pplot=TRUE, mplot=FALSE, newwd=FALSE)
-```
+
